@@ -1,0 +1,9 @@
+Exemple 1 
+--------------------------------
+#INPUT_TYPE pkl exemple1CbyInput/7tim.pkl
+#SPHERICAL_PRUNNING *:LIG.248:C02 25.0
+#FIXED_ATOMS *:LIG.248:C02 20.0
+#SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
+#SET_REACTION_CRD distance yes 3 *:LIG.*:O06 *:HIE.94:HE2 *:HIE.94:NE2
+#SAVE_NAME 7tim_pruned_and_fixed
+_____________________________
