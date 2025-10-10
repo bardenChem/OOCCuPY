@@ -5,6 +5,11 @@ from pDynamo_Scripts import Scripts
 import SimulationSystem 
 import os
 #===================================
+def info():
+	print_message = "OOCCuPy pDynamo_Scripts Libray test #02:\t "
+	print_message += "Test the setting of quantum methods with pySCF .\n"
+
+	print(print_message)
 def Run_Test():
 	'''
 	'''
@@ -45,4 +50,6 @@ def Run_Test():
 
 
 #===================================
-if __name__ == '__main__': Run_Test()
+if __name__ == '__main__': 
+	if ( sys.argv[1] ) == "-print":	info()
+	else: 						    Run_Test()

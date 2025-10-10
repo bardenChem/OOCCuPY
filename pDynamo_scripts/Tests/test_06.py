@@ -14,6 +14,10 @@ def info():
 def Simple_Distance2D(_hamiltonian):
 	'''
 	'''
+
+	if not os.path.exists( os.path.join("test_05","qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
+		os.system("python3 test_05.py")
+
 	system_parameters = {
 		"Input_Type":"pkl",		
 		"pkl_file":os.path.join("test_05","qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
@@ -47,6 +51,9 @@ def Simple_Distance2D(_hamiltonian):
 def Mixed_Distance2D(_hamiltonian):
 	'''
 	'''
+	if not os.path.exists( os.path.join("test_05","qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
+		os.system("python3 test_05.py")
+		
 	system_parameters = {
 		"Input_Type":"pkl",		
 		"pkl_file":os.path.join("test_05","qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		

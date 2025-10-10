@@ -5,15 +5,16 @@ from pDynamo_Scripts import Scripts
 import SimulationSystem 
 import os
 #===================================
+def info():
+	print_message = "OOCCuPy pDynamo_Scripts Libray test #02:\t "
+	print_message += "Test the setting of quantum methods ORCA.\n"
+
+	print(print_message)
+#-----------------------------------
 def Run_Test():
 	'''
-	Test the setting of all quantum methods classes available.
-	Internal semi-empirical methods in pDynamo
-	DFTB+ 
-	Orca 
-	Mopac
-	pySCF 
 	'''
+	info()
 	_parameters = {
 		"Input_Type":"geometry",
 		"crd_file":os.path.join("data","cyclohexane_single_frame.xyz"),
@@ -53,11 +54,8 @@ def Run_Test():
 	test_04 = Scripts("test_02_orca_qmmm_tim")
 	test_04.Set_System(_parameters)
 	test_04.SaveSystem()
-
-
-
-
-
 	
 #===================================
-if __name__ == '__main__': Run_Test()
+if __name__ == '__main__': 
+	if ( sys.argv[1] ) == "-print":	info()
+	else: 						    Run_Test()
