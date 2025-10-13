@@ -6,9 +6,16 @@ from pDynamo_Scripts import Scripts
 import SimulationSystem 
 import os, sys
 #====================================================
+def info():
+	print_message =  "OOCCuPy pDynamo_Scripts Libray test #09:\n\t "
+	print_message += "Testing the split traj functionality.\n"
+
+	print(print_message)
+#----------------------------------
 def Run_Test():
 	'''
 	'''
+	info()
 	_path = "test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
 
 	system_parameters = {
@@ -31,4 +38,6 @@ def Run_Test():
 	test_02.SaveSystem()
 
 #===================================
-if __name__ == '__main__': Run_Test()
+if __name__ == '__main__': 
+	if ( sys.argv[1] ) == "-print":	info()
+	else: Run_Test()

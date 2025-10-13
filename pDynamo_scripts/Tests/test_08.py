@@ -5,6 +5,12 @@ from pDynamo_Scripts import Scripts
 import SimulationSystem 
 import os, sys
 #===================================
+def info():
+	print_message =  "OOCCuPy pDynamo_Scripts Libray test #08:\t "
+	print_message += "Testing the setting and run of Molecular dynamics hybrid simulations.\n"
+
+	print(print_message)
+#------------------------------------
 def Run_Test():
 	'''
 	Test molecular dynamics algorithms with qmmm
@@ -45,4 +51,6 @@ def Run_Test():
 	
 	
 #===================================
-if __name__ == '__main__': Run_Test()
+if __name__ == '__main__': 
+	if ( sys.argv[1] ) == "-print":	info()
+	else: Run_Test()

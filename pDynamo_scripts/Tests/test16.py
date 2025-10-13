@@ -5,6 +5,12 @@ from pDynamo_Scripts import Scripts
 import SimulationSystem 
 import os, sys
 #==============================================
+def info():
+	print_message =  "OOCCuPy pDynamo_Scripts Libray test #16:\t "
+	print_message += "Testing the setting and reaction path determination algorithm.\n"
+
+	print(print_message)
+#----------------------------------
 def Run_Test():
 
 
@@ -42,4 +48,6 @@ def Run_Test():
 	test_01.SaveSystem()
 
 #===================================
-if __name__ == '__main__': Run_Test()
+if __name__ == '__main__': 
+	if ( sys.argv[1] ) == "-print":	info()
+	else: Run_Test()

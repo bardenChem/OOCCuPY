@@ -5,17 +5,23 @@ from pDynamo_Scripts import Scripts
 import SimulationSystem 
 import os, sys
 #===================================
+def info():
+	print_message =  "OOCCuPy pDynamo_Scripts Libray test #11:\t "
+	print_message += "Testing the setting and run of unidimensional umbrella sampling.\n"
+
+	print(print_message)
+#----------------------------------
 def Run_Test():
 	'''
 	Test umbrella sampling 
 	'''
-
+	info()
 	system_parameters = {
 		"Input_Type":"pkl",		
 		"pkl_file":os.path.join("test_05","qcmm_optam1","7tim_am1_opt_PF.pkl"),		
 		"set_reaction_crd":1,	
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
-		#"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
+		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
 		"type_rc1":"Distance",
 		"mass_constraints":["yes"],
 	}
@@ -51,4 +57,6 @@ def Run_Test():
 	
 	
 #===================================
-if __name__ == '__main__': Run_Test()
+if __name__ == '__main__': 
+	if ( sys.argv[1] ) == "-print":	info()
+	else: Run_Test()
