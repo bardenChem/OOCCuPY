@@ -13,7 +13,7 @@ class Interface:
 		'''
 		'''
 
-	def pDynamo_scripts_handler(self):
+	def pDynamoWrapper_handler(self):
 		'''
 		'''
 
@@ -39,7 +39,7 @@ if __name__=="__main__":
 	parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
 	
 	subparsers 		 = parser.add_subparsers(dest="command", help="Comandos disponíveis")
-	pdynamo_parser 	 = subparsers.add_parser("pdynamo_scripts", help="Module pDynamo scripts ")
+	pdynamo_parser 	 = subparsers.add_parser("pDynamoWrapper", help="Module pDynamo scripts ")
 	mdtools_parser 	 = subparsers.add_parser("mdtools", help="Module to prep and handle molecular dynamics ")
 	qm_inputs_parser = subparsers.add_parser("QM_inputs", help="Module to create input for QM softwares")
 	

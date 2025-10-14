@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pDynamo_Scripts import Scripts
+from pDynamoWrapper import Scripts
 import SimulationSystem 
 import os, sys
 #===================================
 def info():
-	print_message =  "OOCCuPy pDynamo_Scripts Libray test #09:\t "
+	print_message =  "OOCCuPy pDynamoWrapper Libray test #09:\n\t "
 	print_message += "Testing the setting and run of unidimensional energy refinement.\n"
 
 	print(print_message)

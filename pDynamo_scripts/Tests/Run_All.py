@@ -22,6 +22,7 @@ test_10.py -- Energy Refinement with changing quantum region
 test_11.py -- Unidimensional Umbrella Sampling + WHAM with and without step optimization
 test_12.py -- Bidimensional Umbrella Sampling + WHAM 
 test_13.py -- Reaction Path Algorithms
+test_14.py -- 
 
 
 #extra
@@ -34,8 +35,24 @@ test_xx.py -- Dihedral Relaxed Scans.
 '''
 
 
-test_list = ["test_01.py",
-			 "test_02.py",
-			 "test_03.py",
-			 "test_04,py",
-			 
+test_list = ["test_01.py","test_02.py","test_02_pyscf.py",
+			 "test_02_orca.py","test_02_smo.py","test_03.py",
+			 "test_04.py","test_05.py","test_06.py","test_07.py",
+			 "test_08.py","test_09.py","test_10.py","test_11.py",
+			 "test_12.py","test_13.py","test_14.py","test_15.py",
+			 "test_16.py","test_17.py"]
+
+
+#----------------------------------------------------------------
+def RUN_ALL_TESTS():
+
+	for test in test_list:
+		try:
+			os.system( "python3 "+test )
+		except:
+			print(test+" did not run as expected.")
+			pass 
+		print("=====================================\n")
+#=================================================================
+if __name__ == '__main__':
+	RUN_ALL_TESTS()
