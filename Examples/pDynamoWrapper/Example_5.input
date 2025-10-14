@@ -1,0 +1,18 @@
+Exemple 5
+--------------------------------
+#INPUT_TYPE pkl example3bbyInput/7tim_opt_pm6_PF.pkl
+#RUN_SIMULATION Relaxed_Surface_Scan
+#SET_ENERGY_MODEL_QM SMO
+#HAMILTONIAN pm6
+#SOFTWARE internal
+#SET_QMMM_REGION #residue_patterns 4 *:LIG.248:* *:GLU.164:* *:HIE.94:* *:ASN.9:*
+#QC_CHARGE -3
+#FORCE_CONSTANTS 1250.0 0 
+#SET_REACTION_CRD distance yes 2  *:LIG.*:H02 *:GLU.164:OE2
+#DINCRE_RC1  -0.1
+#NDIMS 1
+#X_NSTEPS 12
+#LOG_FREQUENCY 10
+#MAX_ITERATIONS 1500
+
+____________________________

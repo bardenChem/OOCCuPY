@@ -1,0 +1,4 @@
+Exemple 1 
+--------------------------------
+#INPUT_TYPE gromacs data/1atp_peptide.top data/1atp_peptide.gro
+_____________________________

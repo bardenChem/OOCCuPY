@@ -39,7 +39,7 @@ if __name__=="__main__":
 	parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
 	
 	subparsers 		 = parser.add_subparsers(dest="command", help="Comandos disponíveis")
-	pdynamo_parser 	 = subparsers.add_parser("pDynamoWrapper", help="Module pDynamo scripts ")
+	pdynamo_parser 	 = subparsers.add_parser("pDynamoWrapper", help="Module pDynamo Wrapper ")
 	mdtools_parser 	 = subparsers.add_parser("mdtools", help="Module to prep and handle molecular dynamics ")
 	qm_inputs_parser = subparsers.add_parser("QM_inputs", help="Module to create input for QM softwares")
 	

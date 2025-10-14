@@ -932,7 +932,7 @@ class LRDmaps:
 #======================================================================#
 
 '''
-os.system('sudo cp ~/Dropbox/RDscripts/orca module/OrcaModule.py /usr/lib/python3.5')
+os.system('sudo cp ~/Dropbox/RDWrapper/orca module/OrcaModule.py /usr/lib/python3.5')
 '''
 	
 

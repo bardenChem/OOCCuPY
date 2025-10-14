@@ -248,20 +248,20 @@ def Orca_Run (MODE="SP"  ,
 		
 		
 try :
-	text_to_run = 'sudo cp OrcaScripts.py /usr/lib/python3.5' 
+	text_to_run = 'sudo cp OrcaWrapper.py /usr/lib/python3.5' 
 	os.system(text_to_run)
 except :
 	pass		
 
 		
 try :
-	text_to_run = 'sudo cp OrcaScripts.py /usr/lib/python3.4'
+	text_to_run = 'sudo cp OrcaWrapper.py /usr/lib/python3.4'
 	os.system(text_to_run)
 except :
 	pass
 
 try :
-	text_to_run = 'sudo cp OrcaScripts.py /usr/lib/python2.7'
+	text_to_run = 'sudo cp OrcaWrapper.py /usr/lib/python2.7'
 	os.system(text_to_run)
 except :
 	pass

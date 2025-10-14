@@ -1,7 +1,0 @@
-Exemple 2 
---------------------------------
-#INPUT_TYPE geometry data/cyclohexane_single_frame.xyz
-#SET_ENERGY_MODEL_QM ORCA
-#FUNCTIONAL b3lyp
-#BASIS 6-31G*
-_____________________________
