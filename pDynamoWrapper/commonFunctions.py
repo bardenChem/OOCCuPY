@@ -3,10 +3,6 @@
 
 #FILE = commonFunctions.py
 
-##############################################################
-#-----------------...EasyHybrid 3.0...-----------------------#
-#-----------Credits and other information here---------------#
-##############################################################
 import pBabel
 from  pCore import Clone
 import pMolecule                            

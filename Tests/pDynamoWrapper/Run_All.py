@@ -33,7 +33,7 @@ test_xx.py -- Modeling protein system ( pDynamo examples )
 test_xx.py -- Dihedral Relaxed Scans. 
 
 '''
-
+import os
 
 test_list = ["test_01.py","test_02.py","test_02_pyscf.py",
 			 "test_02_orca.py","test_02_smo.py","test_03.py",
@@ -47,12 +47,8 @@ test_list = ["test_01.py","test_02.py","test_02_pyscf.py",
 def RUN_ALL_TESTS():
 
 	for test in test_list:
-		try:
-			os.system( "python3 "+test )
-		except:
-			print(test+" did not run as expected.")
-			pass 
-		print("=====================================\n")
+		os.system( "python3 Tests/pDynamoWrapper/"+test )		
+
 #=================================================================
 if __name__ == '__main__':
 	RUN_ALL_TESTS()

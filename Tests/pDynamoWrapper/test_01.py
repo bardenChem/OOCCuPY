@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pDynamoWrapper import Wrapper
-import SimulationSystem 
+from pDynamoWrapper.pDynamoWrapper import Wrapper
+from pDynamoWrapper.SimulationSystem import SimulationSystem
 import os, sys
 #===================================
 def info():
@@ -15,7 +15,7 @@ def Run_Test():
 	info()
 	_parameters = {
 		"Input_Type":"geometry",
-		"crd_file":os.path.join("data","cyclohexane_single_frame.xyz"),	
+		"crd_file":os.path.join("Tests","pDynamoWrapper","data","cyclohexane_single_frame.xyz"),	
 	}
 	#test load xyz
 	test_01 = Wrapper("test_01")
@@ -23,15 +23,15 @@ def Run_Test():
 	test_01.SaveSystem()
 	#test load gromacs topology and coordinate files 
 	_parameters["Input_Type"] = "gromacs"
-	_parameters["crd_file"] = os.path.join("data","1atp_peptide.gro")
-	_parameters["top_file"] = os.path.join("data","1atp_peptide.top")	
+	_parameters["crd_file"] = os.path.join("Tests","pDynamoWrapper","data","1atp_peptide.gro")
+	_parameters["top_file"] = os.path.join("Tests","pDynamoWrapper","data","1atp_peptide.top")	
 	test_02 = Wrapper("test_01")
 	test_02.Set_System(_parameters)
 	test_02.SaveSystem()
 	#test load amber force field topology and coordinate files 
 	_parameters["Input_Type"] = "amber"
-	_parameters["crd_file"] = os.path.join("data","7tim.crd")
-	_parameters["top_file"] = os.path.join("data","7tim.top")
+	_parameters["crd_file"] = os.path.join("Tests","pDynamoWrapper","data","7tim.crd")
+	_parameters["top_file"] = os.path.join("Tests","pDynamoWrapper","data","7tim.top")
 	test_03 = Wrapper("test_01")
 	test_03.Set_System(_parameters)
 	test_03.SaveSystem()
@@ -63,5 +63,4 @@ def Run_Test():
 
 #===================================
 if __name__ == '__main__':
-	if ( sys.argv[1] ) == "-print":	info()
-	else: 							Run_Test()
+	Run_Test()
