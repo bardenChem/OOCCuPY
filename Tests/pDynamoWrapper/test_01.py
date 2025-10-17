@@ -4,6 +4,9 @@
 from pDynamoWrapper.pDynamoWrapper import Wrapper
 from pDynamoWrapper.SimulationSystem import SimulationSystem
 import os, sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_01")
+
 #===================================
 def info():
 	print_message = "OOCCuPy pDynamoWrapper Libray test #01:\t "
@@ -18,35 +21,35 @@ def Run_Test():
 		"crd_file":os.path.join("Tests","pDynamoWrapper","data","cyclohexane_single_frame.xyz"),	
 	}
 	#test load xyz
-	test_01 = Wrapper("test_01")
+	test_01 = Wrapper(folder)
 	test_01.Set_System(_parameters)
 	test_01.SaveSystem()
 	#test load gromacs topology and coordinate files 
 	_parameters["Input_Type"] = "gromacs"
 	_parameters["crd_file"] = os.path.join("Tests","pDynamoWrapper","data","1atp_peptide.gro")
 	_parameters["top_file"] = os.path.join("Tests","pDynamoWrapper","data","1atp_peptide.top")	
-	test_02 = Wrapper("test_01")
+	test_02 = Wrapper(folder)
 	test_02.Set_System(_parameters)
 	test_02.SaveSystem()
 	#test load amber force field topology and coordinate files 
 	_parameters["Input_Type"] = "amber"
 	_parameters["crd_file"] = os.path.join("Tests","pDynamoWrapper","data","7tim.crd")
 	_parameters["top_file"] = os.path.join("Tests","pDynamoWrapper","data","7tim.top")
-	test_03 = Wrapper("test_01")
+	test_03 = Wrapper(folder)
 	test_03.Set_System(_parameters)
 	test_03.SaveSystem()
 	#test load pkl and test spherical pruning and fixed atoms
 
 	_parameters["Input_Type"] = "protein"
-	_parameters["pdb_file"]   = "data/1l2y.pdb"
-	test_04 = Wrapper("test_01")
+	_parameters["pdb_file"]   = "Tests/pDynamoWrapper/data/1l2y.pdb"
+	test_04 = Wrapper(folder)
 	test_04.Set_System(_parameters)
 	test_04.SaveSystem()
 	
 	#test load pkl from amber FF and test spherical pruning and fixed atoms
 	_parameters = {
 		"Input_Type":"pkl",
-		"pkl_file":"test_01/7tim.pkl",
+		"pkl_file":"Tests/pDynamoWrapper/test_01/7tim.pkl",
 		"spherical_prune":"*:LIG.248:C02",
 		"spherical_prune_radius":25.0,
 		"set_fixed_atoms":"*:LIG.248:C02",
@@ -57,7 +60,7 @@ def Run_Test():
 		"mass_constraints":["yes"],
 		"type_rc1":"distance"	
 	}	
-	test_05 = Wrapper("test_01")
+	test_05 = Wrapper(folder)
 	test_05.Set_System(_parameters)
 	test_05.SaveSystem("7tim_pruned_and_fix")
 

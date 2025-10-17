@@ -4,6 +4,9 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os,sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_02")
+
 #===================================
 def info():
 	print_message = "OOCCuPy pDynamoWrapper Libray test #02:\t "
@@ -13,12 +16,6 @@ def info():
 #------------------------------------
 def Run_Test():
 	'''
-	Test the setting of all quantum methods classes available.
-	Internal semi-empirical methods in pDynamo
-	DFTB+ 
-	Orca 
-	Mopac
-	pySCF 
 	'''
 	info()
 	SMOmodels = ["am1","am1dphot","pddgpm3","pm3","rm1","pm6"]		

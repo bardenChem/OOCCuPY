@@ -4,6 +4,9 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os
+
+folder = os.path.join("Tests","pDynamoWrapper","test_02_orca")
+
 #===================================
 def info():
 	print_message = "OOCCuPy pDynamoWrapper Libray test #02:\t "
@@ -27,7 +30,7 @@ def Run_Test():
 		"NmaxThreads":1
 	}
 	
-	test_02 = Wrapper("test_02_orca_cyclohex")
+	test_02 = Wrapper(folder)
 	test_02.Set_System(_parameters)	
 	_parameters["simulation_type"] = "Geometry_Optimization"
 	#test_02.Run_Simulation(_parameters)
@@ -41,7 +44,7 @@ def Run_Test():
 	_parameters["QCcharge"]        = 1
 	_parameters["scratch"]		   = "test_02_orca_qmmm_1atp"
 
-	test_03 = Wrapper("test_02_orca_qmmm_1atp")
+	test_03 = Wrapper(folder)
 	test_03.Set_System(_parameters)
 	test_03.SaveSystem()
 
@@ -51,11 +54,10 @@ def Run_Test():
 	_parameters["scratch"]		   = "test_02_orca_qmmm_tim"
 	_parameters["QCcharge"]        = -3
 
-	test_04 = Wrapper("test_02_orca_qmmm_tim")
+	test_04 = Wrapper(folder)
 	test_04.Set_System(_parameters)
 	test_04.SaveSystem()
 	
 #===================================
 if __name__ == '__main__': 
-	if ( sys.argv[1] ) == "-print":	info()
-	else: 						    Run_Test()
+	Run_Test()
