@@ -3,6 +3,7 @@
 #OOCCuPY.py
 
 import argparse,sys,os
+import subprocess 
 
 #=======================================================
 class Tee:
@@ -44,10 +45,27 @@ class Interface:
 	def pDynamoWrapper_handler(self):
 		'''
 		'''
-		if 	 self.args.tests:  os.system("python3 Tests/pDynamoWrapper/Run_All.py ")
+		if self.args.tests:  
+			# Use subprocess to capture output
+			result = subprocess.run(
+				["python3", "Tests/pDynamoWrapper/Run_All.py"], 
+				stdout=subprocess.PIPE, 
+				stderr=subprocess.STDOUT,  # Merge stderr with stdout
+				text=True
+			)
+			print(result.stdout)  # This goes through our Tee
+            
 		elif self.args.test_number: 
 			test_file = "Tests/pDynamoWrapper/test_{:02d}.py".format(self.args.test_number)
-			os.system("python3 "+test_file )
+			# Use subprocess to capture output
+			result = subprocess.run(
+				["python3", test_file], 
+				stdout=subprocess.PIPE, 
+				stderr=subprocess.STDOUT,
+				text=True
+			)
+			print(result.stdout)
+
 
 	def MD_prep_handler(self):
 		'''
