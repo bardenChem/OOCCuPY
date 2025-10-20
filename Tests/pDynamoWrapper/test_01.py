@@ -62,7 +62,7 @@ def Run_Test():
 	}	
 	test_05 = Wrapper(folder)
 	test_05.Set_System(_parameters)
-	test_05.SaveSystem("7tim_pruned_and_fix")
+	test_05.SaveSystem( "7tim_pruned_and_fix" )
 
 #===================================
 if __name__ == '__main__':

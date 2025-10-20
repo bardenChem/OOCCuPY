@@ -4,6 +4,25 @@
 
 import argparse,sys,os
 
+#=======================================================
+class Tee:
+    def __init__(self, filename, mode='a'):
+        self.file = open(filename, mode)
+        self.stdout = sys.stdout  # Save original stdout
+
+    def write(self, text):
+        self.file.write(text)
+        self.stdout.write(text)  # Print to screen
+
+    def flush(self):  # Required for file flushing
+        self.file.flush()
+        self.stdout.flush()
+
+    def close(self):
+        self.file.close()
+
+#========================================================
+
 class Interface:
 	'''
 	Class to handle the functionalities of OOCCuPy
@@ -12,8 +31,15 @@ class Interface:
 	def __init__(self,args):
 		'''
 		'''
-		self.args = args
+		self.args  = args
+		self.tee   = Tee(self.args.output, 'w')
+		sys.stdout = self.tee
 
+	def __del__(self):
+		'''Clean up when object is destroyed'''
+		if hasattr(self, 'tee'):
+			sys.stdout = self.tee.stdout  # Restore original stdout
+			self.tee.close()
 
 	def pDynamoWrapper_handler(self):
 		'''
@@ -34,9 +60,6 @@ class Interface:
 	def run_testes(self,_number):
 		'''
 		'''
-
-
-
 #=============================================================
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(
@@ -56,6 +79,7 @@ if __name__=="__main__":
 	pdynamo_parser.add_argument("--input",action="store_true",help="Run specif test!!")
 	
 	args = parser.parse_args()
+	print(args)
 
 	if args.verbose: print("Verbose mode enabled!")
 

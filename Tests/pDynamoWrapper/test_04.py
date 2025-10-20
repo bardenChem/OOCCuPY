@@ -4,9 +4,13 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+
+folder = os.path.join("Tests","pDynamoWrapper","test_04")
+
 #===================================
 def info():
-	print_message =  "OOCCuPy pDynamoWrapper Libray test #04:\t "
+	print_message =  "OOCCuPy pDynamoWrapper Libray test #04:\n\t "
 	print_message += "Test molecular dynamics algorithms.\n"
 
 	print(print_message)
@@ -20,7 +24,7 @@ def Run_Test():
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_03","7tim_optLFBGS.pkl"),
+		"pkl_file":os.path.join("Tests","pDynamoWrapper","test_03","7tim_optLFBGS.pkl"),
 	}
 
 	simulation_parameters = {
@@ -34,15 +38,15 @@ def Run_Test():
 				  "sampling_heating":50,
 				}
 	
-	if not os.path.exists( os.path.join("test_03","7tim_optLFBGS.pkl") ):
-		try: os.system("python3 test_03.py")
+	if not os.path.exists( os.path.join("Tests","pDynamoWrapper","test_03","7tim_optLFBGS.pkl") ):
+		try: os.system("python3 Tests/pDynamoWrapper/test_03.py")
 		except: 
 			print("There is no input file for this example! Run example #03!")
 			return(False)
 
 	#------------------------------------
 	#protocol production
-	test_01 = Wrapper("test_04")
+	test_01 = Wrapper(folder)
 	for alg in integrators:
 		test_01.Set_System(system_parameters)
 		simulation_parameters["MD_method"]=alg
@@ -54,5 +58,4 @@ def Run_Test():
 	
 #===================================
 if __name__ == '__main__':
-	if ( sys.argv[1] ) == "-print":	info()
-	else: 						    Run_Test()
+	Run_Test()
