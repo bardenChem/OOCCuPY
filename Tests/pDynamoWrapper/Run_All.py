@@ -40,7 +40,7 @@ test_list = ["test_01.py","test_02.py","test_02_pyscf.py",
 			 "test_04.py","test_05.py","test_06.py","test_07.py",
 			 "test_08.py","test_09.py","test_10.py","test_11.py",
 			 "test_12.py","test_13.py","test_14.py","test_15.py",
-			 "test_16.py","test_17.py"]
+			 "test_16.py","test_17.py","test_18.py","test.19.py","test_20.py"]
 
 
 #----------------------------------------------------------------

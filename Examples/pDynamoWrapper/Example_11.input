@@ -1,9 +1,9 @@
-Exemple 11
+Example 11
 --------------------------------
-#INPUT_TYPE pkl example3bbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl Examples/pDynamoWrapper/example3bbyInput/7tim_opt_pm6_PF.pkl
 #RUN_SIMULATION  Umbrella_Sampling
 #SET_REACTION_CRD distance yes 2 *:LIG.*:H02 *:GLU.164:OE2
-#SOURCE_FOLDER example5byInput/ScanTraj.ptGeo
+#SOURCE_FOLDER Examples/pDynamoWrapper/example5byInput/ScanTraj.ptGeo
 #EQUILIBRATION_STEPS 1000
 #PRODUCTION_STEPS 2000
 #SAMPLING_EQUILIBRATION 200

@@ -1,4 +1,4 @@
 Exemple 1 
 --------------------------------
-#INPUT_TYPE geometry data/cyclohexane_single_frame.xyz
+#INPUT_TYPE protein Examples/pDynamoWrapper/data/1l2y.pdb
 _____________________________
