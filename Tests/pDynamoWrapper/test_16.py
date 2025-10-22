@@ -4,6 +4,11 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_16")
+folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
+folder06 = os.path.join("Tests","pDynamoWrapper","test_06")
+
 #==============================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #16:\n\t "
@@ -16,7 +21,7 @@ def Run_Test():
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_optam1","7tim_am1_opt_PF.pkl"),
+		"pkl_file":os.path.join(folder,"qcmm_optam1","7tim_am1_opt_PF.pkl"),
 		"set_reaction_crd":2,	
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
@@ -25,11 +30,11 @@ def Run_Test():
 		"mass_constraints":["yes","yes"],
 	}
 
-	_path   = "test_06/Multiple_Distance_rm1/ScanTraj.ptGeo"
+	_path   = os.path.join( folder06, "Multiple_Distance_rm1","ScanTraj.ptGeo" )
 
 	analysis_parameters = {
 		"analysis_type":"Energy_Plots",
-		"log_name":"test_06/Multiple_Distance_rm1/ScanTraj.log",
+		"log_name": os.path.join(folder06,"Multiple_Distance_rm1","ScanTraj.log"),
 		"retrieve_path":_path,
 		"xsize":12,
 		"ysize":12,
@@ -42,12 +47,11 @@ def Run_Test():
 		"fin_point":[10,10]    
 	}
 
-	test_01 = Wrapper("test_16")
+	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
 	test_01.Run_Analysis(analysis_parameters)
 	test_01.SaveSystem()
 
 #===================================
 if __name__ == '__main__': 
-	if ( sys.argv[1] ) == "-print":	info()
-	else: Run_Test()
+	Run_Test()

@@ -4,6 +4,10 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
+folder = os.path.join("Tests","pDynamoWrapper","test_06")
+
 #==============================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #06:\t "
@@ -15,12 +19,12 @@ def Simple_Distance2D(_hamiltonian):
 	'''
 	'''
 
-	if not os.path.exists( os.path.join("test_05","qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
-		os.system("python3 test_05.py")
+	if not os.path.exists( os.path.join(folder05,"qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
+		os.system("python3 Tests/pDnyamoWrapper/test_05.py")
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
+		"pkl_file":os.path.join(folder05,"qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
 		"set_reaction_crd":2,
 		"atoms_rc1":["*:LIG.*:H02","*:GLU.164:OE2"],
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2"],
@@ -41,7 +45,7 @@ def Simple_Distance2D(_hamiltonian):
 		"force_constants":[1000.0,1000.0]
 	}
 	#test simple distance
-	test_01 = Wrapper("test_06/Simple_Distance2D_"+_hamiltonian)
+	test_01 = Wrapper( os.path.join(folder,"Simple_Distance2D_"+_hamiltonian) )
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(scan1_parameters)
 	test_01.SaveSystem("Simple_DistanceScan2D")
@@ -51,12 +55,12 @@ def Simple_Distance2D(_hamiltonian):
 def Mixed_Distance2D(_hamiltonian):
 	'''
 	'''
-	if not os.path.exists( os.path.join("test_05","qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
+	if not os.path.exists( os.path.join(folder05,"qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
 		os.system("python3 test_05.py")
 		
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
+		"pkl_file":os.path.join(folder05,"qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
 		"set_reaction_crd":2,
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2"],
@@ -78,7 +82,7 @@ def Mixed_Distance2D(_hamiltonian):
 		"force_constants":[1000.0,1000.0]
 	}
 	#test simple distance
-	test_01 = Wrapper("test_06/Mixed_Distance_"+_hamiltonian)
+	test_01 = Wrapper( os.path.join( folder,"Mixed_Distance_"+_hamiltonian) )
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(scan1_parameters)
 	test_01.SaveSystem("Mixed_DistanceScan")
@@ -90,7 +94,7 @@ def Multiple_Distance2D(_hamiltonian):
 	'''
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
+		"pkl_file":os.path.join(folder05,"qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
 		"set_reaction_crd":2,
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"atoms_rc2":["*:HIE.94:NE2","*:HIE.94:HE2","*:LIG.*:O06"],
@@ -113,7 +117,7 @@ def Multiple_Distance2D(_hamiltonian):
 
 	}
 	#test simple distance
-	test_01 = Wrapper("test_06/Multiple_Distance_"+_hamiltonian)
+	test_01 = Wrapper( os.path.join(folder,"Multiple_Distance_"+_hamiltonian) )
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(scan1_parameters)
 	test_01.SaveSystem("Multiple_DistanceScan")
@@ -123,10 +127,10 @@ def Run_Test():
 	Test 
 	'''
 	info()
-	if not os.path.exists( os.path.join("test_05","7tim.pkl") ):
+	if not os.path.exists( os.path.join(folder05,"7tim.pkl") ):
 		Prepare_MM_System()
 	
-	if not os.path.exists( os.path.join("test_05","7tim_optMM.pkl") ):
+	if not os.path.exists( os.path.join(folder05,"7tim_optMM.pkl") ):
 		Prepare_Prune_System()	
 
 	Simple_Distance2D("am1")	
@@ -136,5 +140,4 @@ def Run_Test():
 	
 #===================================
 if __name__ == '__main__':
-	if ( sys.argv[1] ) == "-print":	info()
-	else: 						    Run_Test()
+	Run_Test()

@@ -4,6 +4,9 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_05")
+
 #==============================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #05:\t "
@@ -27,9 +30,9 @@ def Prepare_MM_System():
 
 	#preparation of 7tim structure	
 	#test load amber force field topology and coordinate files 
-	_opt_pars["crd_file"] = os.path.join("data","7tim.crd")
-	_opt_pars["top_file"] = os.path.join("data","7tim.top")
-	test_03 = Wrapper("test_05")
+	_opt_pars["crd_file"] = os.path.join("Tests","pDynamoWrapper","data","7tim.crd")
+	_opt_pars["top_file"] = os.path.join("Tests","pDynamoWrapper","data","7tim.top")
+	test_03 = Wrapper(folder)
 	test_03.Set_System(_opt_pars)
 	test_03.Run_Simulation(_opt_pars)
 	test_03.SaveSystem()
@@ -40,7 +43,7 @@ def Prepare_Prune_System():
 	'''
 	_prune_pars= {
 		"Input_Type":"pkl",
-		"pkl_file":"test_05/7tim.pkl",
+		"pkl_file":"Tests/pDynamoWrapper/test_05/7tim.pkl",
 		"simulation_type":"Geometry_Optimization",
 		"spherical_prune":"*:LIG.248:C02",
 		"spherical_prune_radius":25.0,
@@ -53,7 +56,7 @@ def Prepare_Prune_System():
 		"trajectory_name":"opt_pruned_tim.ptGeo"		
 	}
 
-	test_03_b = Wrapper("test_05")
+	test_03_b = Wrapper(folder)
 	test_03_b.Set_System(_prune_pars)
 	test_03_b.Run_Simulation(_prune_pars)
 	test_03_b.SaveSystem("7tim_optMM")
@@ -65,7 +68,7 @@ def Set_QC_MM(_hamiltonian="am1"):
 	'''
 	_qc_mmpars = {
 		"Input_Type":"pkl",
-		"pkl_file":"test_05/7tim_optMM.pkl",
+		"pkl_file": os.path.join(folder,"7tim_optMM.pkl"),
 		"set_energy_model":"QM",
 		"Hamiltonian":_hamiltonian,
 		"method_class":"SMO",
@@ -80,7 +83,7 @@ def Set_QC_MM(_hamiltonian="am1"):
 		"simulation_type":"Geometry_Optimization"
 	}
 
-	test_03_c = Wrapper("test_05/qcmm_opt"+_hamiltonian)
+	test_03_c = Wrapper( os.path.join(folder,"qcmm_opt"+_hamiltonian) )
 	test_03_c.Set_System(_qc_mmpars)
 	test_03_c.Run_Simulation(_qc_mmpars)
 	test_03_c.SaveSystem("7tim_"+_hamiltonian+"_opt_PF")
@@ -98,12 +101,12 @@ def Simple_Distance(_hamiltonian):
 	'''
 	'''
 
-	if not os.path.exists( os.path.join("test_05","qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
+	if not os.path.exists( os.path.join(folder,"qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
 		Set_QC_MM(_hamiltonian)
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
+		"pkl_file":os.path.join(folder,"qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
 		"set_reaction_crd":1,
 		"atoms_rc1":["*:LIG.*:H02","*:GLU.164:OE2"],
 		"type_rc1":"Distance",
@@ -118,7 +121,7 @@ def Simple_Distance(_hamiltonian):
 		"force_constants":[1200.0,1200.0]
 	}
 	#test simple distance
-	test_01 = Wrapper("test_05/Simple_Distance_"+_hamiltonian)
+	test_01 = Wrapper( os.path.join(folder,"Simple_Distance_"+_hamiltonian) )
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(scan1_parameters)
 	test_01.SaveSystem("Simple_DistanceScan")
@@ -129,12 +132,12 @@ def Multiple_Distance(_hamiltonian):
 	'''
 	'''
 
-	if not os.path.exists( os.path.join("test_05","qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
+	if not os.path.exists( os.path.join( folder,"qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
 		Set_QC_MM(_hamiltonian)
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
+		"pkl_file":os.path.join(folder,"qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl"),		
 		"set_reaction_crd":1,
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"type_rc1":"Distance",
@@ -151,7 +154,7 @@ def Multiple_Distance(_hamiltonian):
 		"force_constants":[1200.0,1200.0]
 	}
 	#test simple distance
-	test_01 = Wrapper("test_05/Multiple_Distance_"+_hamiltonian)
+	test_01 = Wrapper( os.path.join(folder,"Multiple_Distance_"+_hamiltonian) )
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(scan1_parameters)
 	test_01.SaveSystem("Multiple_DistanceScan")
@@ -159,10 +162,10 @@ def Multiple_Distance(_hamiltonian):
 #-----------------------------------------------
 def Run_Test():
 	info()
-	if not os.path.exists( os.path.join("test_05","7tim.pkl") ):
+	if not os.path.exists( os.path.join(folder,"7tim.pkl") ):
 		Prepare_MM_System()
 	
-	if not os.path.exists( os.path.join("test_05","7tim_optMM.pkl") ):
+	if not os.path.exists( os.path.join(folder,"7tim_optMM.pkl") ):
 		Prepare_Prune_System()
 	
 	SMOmodels = ["am1","rm1","pm3","pm6","am1dphot","pddgpm3"]
@@ -172,5 +175,4 @@ def Run_Test():
 	
 #===================================
 if __name__ == '__main__':
-	if ( sys.argv[1] ) == "-print":	info()
-	else: 						    Run_Test()
+	Run_Test()

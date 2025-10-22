@@ -4,6 +4,12 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_13")
+folderTRJ = os.path.join("Tests","pDynamoWrapper","test_13_trj")
+folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
+
+
 #====================================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #13:\n\t "
@@ -15,15 +21,15 @@ def Run_Test():
 	'''
 	'''
 	info()
-	_path = "test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
 
+	_path   = os.path.join( folder05, "Multiple_Distance_rm1","ScanTraj.ptGeo" )
 	init_path    = os.path.join( _path, "frame0.pkl")
 	final_path   = os.path.join( _path, "frame19.pkl")
 	saddle_coord = os.path.join( _path, "frame12.pkl") 
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_optam1","7tim_am1_opt_PF.pkl"),		
+		"pkl_file":os.path.join(folder05,"qcmm_optam1","7tim_am1_opt_PF.pkl"),		
 		"set_reaction_crd":2,	
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
@@ -42,7 +48,7 @@ def Run_Test():
 						"rmsGradient":0.10               					,
 						"fixed_terminal_images":"no"    	                }
 
-	test_01 = Wrapper("test_13_NEB")
+	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(parameters_NEB)
 	test_01.SaveSystem()
@@ -56,13 +62,14 @@ def Run_Test():
 						"rmsGradient":0.3               					,
 						"fixed_terminal_images":"no"                       }
 	
-	test_02 = Wrapper("test_13_NEB_traj")
+	test_02 = Wrapper(folderTRJ)
 	test_02.Set_System(system_parameters)
 	test_02.Run_Simulation(parameters_NEBT)
 	test_02.SaveSystem()
 
 	
 	#------------------------------------------------------------------------------		
+	'''
 	parameters_steep = { "traj_source":_path                               ,
 						"refine_methods":["rm1","am1","pm3","pddgpm3","pm6"],
 						"simulation_type":"Steep_Path_Searcher"          	,
@@ -83,9 +90,9 @@ def Run_Test():
 	test_04 = Wrapper("test_13_Saddle")
 	test_04.Set_System(system_parameters)
 	#test_04.Run_Simulation(parameters_saddle)
-	test_04.SaveSystem()				
+	test_04.SaveSystem()
+	'''				
 
 #===================================
 if __name__ == '__main__': 
-	if ( sys.argv[1] ) == "-print":	info()
-	else: Run_Test()
+	Run_Test()

@@ -4,6 +4,10 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_14")
+
+
 #====================================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #14:\n\t "
@@ -33,12 +37,11 @@ def Run_Test():
 						"temperature":298.15,
 						"mode":0}
 
-	test_01 = Wrapper("test_14_NM")
+	test_01 = Wrapper("folder")
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(parameters_NM)
 	test_01.SaveSystem()
 
 #====================================================
 if __name__ == '__main__': 
-	if ( sys.argv[1] ) == "-print":	info()
-	else: Run_Test()
+	Run_Test()

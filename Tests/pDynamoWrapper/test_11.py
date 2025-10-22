@@ -4,6 +4,11 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_11")
+folderOPT = os.path.join("Tests","pDynamoWrapper","test_11_opt")
+folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
+
 #===================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #11:\n\t "
@@ -18,7 +23,7 @@ def Run_Test():
 	info()
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_optam1","7tim_am1_opt_PF.pkl"),		
+		"pkl_file":os.path.join(folder,"qcmm_optam1","7tim_am1_opt_PF.pkl"),		
 		"set_reaction_crd":1,	
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
@@ -26,7 +31,7 @@ def Run_Test():
 		"mass_constraints":["yes"],
 	}
 
-	_path   = "test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
+	_path   = os.path.join( folder05, "Multiple_Distance_rm1","ScanTraj.ptGeo" )
 	
 	US_parameters = {
 				   "ndim": 1 					        ,
@@ -43,13 +48,13 @@ def Run_Test():
 				   "trajectory_name":"US_test"          ,
 				   }
 	#------------------------------------
-	test_01 = Wrapper("test_11")
+	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
 	test_01.Run_Simulation(US_parameters)
 	test_01.SaveSystem()
 	#-----------------------------------	
 	US_parameters["optmize_US"] = "True"
-	test_01 = Wrapper("test_11_opt")
+	test_01 = Wrapper(folderOPT)
 	test_01.Set_System(system_parameters)
 	#test_01.Run_Simulation(US_parameters)
 	#test_01.SaveSystem()

@@ -4,6 +4,10 @@
 from pDynamoWrapper import Wrapper
 import SimulationSystem 
 import os, sys
+
+folder = os.path.join("Tests","pDynamoWrapper","test_08")
+folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
+
 #===================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #08:\t "
@@ -15,10 +19,10 @@ def Run_Test():
 	'''
 	Test molecular dynamics algorithms with qmmm
 	'''
-
+	info()
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("test_05","qcmm_optam1","7tim_am1_opt_PF.pkl"),
+		"pkl_file":os.path.join(folder05,"qcmm_optam1","7tim_am1_opt_PF.pkl"),
 		"set_reaction_crd":2,	
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
@@ -42,7 +46,7 @@ def Run_Test():
 	
 	#------------------------------------
 	#protocol production
-	test_01 = Wrapper("test_08")
+	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
 	simulation_parameters["trajectory_name"]="7timQCMD_restricted"
 	test_01.Run_Simulation(simulation_parameters)
@@ -52,5 +56,4 @@ def Run_Test():
 	
 #===================================
 if __name__ == '__main__': 
-	if ( sys.argv[1] ) == "-print":	info()
-	else: Run_Test()
+	Run_Test()
