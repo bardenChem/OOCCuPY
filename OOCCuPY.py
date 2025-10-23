@@ -98,6 +98,7 @@ class Interface:
 	def run_testes(self,_number):
 		'''
 		'''
+
 #=============================================================
 if __name__=="__main__":
 	parser = argparse.ArgumentParser(

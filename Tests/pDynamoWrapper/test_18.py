@@ -7,7 +7,6 @@ import os
 
 folder = os.path.join("Tests","pDynamoWrapper","test_18")
 
-
 #===================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #18:\n\t "
