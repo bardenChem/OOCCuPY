@@ -1,5 +1,5 @@
 Exemple 1 
 --------------------------------
-#INPUT_TYPE gromacs Examples/pDynamoWrapper/data/1atp_peptide.top Examples/pDynamoWrapper/data/1atp_peptide.gro
+#INPUT_TYPE gromacs /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/data/1atp_peptide.top Examples/pDynamoWrapper/data/1atp_peptide.gro
 #SAVE_NAME 1atp_peptide
 _____________________________

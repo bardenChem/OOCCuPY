@@ -50,7 +50,7 @@ class Simulation:
 		'''
 		self.molecule   = _parameters["active_system"]
 		self.parameters = None
-		self.Iniate_Parameters(_parameters)
+		self.Initiate_Parameters(_parameters)
 		self.baseFolder = _parameters["project_folder"]
 
 		self.restart    = False
@@ -59,7 +59,7 @@ class Simulation:
 		if self.parameters["adaptative"] == "yes": self.adaptative = True
 
 	#======================================================================
-	def Iniate_Parameters(self,_parameters):
+	def Initiate_Parameters(self,_parameters):
 		'''		
 		Initiate parameters attrubute dict and the deafult values of each entry.
 		'''	
@@ -79,7 +79,7 @@ class Simulation:
 			"QCcharge":0,
 			"charge":0,
 			"multiplicity":1,
-			"correct_QMMM_charge":False,
+			"correct_QMMM_charge":"no",
 			"pySCF_method":"RHF",
 			#parameters energy refinement
 			"xnbins":0,

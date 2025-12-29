@@ -99,8 +99,8 @@ class Interface:
 		'''
 		'''
 
-#=============================================================
-if __name__=="__main__":
+
+def main():
 	parser = argparse.ArgumentParser(
 						prog="OOCCuPy",
 						description="Object Oriented Computational Chemistry ")
@@ -125,6 +125,12 @@ if __name__=="__main__":
 	if 		args.command == "pDynamo": RunOOCCuPy.pDynamoWrapper_handler()
 	elif 	args.command == "mdtools": RunOOCCuPy.MD_prep_handler()
 	elif 	args.command == "QM_inputs": RunOOCCuPy.QM_input_handler() 
+
+
+
+#=============================================================
+if __name__=="__main__":
+	main()
 
 
 

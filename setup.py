@@ -202,7 +202,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "ooccupy=OOCCuPY.OOCCuPY:main",
+            "ooccupy=OOCCuPY:main",
         ],
     },
     license="MPL-2.0",

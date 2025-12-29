@@ -90,6 +90,8 @@ class SimulationSystem:
         '''
         self = selfClass()
         parameters   = GromacsParameterFileReader.PathToParameters ( _topologyFile )
+        print(parameters)
+        input()
         self.system  = GromacsDefinitionsFileReader.PathToSystem   ( _topologyFile, parameters = parameters )
         self.system.coordinates3 = ImportCoordinates3              ( _coordinateFile )
         if self.system.symmetryParameters is not None: self.system.DefineNBModel ( NBModelCutOff.WithDefaults ( ) )
@@ -191,8 +193,6 @@ class SimulationSystem:
     #=========================================================================
     def Set_QCMM_Region(self,_pat_list,_centerAtom=None,_radius=None,_DEBUG=False):
         '''
-            lig = AtomSelection.FromAtomPattern(proj.system,"*:LIG.248:*")
-
         '''
         if len(_pat_list) > 0:
             for pat in _pat_list:

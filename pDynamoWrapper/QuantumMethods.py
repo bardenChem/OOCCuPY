@@ -62,7 +62,7 @@ class QuantumMethods:
 		try:
 			new_charge  = self.GetQCCharge(newSystem)			
 			if not new_charge == self.pars["QCcharge"]:
-				if self.pars["correct_QMMM_charge"]:
+				if self.pars["correct_QMMM_charge"] == "yes":
 					self.pars["QCcharge"] = new_charge
 		except:
 			pass
