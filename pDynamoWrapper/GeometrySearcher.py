@@ -6,8 +6,7 @@
 #==============================================================================
 import os, sys
 #importing our library functions
-import commonFunctions
-from LogFile import LogFileWriter
+from . import commonFunctions
 # pDynamo
 from pBabel                    import *                                     
 from pCore                     import *                                     
@@ -17,7 +16,7 @@ from pScientific.Arrays        import *
 from pScientific.Geometry3     import *                 
 from pSimulation               import *
 
-from TrajectoryAnalysis  import TrajectoryAnalysis
+from .TrajectoryAnalysis  import TrajectoryAnalysis
 #*********************************************************************************
 class GeometrySearcher:
     '''

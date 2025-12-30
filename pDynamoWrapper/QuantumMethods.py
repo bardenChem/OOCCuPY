@@ -18,7 +18,7 @@ from pMolecule.NBModel import NBModelORCA
 
 from addOns.pySCF import NBModelPySCF , \
                              QCModelPySCF
-import MopacQCMMinput
+from .MopacQCMMinput import MopacQCMMinput
 import pyscf
 #==============================================================
 class QuantumMethods:

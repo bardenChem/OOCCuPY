@@ -10,9 +10,9 @@ import numpy as np
 #-----------------------------------------------------------------------------------------------------
 #Loading own libraries
 #-------------------------------------------------------------
-from EnergyAnalysis     	import EnergyAnalysis
-from TrajectoryAnalysis 	import TrajectoryAnalysis
-from PotentialOfMeanForce   import PMF
+from .EnergyAnalysis     	import EnergyAnalysis
+from .TrajectoryAnalysis 	import TrajectoryAnalysis
+from .PotentialOfMeanForce   import PMF
 from pBabel                    	import *                                     
 from pCore                     	import *                                     
 from pMolecule                 	import *            

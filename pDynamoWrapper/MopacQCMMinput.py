@@ -4,7 +4,7 @@
 #FILE = MopacQCMMinput.py
 
 
-from commonFunctions import *
+from .commonFunctions import *
 from pMolecule import *
 from pBabel import ImportCoordinates3
 from pCore import Unpickle

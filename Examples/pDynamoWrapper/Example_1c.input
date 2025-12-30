@@ -1,6 +1,6 @@
 Exemple 1 
 --------------------------------
-#INPUT_TYPE amber Examples/pDynamoWrapper/data/7tim.top Examples/pDynamoWrapper/data/7tim.crd
+#INPUT_TYPE amber /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/data/7tim.top /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/data/7tim.crd
 #SPHERICAL_PRUNNING *:LIG.248:C02 25.0
 #FIXED_ATOMS *:LIG.248:C02 20.0
 _____________________________

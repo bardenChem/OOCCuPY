@@ -1,6 +1,6 @@
 Example 1 
 --------------------------------
-#INPUT_TYPE pkl Examples/pDynamoWrapper/Example1CbyInput/7tim.pkl
+#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example1CbyInput/7tim.pkl
 #SPHERICAL_PRUNNING *:LIG.248:C02 25.0
 #FIXED_ATOMS *:LIG.248:C02 20.0
 #SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2

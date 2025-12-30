@@ -6,17 +6,17 @@
 
 #================================
 import pymp
-from commonFunctions import *
+from .commonFunctions import *
 from pMolecule import *
 from pMolecule.QCModel import *
 
-from GeometrySearcher import * 
+from .GeometrySearcher import * 
 
 import os, glob, sys, shutil
 import numpy as np 
 
 from pSimulation import *
-from QuantumMethods import *
+from .QuantumMethods import *
 #================================
 #**********************************************************
 

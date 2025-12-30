@@ -13,7 +13,7 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.colors as colors
 from matplotlib.colors import BoundaryNorm
 
-from commonFunctions import *
+from .commonFunctions import *
 
 from pBabel                    import *                                     
 from pCore                     import *                                     

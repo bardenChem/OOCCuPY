@@ -9,8 +9,8 @@
 #-----------------------------------------------------
 import os, glob, sys, shutil
 #-----------------------------------------------------
-from MolecularDynamics import MD 
-from GeometrySearcher  import GeometrySearcher
+from .MolecularDynamics import MD 
+from .GeometrySearcher  import GeometrySearcher
 #-----------------------------------------------------
 import pymp
 #-----------------------------------------------------

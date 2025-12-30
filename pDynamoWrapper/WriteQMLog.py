@@ -5,9 +5,7 @@ sys.path.append("/home/igorchem/VisMol/easyhybrid/pDynamoMethods")
 import pymp
 #--------------------------------------------------------------------
 import os, glob
-from commonFunctions import *
-from CoreInterface import *
-import SimulationsPreset
+from .commonFunctions import *
 
 #==================================================
 class WriteQMLog:

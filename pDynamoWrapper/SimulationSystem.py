@@ -7,10 +7,10 @@
 import os, glob, sys
 #--------------------------------------------------------------
 #Loading own libraries
-from commonFunctions import *
-from Simulation import Simulation
-from Analysis import *
-from QuantumMethods import *
+from .commonFunctions import *
+from .Simulation import Simulation
+from .Analysis import *
+from .QuantumMethods import *
 #--------------------------------------------------------------
 #loading pDynamo Libraries
 from pBabel                    import *                                     
@@ -26,7 +26,7 @@ from pBabel            import ExportSystem                    , \
                               GromacsParameterFileReader      , \
                               ImportCoordinates3              , \
                               ImportSystem
-from ReactionCoordinate import ReactionCoordinate
+from .ReactionCoordinate import ReactionCoordinate
 #==========================================================================
 
 #**************************************************************************
@@ -211,8 +211,15 @@ class SimulationSystem:
         '''
         '''
         _atom_pat = []
-        for atom in atoms_rc:            
-            _atom_pat.append( AtomSelection.FromAtomPattern(self.system, atom)[0] )
+        pat = -1
+        for atom in atoms_rc:
+            try:
+                pat= int(atom)
+            except:
+                pat=AtomSelection.FromAtomPattern(self.system, atom)[0]
+            if (pat ==-1): 
+                print("Error in selection of atom pattern!!")
+            _atom_pat.append(pat )
         
         
         _rc = ReactionCoordinate(_atom_pat,_mass_c,_type)

@@ -9,7 +9,7 @@ import pymp
 import numpy as np 
 #-----------------------------
 #my library
-from GeometrySearcher import * 
+from .GeometrySearcher import * 
 #-----------------------------
 #pDynamo library
 from pMolecule import *

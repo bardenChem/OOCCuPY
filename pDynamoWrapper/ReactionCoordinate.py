@@ -5,7 +5,7 @@
 #FILE = ReactionCoordinate.py
 
 #=============================================================================
-from commonFunctions import *
+from .commonFunctions import *
 from pMolecule import *
 #*****************************************************************************
 class ReactionCoordinate:

@@ -12,7 +12,7 @@ from pMolecule                 	import *
 from pScientific               	import *                 
          
 from pSimulation               	import *
-from commonFunctions 			import GetFrameIndex
+from .commonFunctions 			import GetFrameIndex
 #-----------------------------------------------------
 import pymp
 #-----------------------------------------------------

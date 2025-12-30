@@ -11,7 +11,7 @@ import numpy as np
 #--------------------------------------------------------------
 import matplotlib.pyplot as plt
 #--------------------------------------------------------------
-from commonFunctions 			import *
+from .commonFunctions 			import *
 from pBabel                     import *                                     
 from pCore                      import *                                     
 from pMolecule                  import *                   

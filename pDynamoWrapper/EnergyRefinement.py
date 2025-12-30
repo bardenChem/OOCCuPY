@@ -5,16 +5,16 @@
 
 #================================
 import pymp
-from commonFunctions import *
+from .commonFunctions import *
 from pMolecule import *
 from pMolecule.QCModel import *
 
-from MopacQCMMinput import MopacQCMMinput
+from .MopacQCMMinput import MopacQCMMinput
 import os, glob, sys, shutil
 import numpy as np 
 
 from pSimulation import *
-from QuantumMethods import *
+from .QuantumMethods import *
 #================================
 #**********************************************************
 class EnergyRefinement:

@@ -9,18 +9,18 @@ import numpy as np
 #-----------------------------------------------------------------------------------------------------
 #Loading own libraries
 #-------------------------------------------------------------
-from EnergyAnalysis         import EnergyAnalysis
-from TrajectoryAnalysis 	import TrajectoryAnalysis
-from Analysis import Analysis
+from .EnergyAnalysis         import EnergyAnalysis
+from .TrajectoryAnalysis 	import TrajectoryAnalysis
+from .Analysis import Analysis
 #-------------------------------------------------------------
-from GeometrySearcher 	    import GeometrySearcher
-from RelaxedScan 			import SCAN
-from MolecularDynamics  	import MD
-from UmbrellaSampling  	    import US
-from PotentialOfMeanForce   import PMF
-from ReactionCoordinate 	import ReactionCoordinate
-from EnergyRefinement	 	import EnergyRefinement
-from ScanRefinement			import ScanRefinement
+from .GeometrySearcher 	    import GeometrySearcher
+from .RelaxedScan 			import SCAN
+from .MolecularDynamics  	import MD
+from .UmbrellaSampling  	    import US
+from .PotentialOfMeanForce   import PMF
+from .ReactionCoordinate 	import ReactionCoordinate
+from .EnergyRefinement	 	import EnergyRefinement
+from .ScanRefinement			import ScanRefinement
 #--------------------------------------------------------------
 #loading pDynamo Libraries
 from pBabel                    import *                                     

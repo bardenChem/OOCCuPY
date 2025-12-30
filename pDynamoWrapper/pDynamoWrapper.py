@@ -6,10 +6,10 @@
 #--------------------------------------------------------------
 import os, glob, sys
 
-from commonFunctions import *
-from SimulationSystem import SimulationSystem
-from Simulation import *
-from Analysis import *
+from .commonFunctions import *
+from .SimulationSystem import SimulationSystem
+from .Simulation import *
+from .Analysis import *
 
 #==============================================================
 class Wrapper:
