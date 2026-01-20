@@ -499,3 +499,7 @@ class protein:
 		input_file =open(self.name[:-4] + ".mop",'w')
 		input_file.write(input_text)
 		input_file.close()
+
+
+Objeto_exemplo = protein("nome_do_arquivo.pdb") #criei o objeto
+Objeto_exemplo.write_xyz()

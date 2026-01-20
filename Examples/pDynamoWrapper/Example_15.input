@@ -1,6 +1,6 @@
 Example 15
 --------------------------------
-#INPUT_TYPE pkl Examples/pDynamoWrapper/example3bbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
 #RUN_SIMULATION  Energy_Refinement
 #SET_ENERGY_MODEL_QM SMO
 #HAMILTONIAN rm1
@@ -8,12 +8,12 @@ Example 15
 #SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
 #SET_REACTION_CRD distance yes 3 *:HIE.94:NE2 *:LIG.*:O06 *:HIE.94:HE2
 #METHODS_SMO am1 rm1 pm6 
-#SOURCE_FOLDER Examples/pDynamoWrapper/example6cbyInput/ScanTraj.ptGeo
+#SOURCE_FOLDER /home/igorchem/Dev/OOCCuPY/Examples/example6CbyInput/ScanTraj.ptGeo
 #LOG_FREQUENCY 10
 #CORRECT_QMMM_CHARGES yes 
 #MULTIPLICITY 1 
 #SOFTWARE pDynamo
-#FOLDER Examples/pDynamoWrapper/example15byInput
+#FOLDER /home/igorchem/Dev/OOCCuPY/Examples/example15byInput
 #XNBINS 20
 #YNBINS 20
 #MAX_NUM_OF_THREADS 8

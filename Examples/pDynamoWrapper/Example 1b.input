@@ -1,4 +1,4 @@
 Example 1 
 --------------------------------
-#INPUT_TYPE gromacs data/1atp_peptide.top data/1atp_peptide.gro
+#INPUT_TYPE gromacs /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/data/1atp_peptide.top data/1atp_peptide.gro
 _____________________________

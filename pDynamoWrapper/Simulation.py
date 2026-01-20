@@ -229,7 +229,7 @@ class Simulation:
 		if self.parameters["reverse_rc1"] == "yes": _reverse_rc1 = True 
 		if self.parameters["reverse_rc2"] == "yes": _reverse_rc2 = True 
 		if   _type == "1DRef": EA.MultPlot1D(crd1_label)
-		elif _type == "2DRef": EA.MultPlot2D(self._parameters["contour_lines"],crd1_label,crd2_label,self.parameters["fig_size"],_reverse_rc1,_reverse_rc2)	
+		elif _type == "2DRef": EA.MultPlot2D(self.parameters["contour_lines"],crd1_label,crd2_label,self.parameters["fig_size"],_reverse_rc1,_reverse_rc2)	
 	#==================================================================
 	def GeometryOptimization(self):
 		'''
@@ -275,15 +275,20 @@ class Simulation:
 				scan.Run1DScan(self.parameters["nsteps_rc1"])
 			log_path = scan.Finalize()
 
+			print(f"DEBUG in RelaxedSurfaceScan: xlim = {self.parameters['xlim']}")
+			print(f"DEBUG in RelaxedSurfaceScan: ylim = {self.parameters['ylim']}")
+			print(f"DEBUG in RelaxedSurfaceScan: type(xlim) = {type(self.parameters['xlim'])}")
+			print(f"DEBUG in RelaxedSurfaceScan: type(ylim) = {type(self.parameters['ylim'])}")
+
 			EA = EnergyAnalysis( X, Y, _type=_type)		
 			EA.ReadLog(log_path)
 			#--------------------------------------------------------
 			crd1_label = self.molecule.reactionCoordinates[0].label
 			
 			if   _type == "1D": EA.Plot1D(crd1_label)
-			elif _type == "2D":					
-				self.parameters["xlim"] = [scan.reactionCoordinate1[0] , scan.reactionCoordinate1[-1] ]
-				self.parameters["ylim"] = [scan.reactionCoordinate2[0] , scan.reactionCoordinate2[-1] ]	
+			elif _type == "2D":
+				self.parameters["xlim"] = [scan.reactionCoordinate1[0,0] , scan.reactionCoordinate1[-1,-1] ]
+				self.parameters["ylim"] = [scan.reactionCoordinate2[0,0] , scan.reactionCoordinate2[-1,-1] ]					
 				EA.Plot2D(self.parameters["contour_lines"],crd1_label,crd2_label,_xlim=self.parameters["xlim"],_ylim=self.parameters["ylim"],_figS=self.parameters["fig_size"])		
 	#==================================================================================	
 	def ScanRefinement(self):
@@ -456,7 +461,7 @@ class Simulation:
 			self.parameters["folder"] = self.baseFolder
 			self.parameters["source_folder"] = self.baseFolder
 			self.parameters["analysis_type"] = "PMF"
-			WHAM = Analyasis(self.parameters)
+			WHAM = Analysis(self.parameters)
 			WHAM.PMFAnalysis()		
 	
 	#==========================================================================

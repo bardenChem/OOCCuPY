@@ -1,13 +1,13 @@
 Example 14
 --------------------------------
-#INPUT_TYPE pkl Examples/pDynamoWrapper/example3bbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
 #FIXED_ATOMS *:LIG.248:C02 3.0
 #RUN_SIMULATION Normal_Modes 
-#INIT_COORD Examples/pDynamoWrapper/example5bbyInput/ScanTraj.ptGeo/frame0.pkl
+#INIT_COORD /home/igorchem/Dev/OOCCuPY/Examples/example5BbyInput/ScanTraj.ptGeo/frame0.pkl
 #CYCLES 12
 #SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
 #LOG_FREQUENCY 10 
-#FOLDER Examples/pDynamoWrapper/example14byInput
+#FOLDER /home/igorchem/Dev/OOCCuPY/Examples/example14byInput
 #NDIMS 1
 #mode 0 
 #MAX_NUM_OF_THREADS 8

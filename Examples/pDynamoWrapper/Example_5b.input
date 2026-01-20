@@ -1,6 +1,6 @@
 Example 5
 --------------------------------
-#INPUT_TYPE pkl Examples/pDynamoWrapper/example3bbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
 #RUN_SIMULATION Relaxed_Surface_Scan
 #SET_ENERGY_MODEL_QM SMO
 #HAMILTONIAN pm6

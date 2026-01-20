@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
 import os, sys
 
 folder = os.path.join("Tests","pDynamoWrapper","test_03")

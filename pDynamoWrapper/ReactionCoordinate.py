@@ -21,6 +21,7 @@ class ReactionCoordinate:
 			Dihedral
 			Thether
 		'''
+		print(_massConstraint)
 		self.atomsSel	    = _atoms
 		self.atoms          = []
 		self.nAtoms 		= len(_atoms)
@@ -105,9 +106,9 @@ class ReactionCoordinate:
 		if not _sigma_pk1_pk3 == None: 	self.weight13 = _sigma_pk1_pk3
 		if not _sigma_pk3_pk1 == None:	self.weight31 = _sigma_pk3_pk1		
 		if set_pars: 
-			if self.Type == "multipleDistance":
+			if self.Type == "multipleDistance":				
 				#.-------------------------------------------------
-				if self.massConstraint == "True":			
+				if self.massConstraint:			
 					#------------------------------------------------
 					atomic_n1 = _molecule.atoms.items[ self.atoms[0] ].atomicNumber
 					atomic_n3 = _molecule.atoms.items[ self.atoms[2] ].atomicNumber
@@ -118,12 +119,13 @@ class ReactionCoordinate:
 					self.weight31 = self.weight31*-1
 					dist_a1_a2 = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
 					dist_a2_a3 = _molecule.coordinates3.Distance( self.atoms[1], self.atoms[2] )
-					self.minimumD = ( self.weight13 * dist_a1_a2 ) - ( self.weight31 * dist_a2_a3*-1)				
+					self.minimumD = ( self.weight13 * dist_a1_a2 ) - ( self.weight31 * dist_a2_a3*-1)	
+					
             		#.------------------------------------------------
 				else:
 					dist_a1_a2 = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
 					dist_a2_a3 = _molecule.coordinates3.Distance( self.atoms[1], self.atoms[2] )
-					self.minimumD =  dist_a1_a2 - dist_a2_a3
+					self.minimumD =  dist_a1_a2 - dist_a2_a3					
 				#.-------------------------------------------------------------      
 			elif self.Type == "Distance" or self.Type == "distance": self.minimumD = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
 			#.--------------------------
@@ -135,7 +137,7 @@ class ReactionCoordinate:
 		'''
 		print( "Printing reaction coordinate information:")
 		print( "\tAtoms Indices: {}".format(self.atoms) )
-		print( "\tLabel: {}".format(self.label2) )
+		print( "\tLabel: {}".format(self.label) )
 		print( "\tType: {}".format(self.Type) )
 		print( "\tWeight N1:{} ".format(self.weight13) )
 		print( "\tWeight N2:{} ".format(self.weight31) )

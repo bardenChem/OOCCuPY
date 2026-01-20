@@ -145,6 +145,7 @@ class SCAN:
         Set reaction coordinate, determining initial parameters from the atoms information
         '''
         #------------------------------------------------------------
+        _RC.Print()
         ndim = self.nDim # temp var to hold the index of the curren dim
         self.nDim += 1
         self.atoms.append(_RC.atoms)
@@ -154,6 +155,7 @@ class SCAN:
         self.sigma_a3_a1[ndim]      = _RC.weight31
         self.DMINIMUM[ndim]         = _RC.minimumD
         self.massConstraint         = _RC.massConstraint
+
 
         if len(_RC.atoms)   == 3: self.multipleDistance[ndim] = True
         elif len(_RC.atoms) == 4: self.dihedral = True

@@ -1,18 +1,18 @@
 Example 13
 --------------------------------
-#INPUT_TYPE pkl Examples/pDynamoWrapper/example3bbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
 #RUN_SIMULATION NEB 
 #RMS_GROWING_STRING 0.1
 #FIXED_NEB no
 #SPRING_FORCE 500.0
 #SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
-#SOURCE_FOLDER Examples/pDynamoWrapper/example5bbyInput/ScanTraj.ptGeo
+#SOURCE_FOLDER /home/igorchem/Dev/OOCCuPY/Examples/example5BbyInput/ScanTraj.ptGeo
 #LOG_FREQUENCY 10 
 #FOLDER example13byInput
 #BINS 12
 #NDIMS 1
-#INITIAL_CRD Examples/pDynamoWrapper/example5bbyInput/ScanTraj.ptGeo/frame0.pkl
-#FINAL_CRD   Examples/pDynamoWrapper/example5bbyInput/ScanTraj.ptGeo/frame11.pkl
+#INITIAL_CRD /home/igorchem/Dev/OOCCuPY/Examples/example5BbyInput/ScanTraj.ptGeo/frame0.pkl
+#FINAL_CRD   /home/igorchem/Dev/OOCCuPY/Examples/example5BbyInput/ScanTraj.ptGeo/frame11.pkl
 #REFINE_METHODS am1 pm3  
 #MAX_NUM_OF_THREADS 8
 _____________________

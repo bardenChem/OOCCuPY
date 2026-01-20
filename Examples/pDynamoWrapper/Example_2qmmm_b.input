@@ -1,6 +1,6 @@
 Example 2 
 --------------------------------
-#INPUT_TYPE pkl Examples/pDynamoWrapper/example1bByInput/1atp_peptide.pkl
+#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example1BbyInput/1atp_peptide.pkl
 #SET_ENERGY_MODEL_QM SMO
 #HAMILTONIAN am1
 #SET_QMMM_REGION #residue_patterns 1 *:ARG.19:*

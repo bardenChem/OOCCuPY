@@ -292,6 +292,17 @@ class EnergyAnalysis:
 		X = []
 		Y = []
 		self.NormalizeEnergies()
+		
+		
+    
+		# Force xlen and ylen to be integers if they're not
+		if not isinstance(self.xlen, int):
+			print(f"DEBUG: xlen is not int, converting. Original value: {self.xlen}")
+			self.xlen = int(self.xlen)
+		if not isinstance(self.ylen, int):
+			print(f"DEBUG: ylen is not int, converting. Original value: {self.ylen}")
+			self.ylen = int(self.ylen)
+
 		if _xlim == None and _ylim == None:
 			_xlim = [ 0, self.xlen ]
 			_ylim = [ 0, self.ylen ]
@@ -310,6 +321,7 @@ class EnergyAnalysis:
 			X = np.linspace(_xlim[0],_xlim[1],self.xlen)
 			Y = np.linspace(_ylim[0],_ylim[1],self.ylen)
 		#------------------------------------------------------
+		
 		z = self.energiesMatrix
 		#------------------------------------------------------
 		fig, (ax0) = plt.subplots( nrows=1, figsize=(_figS[0],_figS[1]) )
@@ -323,8 +335,10 @@ class EnergyAnalysis:
 		norm= colors.PowerNorm(gamma=1./2.)
 		norm= colors.Normalize(vmin=vmin, vmax=vmax)
 		#------------------------------------------------------
-		im = ax0.pcolormesh(X,Y,z, cmap=cmap, norm=norm, shading = "gouraud")
-		am = ax0.contour(X,Y,z,contourlines, colors='k')		
+
+		X_grid, Y_grid = np.meshgrid(X, Y)
+		im = ax0.pcolormesh(X,Y,z, cmap=cmap, norm=norm, shading = "gouraud")		
+		am = ax0.contour(X_grid,Y_grid,z,contourlines, colors='k')		
 		ax0.clabel(am, inline=1, fontsize=8, fmt='%1.1f',colors="k")		
 		cbar = fig.colorbar(im, ax=ax0)
 		cbar.ax.tick_params()
@@ -392,6 +406,8 @@ class EnergyAnalysis:
 		
 		dirs = [ [1,0] ,[0,1], [1,1] ]
 
+		print(cp, fin_point)
+		input()
 		while not cp == fin_point:
 
 			print( "Current Point is: {} {} ".format(cp[0], cp[1] ) )

@@ -47,6 +47,7 @@ class Wrapper:
 		reactions_crds = []
 		_parameters = {}
 		simulations = []
+		analysis    = []
 		_parameters["mass_constraints"] = []
 		_parameters["crd_labels"] = []
 		save_name = None
@@ -101,6 +102,7 @@ class Wrapper:
 						_parameters["set_energy_model"] = "QM"
 				elif lines[0] == "#HAMILTONIAN": _parameters["Hamiltonian"] = lines[1]
 				elif lines[0] == "#RUN_SIMULATION":	_parameters["simulation_type"] = simulations.append(lines[1])
+				elif lines[0] == "#RUN_ANALYSIS":	_parameters["analysis_type"] = analysis.append(lines[1])
 				elif lines[0] == "#QC_CHARGE": _parameters["QCcharge"] = int(lines[1])
 				elif lines[0] == "#MULTIPLICITY": _parameters["multiplicity"] = int(lines[1])
 				elif lines[0] == "#ORCA_METHOD": _parameters["orca_method"] = lines[1] 
@@ -179,7 +181,14 @@ class Wrapper:
 				elif lines[0] == "#CRD_LABEL_2": _parameters["crd_labels"].append(lines[1])
 				elif lines[0] == "#SAVE_NAME": save_name = lines[1]
 				elif lines[0] == "#SCRATCH": _parameters["scratch"] = lines[1] 
-				elif lines[0] == "#REFINE_METHODS": _parameters["refine_methods"] = lines[1] 
+				elif lines[0] == "#REFINE_METHODS": _parameters["refine_methods"] = lines[1]
+				elif lines[0] == "#XSIZE": _parameters["xsize"] = int(lines[1])
+				elif lines[0] == "#YSIZE": _parameters["ysize"] = int(lines[1])
+				elif lines[0] == "#PLOTTYPE": _parameters["type"] = lines[1]
+				elif lines[0] == "#INPOINT": _parameters["in_point"]   = [ int(lines[1]), int(lines[2]) ]
+				elif lines[0] == "#FINPOINT": _parameters["fin_point"] = [ int(lines[1]), int(lines[2]) ]
+				elif lines[0] == "#LOGNAME": _parameters["log_name"] = lines[1]
+				elif lines[0] == "#RETRIEVE_PATH": _parameters["retrieve_path"] = lines[1]
 
 		
 		_parameters["set_reaction_crd"] = SET_CRD_NMB			
@@ -188,6 +197,10 @@ class Wrapper:
 		for sim in simulations:
 			_parameters["simulation_type"] = sim
 			self.Run_Simulation(_parameters)
+
+		for an in analysis:
+			_parameters["analysis_type"] = an
+			self.Run_Analysis(_parameters)	
 
 		self.SaveSystem(save_name)
 		inpFile.close()		
