@@ -21,7 +21,6 @@ class ReactionCoordinate:
 			Dihedral
 			Thether
 		'''
-		print(_massConstraint)
 		self.atomsSel	    = _atoms
 		self.atoms          = []
 		self.nAtoms 		= len(_atoms)

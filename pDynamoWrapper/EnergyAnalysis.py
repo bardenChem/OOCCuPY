@@ -292,9 +292,6 @@ class EnergyAnalysis:
 		X = []
 		Y = []
 		self.NormalizeEnergies()
-		
-		
-    
 		# Force xlen and ylen to be integers if they're not
 		if not isinstance(self.xlen, int):
 			print(f"DEBUG: xlen is not int, converting. Original value: {self.xlen}")
@@ -302,26 +299,34 @@ class EnergyAnalysis:
 		if not isinstance(self.ylen, int):
 			print(f"DEBUG: ylen is not int, converting. Original value: {self.ylen}")
 			self.ylen = int(self.ylen)
-
-		if _xlim == None and _ylim == None:
+		#------------------------------------------------------
+		if _xlim == None:
 			_xlim = [ 0, self.xlen ]
-			_ylim = [ 0, self.ylen ]
 			if len(self.RC1) > 0:
 				X = np.linspace( np.min(self.RC1) , np.max(self.RC1), self.xlen )
-				Y = np.linspace( np.min(self.RC2) , np.max(self.RC2), self.ylen )
 			else:
 				if _reverserc1: 
 					X = np.linspace(self.xlen,0,self.xlen)
-				else:           X = np.linspace(0,self.xlen,self.xlen)
-				if _reverserc2: 
-					Y = np.linspace(self.ylen,0,self.ylen)
-				else:           Y = np.linspace(0,self.ylen,self.ylen)
-		#------------------------------------------------------
+				else:
+					X = np.linspace(0,self.xlen,self.xlen)				
 		else:			
 			X = np.linspace(_xlim[0],_xlim[1],self.xlen)
-			Y = np.linspace(_ylim[0],_ylim[1],self.ylen)
 		#------------------------------------------------------
-		
+
+		if _ylim == None:
+			_ylim = [ 0, self.ylen ]
+			if len(self.RC2) > 0:
+				Y = np.linspace( np.min(self.RC2) , np.max(self.RC2), self.ylen )
+			else:
+				if _reverserc2: 
+					Y = np.linspace(self.ylen,0,self.ylen)
+				else: 
+					Y = np.linspace(0,self.ylen,self.ylen)
+
+		#------------------------------------------------------
+		else:
+			Y = np.linspace(_ylim[0],_ylim[1],self.ylen)
+		#------------------------------------------------------		
 		z = self.energiesMatrix
 		#------------------------------------------------------
 		fig, (ax0) = plt.subplots( nrows=1, figsize=(_figS[0],_figS[1]) )
@@ -335,7 +340,6 @@ class EnergyAnalysis:
 		norm= colors.PowerNorm(gamma=1./2.)
 		norm= colors.Normalize(vmin=vmin, vmax=vmax)
 		#------------------------------------------------------
-
 		X_grid, Y_grid = np.meshgrid(X, Y)
 		im = ax0.pcolormesh(X,Y,z, cmap=cmap, norm=norm, shading = "gouraud")		
 		am = ax0.contour(X_grid,Y_grid,z,contourlines, colors='k')		
@@ -348,7 +352,6 @@ class EnergyAnalysis:
 		for tick in (ax0.xaxis.get_major_ticks()):
 			tick.label.set_fontname('Arial')
 			tick.label.set_fontsize(14)
-
 		for tick in (ax0.yaxis.get_major_ticks()):
 			tick.label.set_fontname('Dejavu')
 			tick.label.set_fontsize(14) 

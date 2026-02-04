@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
 import os, sys
 
 folder = os.path.join("Tests","pDynamoWrapper","test_10")
@@ -22,7 +21,7 @@ def Run_Test():
 	info()
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join(folder,"qcmm_optam1","7tim_am1_opt_PF.pkl"),
+		"pkl_file":os.path.join(folder05,"qcmm_optam1","7tim_am1_opt_PF.pkl"),
 		"set_qc_region":"yes",
 		"set_energy_model":"QM",
 		"Hamiltonian":"rm1",
@@ -38,11 +37,11 @@ def Run_Test():
 		"reverse_rc1":"yes",
 	}
 
-	_path   = "test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
+	_path   = "Tests/pDynamoWrapper/test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
 	methods = ["am1","pm3","rm1","pm6"]
 	
 	simulation_parameters = { "xnbins":20			    ,
-				   "source_folder":_path                , 
+				   "source_folder":_path                ,				    
 				   "folder":folder                      ,
 				   "QCcharge":-2		                ,
 				   "multiplicity":1 	                ,
@@ -51,6 +50,7 @@ def Run_Test():
 				   "simulation_type":"Energy_Refinement",
 				   "Software":"pDynamo"	}				  
 					
+	
 	#------------------------------------
 	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
@@ -69,7 +69,7 @@ def Run_Test():
 	test_02.SaveSystem()
 	
 	simulation_parameters["Software"]    = "ORCA"
-	simulation_parameters["folder"]      = folder 
+	simulation_parameters["folder"]      = os.path.join("Tests","pDynamoWrapper","test_10_orca")
 	simulation_parameters["orca_method"] = "b3lyp"   	                                         
 	simulation_parameters["basis"]       = "6-31G*" 
 	test_03 = Wrapper("test_10_orca")

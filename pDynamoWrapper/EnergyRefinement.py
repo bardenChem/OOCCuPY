@@ -56,7 +56,7 @@ class EnergyRefinement:
 		if not os.path.exists(self.baseName): os.makedirs(self.baseName)
 		if self.xlen > 1:
 			_path = os.path.join( _trajFolder,"")
-			self.fileLists  = glob.glob(_path + "frame*.pkl")			
+			self.fileLists = glob.glob(_path + "frame*.pkl")			
 		elif self.xlen == 1:
 			self.fileLists.append(_trajFolder+".pkl")		
 		#----------------------------------------------------------------------
@@ -189,7 +189,7 @@ class EnergyRefinement:
 				self.molecule.coordinates3 = ImportCoordinates3(self.fileLists[i],log=None)
 				mop_pars["Hamiltonian"]    = smo 
 				mop_pars["cood_name"]      = self.fileLists[i]
-				mop = MopacQCMMinput.MopacQCMMinput(mop_pars)
+				mop = MopacQCMMinput(mop_pars)
 				mop.CalculateGradVectors()
 				mop.write_input(os.path.basename(mop_pars["cood_name"]))
 				mop.Execute()				
@@ -299,11 +299,14 @@ class EnergyRefinement:
 		Perform energy refinement using the interface available on the pDynamo with the ORCA software, enabling QC(QM)/MM potential.
 		Parameters:
 		'''
+		self.Print_Debug()
 		self.methods.append(_method+_base)
 		self.restart = _restart	
 		if self.restart == "yes":
 			self.SetRestart4Orca()	
-		self.SMOenergies = {}			
+		self.SMOenergies = {}	
+		#self.Print_Debug()
+		input()		
 		#---------------------------------------------------------
 		#Initiate parallel run
 		with pymp.Parallel(_NmaxThreads) as p:
@@ -345,14 +348,16 @@ class EnergyRefinement:
 				self.molecule.coordinates3 = ImportCoordinates3( self.fileLists[i] )
 				#---------------------------------------------------------------------------
 				if self.ylen > 1:
-					self.energiesArray[ lsFrames[0], lsFrames[1] ] = self.molecule.Energy()					
+					self.molecule.Energy()
+					self.energiesArray[ lsFrames[0], lsFrames[1] ] = self.molecule.scratch.energyTerms["ORCA QC"]			
 					self.indexArrayX[ lsFrames[0], lsFrames[1] ]   = lsFrames[0]
 					self.indexArrayY[ lsFrames[0], lsFrames[1] ]   = lsFrames[1]
 					tmpText = "{}".format(self.energiesArray[ lsFrames[0], lsFrames[1] ])
 					tmpLog.write(tmpText)
 					tmpLog.close()
-				else:					
-					self.energiesArray[ lsFrames[0] ] = self.molecule.Energy()
+				else:
+					self.molecule.Energy()			
+					self.energiesArray[ lsFrames[0] ] = self.molecule.scratch.energyTerms["ORCA QC"]	
 					self.indexArrayX[ lsFrames[0] ]   = lsFrames[0]
 					tmpText = "{}".format(self.energiesArray[ lsFrames[0] ])
 					tmpLog.write(tmpText)
@@ -432,7 +437,20 @@ class EnergyRefinement:
 		return(_filename)
 		#----------------------------
 		#filesTmp = glob.glob( self.baseName+"/*.eTmp" )
-		#for ftpm in filesTmp: os.remove(ftpm)		
+		#for ftpm in filesTmp: os.remove(ftpm)	
+
+	#================================================================
+	def Print_Debug(self):
+		'''
+		'''
+		print("="*40)
+		print("Printing debug information of EnergyRefinement Class")
+		print("Folder with trajectory: {}".format(self.trajFolder) )
+		print("Xlen: {}".format(self.xlen))
+		print("Ylen: {}".format(self.ylen))
+		print("File lists len: {}".format(len(self.fileLists)) )
+		print("="*40)
+		
 
 
 #================================================================================================#

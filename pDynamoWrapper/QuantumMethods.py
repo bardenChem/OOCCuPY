@@ -182,7 +182,7 @@ class QuantumMethods:
 		#options +="%pal\n"
 		#options +="nprocs 2\n"
 		#options +="end\n"
-		_keyWords = [ self.pars["functional"],
+		_keyWords = [ self.pars["orca_method"],
 					  self.pars["basis"],
 					  #"PAL{}".format(self.pars["NmaxThreads"]),
 					  options ]

@@ -1,0 +1,1 @@
+Starting pDynamoWrapper_handler - output will be saved to output.txt

@@ -3,7 +3,7 @@ Example 6
 #INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3byInput/7tim_pruned_and_fixed.pkl
 #RUN_SIMULATION Relaxed_Surface_Scan
 #SET_ENERGY_MODEL_QM SMO
-#HAMILTONIAN pm6
+#HAMILTONIAN rm1
 #SOFTWARE internal
 #SET_QMMM_REGION #residue_patterns 4 *:LIG.248:* *:GLU.164:* *:HIE.94:* *:ASN.9:*
 #QC_CHARGE -3
@@ -17,6 +17,6 @@ Example 6
 #Y_NSTEPS 10
 #LOG_FREQUENCY 10
 #MAX_ITERATIONS 1500
-#OPT_ALG LFBGS
+#OPT_ALG ConjugatedGradient
 #MAX_NUM_THREADS 8 
 ____________________________

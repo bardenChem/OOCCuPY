@@ -97,12 +97,15 @@ def pdb_cat(pdb1,pdb2,flname):
 #=======================================================================
 			
 class md_prep:
-	'''	Class Doc
+	'''	
+	Classe para auxiliar na preparação de simulações de dinâmica molecular
 	'''
 	#-------------------------------------------
 	
 	def __init__(self,pdb):
-		'''Method Doc
+		'''
+		Construtor padrão da classe. 
+		Inicaliza o objeto com essas variáveis
 		'''
 		self.pdb         = pdb
 		self.current_pdb = pdb 

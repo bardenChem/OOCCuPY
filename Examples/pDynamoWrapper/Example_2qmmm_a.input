@@ -2,7 +2,7 @@ Example 2
 --------------------------------
 #INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example1BbyInput/1atp_peptide.pkl
 #SET_ENERGY_MODEL_QM ORCA
-#FUNCTIONAL hf
+#ORCA_METHOD hf
 #BASIS 6-31G*
 #SET_QMMM_REGION #residue_patterns 1 *:ARG.19:*
 #QC_CHARGE 1 

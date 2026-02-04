@@ -189,6 +189,8 @@ class Wrapper:
 				elif lines[0] == "#FINPOINT": _parameters["fin_point"] = [ int(lines[1]), int(lines[2]) ]
 				elif lines[0] == "#LOGNAME": _parameters["log_name"] = lines[1]
 				elif lines[0] == "#RETRIEVE_PATH": _parameters["retrieve_path"] = lines[1]
+				elif lines[0] == "#CONVERGER": _parameters["converger"] = lines[1]
+				elif lines[0] == "#OPT_US": _parameters["optimize_US"] = lines[1] 
 
 		
 		_parameters["set_reaction_crd"] = SET_CRD_NMB			

@@ -1,0 +1,40 @@
+Metadata-Version: 2.4
+Name: ooccupy
+Version: 1.0.0
+Summary: Object Oriented Computational Chemistry in Python
+Home-page: https://github.com/bardenChem/OOCCuPY
+Author: Igor Barden Grillo
+Author-email: barden.igor@gmail.com
+License: MPL-2.0
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Classifier: License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: scipy>=1.7.0
+Requires-Dist: matplotlib>=3.5.0
+Requires-Dist: pandas>=1.3.0
+Requires-Dist: argparse>=1.4.0
+Requires-Dist: pathlib2>=2.3.0; python_version < "3.4"
+Requires-Dist: pyyaml>=6.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+# OOCCuPY
+Object-Oriented Computational Chemistry with Python

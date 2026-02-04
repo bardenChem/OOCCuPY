@@ -502,4 +502,4 @@ class protein:
 
 
 Objeto_exemplo = protein("nome_do_arquivo.pdb") #criei o objeto
-Objeto_exemplo.write_xyz()
+Objeto_exemplo.write_xyz() #usando método 

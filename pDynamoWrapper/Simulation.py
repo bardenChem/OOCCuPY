@@ -57,6 +57,7 @@ class Simulation:
 		self.adaptative = False
 		if self.parameters["restart"] 	 == "yes": self.restart    = True
 		if self.parameters["adaptative"] == "yes": self.adaptative = True
+		if self.parameters["optimize_US"]== "yes": self.parameters["optimize_US"] = True
 
 	#======================================================================
 	def Initiate_Parameters(self,_parameters):
@@ -178,6 +179,7 @@ class Simulation:
 		'''
 		Set up and execute energy refinement using a series of methods	
 		'''
+		
 		dimensions    = [ self.parameters["xnbins"], 0 ] 
 		nmaxthreads   =  self.parameters["NmaxThreads"]
 		_trajfolder   = "single"
@@ -185,6 +187,13 @@ class Simulation:
 		if self.parameters["ynbins"] > 0: _type = "2DRef"
 		if "ynbins"        in self.parameters: dimensions[1] = self.parameters["ynbins"]
 		if "source_folder" in self.parameters: _trajfolder   = self.parameters["source_folder"] 
+		#-----------------------------------------------------------------
+		print("="*40)
+		print("Initializinf Energy Refine Routine")
+		print("Xlen: {}".format(dimensions[0]))
+		print("Ylen: {}".format(dimensions[0]))
+		print("Software: {}".format(self.parameters["Software"]))
+		print("="*40)
 		#------------------------------------------------------------------
 		ER = EnergyRefinement(self.molecule.system          ,
 							  _trajfolder  		            ,
@@ -198,7 +207,7 @@ class Simulation:
 		elif self.parameters["Software"] == "pDynamoDFT": ER.RunInternalDFT(self.parameters["functional"],self.parameters["basis"],nmaxthreads)
 		elif self.parameters["Software"] == "DFTBplus"  : ER.RunDFTB()
 		elif self.parameters["Software"] == "pySCF"     : ER.RunPySCF(self.parameters["functional"],self.parameters["basis"],_SCF_type=self.parameters["pySCF_method"])
-		elif self.parameters["Software"] == "ORCA"		: ER.RunORCA(self.parameters["orca_method"],self.parameters["basis"],nmaxthreads,_restart=self.parameters["restart"])
+		elif self.parameters["Software"] == "ORCA"		: ER.RunORCA(self.parameters["orca_method"],self.parameters["basis"],nmaxthreads,_restart=self.restart)
 		elif self.parameters["Software"] == "mopac" or self.parameters["Software"]=="MOPAC":
 			_mopacKeyWords = ["AUX","LARGE"] 
 			if "mopac_keywords" in self.parameters:
@@ -222,14 +231,14 @@ class Simulation:
 			try: crd1_label = self.molecule.reactionCoordinates[0].label
 			except: crd1_label = "Reaction Path frames (n)"
 			try: crd2_label = self.molecule.reactionCoordinates[1].label
-			except: crd2_label = "Reaction Path frames (n)"
+			except: crd2_label = "Reaction Path frames (n)"		
 		
 		_reverse_rc1 = False
 		_reverse_rc2 = False
 		if self.parameters["reverse_rc1"] == "yes": _reverse_rc1 = True 
 		if self.parameters["reverse_rc2"] == "yes": _reverse_rc2 = True 
 		if   _type == "1DRef": EA.MultPlot1D(crd1_label)
-		elif _type == "2DRef": EA.MultPlot2D(self.parameters["contour_lines"],crd1_label,crd2_label,self.parameters["fig_size"],_reverse_rc1,_reverse_rc2)	
+		elif _type == "2DRef": EA.MultPlot2D(self.parameters["contour_lines"],crd1_label,crd2_label,_xlim=None,_ylim=None,_reverserc1=_reverse_rc1,_reverserc2=_reverse_rc2)	
 	#==================================================================
 	def GeometryOptimization(self):
 		'''
@@ -258,7 +267,7 @@ class Simulation:
 			scan = SCAN(self.molecule.system,self.baseFolder,self.parameters)
 			crd2_label = None
 			#--------------------------------------------------------------------
-			scan = SCAN(self.molecule.system,self.baseFolder,self.parameters["optmizer"],self.parameters["adaptative"],self.parameters["restart"])
+			scan = SCAN(self.molecule.system,self.baseFolder,self.parameters["optmizer"],self.parameters["adaptative"],self.restart)
 			scan.ChangeDefaultParameters(self.parameters)	
 			#--------------------------------------------------------------------
 			self.molecule.reactionCoordinates[0].SetInformation(self.molecule.system,self.parameters["dincre_rc1"])
@@ -273,13 +282,8 @@ class Simulation:
 			else: 
 				print("One dimension relaxed surface scan!")
 				scan.Run1DScan(self.parameters["nsteps_rc1"])
-			log_path = scan.Finalize()
-
-			print(f"DEBUG in RelaxedSurfaceScan: xlim = {self.parameters['xlim']}")
-			print(f"DEBUG in RelaxedSurfaceScan: ylim = {self.parameters['ylim']}")
-			print(f"DEBUG in RelaxedSurfaceScan: type(xlim) = {type(self.parameters['xlim'])}")
-			print(f"DEBUG in RelaxedSurfaceScan: type(ylim) = {type(self.parameters['ylim'])}")
-
+			log_path = scan.Finalize()			
+			#-------------------------------------------------------
 			EA = EnergyAnalysis( X, Y, _type=_type)		
 			EA.ReadLog(log_path)
 			#--------------------------------------------------------
