@@ -1,6 +1,6 @@
 Example 14
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example3BbyInput/7tim_opt_pm6_PF.pkl
 #FIXED_ATOMS *:LIG.248:C02 3.0
 #RUN_SIMULATION Normal_Modes 
 #INIT_COORD /home/igorchem/Dev/OOCCuPY/Examples/example5BbyInput/ScanTraj.ptGeo/frame0.pkl

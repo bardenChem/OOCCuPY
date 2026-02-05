@@ -1,6 +1,6 @@
 Example 2 
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example1BbyInput/1atp_peptide.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example1BbyInput/1atp_peptide.pkl
 #SET_ENERGY_MODEL_QM pySCF
 #FUNCTIONAL b3lyp
 #BASIS 6-31G*

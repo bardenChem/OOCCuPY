@@ -1,6 +1,6 @@
 Example 7
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example3BbyInput/7tim_opt_pm6_PF.pkl
 #RUN_SIMULATION  Molecular_Dynamics
 #MD_METHOD LeapFrog
 #PRESSURE 1.0

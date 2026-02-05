@@ -66,45 +66,44 @@ class Interface:
 		config = get_config()
 
 		if self.args.tests:  
-        	# Find test directory
-        	test_dir = config.get_test_data_path("pDynamoWrapper")
-        	print(f"Looking for tests in: {test_dir}")
-        
-        	# Try to find Run_All.py
-        	run_all_path = find_data_file("Run_All.py", "pDynamoWrapper")
-        	if run_all_path:
-            	self._run_subprocess_real_time(["python3", str(run_all_path)])
-        	else:
-        	    print(f"⚠ Run_All.py not found")
-            	print(f"Searching in: {test_dir}")
-            
-            	# Run individual tests
-            	test_files = list(test_dir.glob("test_*.py"))
-            	if test_files:
-                	print(f"Found {len(test_files)} test files:")
-                	for tf in sorted(test_files):
-                	    print(f"  - {tf.name}")
-                
-                	# Option: Run all tests sequentially
-                	for test_file in sorted(test_files):
-                	    print(f"\n{'='*50}")
-                	    print(f"Running: {test_file.name}")
-                	    print('='*50)
-                	    self._run_subprocess_real_time(["python3", str(test_file)])
-            	else:
-                	print("No test files found!")
-                
-    	elif self.args.test_number: 
-        	# Find specific test
-        	test_file = find_data_file(f"test_{self.args.test_number:02d}.py", "pDynamoWrapper")
-        	if test_file:
-            	self._run_subprocess_real_time(["python3", str(test_file)])
-        	else:
-         	   print(f"⚠ Test {self.args.test_number} not found")
-            
-    	else:
-        	if self.args.inp_file:
-            	run_input = Wrapper.From_Input(self.args.inp_file, self.args.proj_folder)
+			# Find test directory
+			test_dir = config.get_test_data_path("pDynamoWrapper")
+			print(f"Looking for tests in: {test_dir}")
+		
+			# Try to find Run_All.py
+			run_all_path = find_data_file("Run_All.py", "pDynamoWrapper")
+			if run_all_path:
+				self._run_subprocess_real_time(["python3", str(run_all_path)])
+			else:
+				print(f"⚠ Run_All.py not found")
+				print(f"Searching in: {test_dir}")
+			
+				# Run individual tests
+				test_files = list(test_dir.glob("test_*.py"))
+				if test_files:
+					print(f"Found {len(test_files)} test files:")
+					for tf in sorted(test_files):
+						print(f"  - {tf.name}")
+				
+					# Option: Run all tests sequentially
+					for test_file in sorted(test_files):
+						print(f"\n{'='*50}")
+						print(f"Running: {test_file.name}")
+						print('='*50)
+						self._run_subprocess_real_time(["python3", str(test_file)])
+				else:
+					print("No test files found!")
+				
+		elif self.args.test_number: 
+			# Find specific test
+			test_file = find_data_file(f"test_{self.args.test_number:02d}.py", "pDynamoWrapper")
+			if test_file:
+				self._run_subprocess_real_time(["python3", str(test_file)])
+			else:
+				print(f"⚠ Test {self.args.test_number} not found")
+		else:
+			if self.args.inp_file:
+				run_input = Wrapper.From_Input(self.args.inp_file, self.args.proj_folder)
 
 
 
@@ -153,27 +152,27 @@ def main():
 	elif 	args.command == "mdtools": RunOOCCuPy.MD_prep_handler()
 	elif 	args.command == "QM_inputs": RunOOCCuPy.QM_input_handler() 
 	elif args.command == "config":
-    	if args.show:
-    	    config = get_config()
-    	    config.show()
-    	elif args.paths:
-        	config = get_config()
-        	print("\nOOCCuPY Paths:")
-        	print("="*40)
-        	print(f"Config: {config.config_dir}")
-        	print(f"Tests: {config.get_test_data_path()}")
-        	print(f"Examples: {config.get_examples_path()}")
-        
-        	# Show package paths if available
-        	pkg_tests = config.get('paths.package_tests')
-        	pkg_examples = config.get('paths.package_examples')
-        	if pkg_tests:
-        	    print(f"Package Tests: {pkg_tests}")
-        	if pkg_examples:
-        	    print(f"Package Examples: {pkg_examples}")
-    	elif args.setup:
-        	from config import setup_environment
-        	setup_environment()
+		if args.show:
+			config = get_config()
+			config.show()
+		elif args.paths:
+			config = get_config()
+			print("\nOOCCuPY Paths:")
+			print("="*40)
+			print(f"Config: {config.config_dir}")
+			print(f"Tests: {config.get_test_data_path()}")
+			print(f"Examples: {config.get_examples_path()}")
+		
+			# Show package paths if available
+			pkg_tests = config.get('paths.package_tests')
+			pkg_examples = config.get('paths.package_examples')
+			if pkg_tests:
+				print(f"Package Tests: {pkg_tests}")
+			if pkg_examples:
+				print(f"Package Examples: {pkg_examples}")
+		elif args.setup:
+			from config import setup_environment
+			setup_environment()
 
 
 #=============================================================

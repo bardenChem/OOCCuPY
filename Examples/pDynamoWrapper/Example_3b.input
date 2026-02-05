@@ -1,6 +1,6 @@
 Example 3 
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example1EbyInput/7tim_pruned_and_fixed.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example1EbyInput/7tim_pruned_and_fixed.pkl
 #SET_ENERGY_MODEL_QM SMO
 #HAMILTONIAN pm6
 #SOFTWARE internal

@@ -36,7 +36,20 @@ class Wrapper:
 		'''
 		Reads input and automate system setting, simulation and analysis.
 		'''
-		self            = selfClass(_projectFolder=_projectFolder_)
+		self = selfClass(_projectFolder=_projectFolder_)
+
+		from config import get_config
+	
+		config = get_config()
+	
+		# Read the input file
+		with open(_inputFile, 'r') as f:
+			content = f.read()
+	
+		# Simple replacement: @OOCCUPY_ROOT@ -> actual path
+		if '@OOCCUPY_ROOT@' in content:
+			ooccupy_root = config.get_ooccupy_root()
+			content = content.replace('@OOCCUPY_ROOT@', str(ooccupy_root))
 
 		RUN_SIMULATIONS = 0
 		RUN_ANALYSIS    = 0 
@@ -53,7 +66,8 @@ class Wrapper:
 		save_name = None
 
 		inpFile = open(_inputFile,"r")
-		for line in inpFile:
+		Lines = content.split("\n")
+		for line in Lines:
 			lines = line.split()
 			if len(lines) > 0:
 				if  lines[0] == "#INPUT_TYPE":

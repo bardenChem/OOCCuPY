@@ -25,8 +25,8 @@ class OOCCuPYConfig:
         # Define subdirectories - match your setup
         self.dirs = {
             'data': self.config_dir / "data",
-            'Tests': self.config_dir / "Tests",      # Capital T to match your structure
-            'Examples': self.config_dir / "Examples", # Capital E to match
+            'Tests': self.config_dir / "Tests",      
+            'Examples': self.config_dir / "Examples", 
             'logs': self.config_dir / "logs",
             'cache': self.config_dir / "cache",
             'temp': self.config_dir / "temp",
@@ -76,7 +76,7 @@ class OOCCuPYConfig:
         }
         
         # Initialize
-        self._create_directories()
+        #self._create_directories()
         self._load_config()
         self._discover_package_paths()
     
@@ -92,7 +92,7 @@ class OOCCuPYConfig:
             try:
                 with open(self.config_file, 'r') as f:
                     self.config = yaml.safe_load(f)
-                print(f"Loaded configuration from {self.config_file}")
+                #print(f"Loaded configuration from {self.config_file}")
             except Exception as e:
                 print(f"Error loading config: {e}. Using defaults.")
                 self.config = self.default_config.copy()
@@ -137,7 +137,7 @@ class OOCCuPYConfig:
                 package_data_path = package_root / data_type
                 if package_data_path.exists():
                     self.config['paths'][f'package_{data_type.lower()}'] = str(package_data_path)
-                    print(f"Found package {data_type}: {package_data_path}")
+                    #print(f"Found package {data_type}: {package_data_path}")
             
         except Exception as e:
             print(f"Could not discover package paths: {e}")
@@ -232,6 +232,33 @@ class OOCCuPYConfig:
         print("="*60)
         for name, path in self.dirs.items():
             print(f"{name:10}: {path}")
+
+    def get_ooccupy_root(self) -> Path:
+        """Get the OOCCuPY installation root directory"""
+        # Try to get from config first
+        package_root = self.get('paths.package_root')
+        if package_root:
+            return Path(package_root)
+        
+        # Fallback: find where OOCCuPY is installed
+        try:
+            import OOCCuPY
+            return Path(OOCCuPY.__file__).parent
+        except ImportError:
+            # For development or direct execution
+            import sys
+            for path in sys.path:
+                potential = Path(path) / "OOCCuPY.py"
+                if potential.exists():
+                    return potential.parent
+            
+            # Last resort: current directory
+            return Path.cwd()
+    
+    def get_relative_path(self, relative_path: str) -> Path:
+        """Get a path relative to OOCCuPY installation"""
+        ooccupy_root = self.get_ooccupy_root()
+        return ooccupy_root / relative_path
 
 
 # Global instance

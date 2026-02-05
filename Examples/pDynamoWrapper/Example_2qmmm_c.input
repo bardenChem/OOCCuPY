@@ -1,6 +1,6 @@
 Example 2 
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example1CbyInput/7tim.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example1CbyInput/7tim.pkl
 #SET_ENERGY_MODEL_QM pySCF
 #SET_QMMM_REGION #residue_patterns 3 *:LIG.248:* *:GLU.164:* *:ASN.9:*
 #QC_CHARGE -3

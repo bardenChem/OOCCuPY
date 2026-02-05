@@ -1,6 +1,6 @@
 Example 6
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3byInput/7tim_pruned_and_fixed.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example3byInput/7tim_pruned_and_fixed.pkl
 #RUN_SIMULATION Relaxed_Surface_Scan
 #SET_ENERGY_MODEL_QM SMO
 #HAMILTONIAN rm1

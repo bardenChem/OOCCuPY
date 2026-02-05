@@ -1,6 +1,6 @@
 Example 11
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example3BbyInput/7tim_opt_pm6_PF.pkl
 #RUN_SIMULATION  Umbrella_Sampling
 #SET_REACTION_CRD distance yes 2 *:LIG.*:H02 *:GLU.164:OE2
 #SOURCE_FOLDER /home/igorchem/Dev/OOCCuPY/Examples/example5byInput/ScanTraj.ptGeo

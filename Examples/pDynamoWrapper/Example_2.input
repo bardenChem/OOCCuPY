@@ -1,6 +1,6 @@
 Example 2 
 --------------------------------
-#INPUT_TYPE geometry /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/data/cyclohexane_single_frame.xyz
+#INPUT_TYPE geometry @OOCCUPY_ROOT@/data/cyclohexane_single_frame.xyz
 #SET_ENERGY_MODEL_QM SMO
 #HAMILTONIAN pm6
 #SOFTWARE internal

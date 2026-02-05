@@ -1,6 +1,6 @@
 Example 16
 --------------------------------
-#INPUT_TYPE pkl /home/igorchem/Dev/OOCCuPY/Examples/example3BbyInput/7tim_opt_pm6_PF.pkl
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example3BbyInput/7tim_opt_pm6_PF.pkl
 #RUN_ANALYSIS Energy_Plots
 #SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
 #SET_REACTION_CRD distance yes 3 *:HIE.94:NE2 *:LIG.*:O06 *:HIE.94:HE2
