@@ -102,8 +102,8 @@ class Analysis:
 		FindPath  = False
 		#--------------------------------------------------------
 		if "contour_lines" 	in self.parameters: cnt_lines  = self.parameters["contour_lines"]		
-		if "xlim_list" 		in self.parameters: xlim  	   = self.parameters["xlim_list"    ]
-		if "ylim_list" 		in self.parameters: ylim       = self.parameters["ylim_list"    ]
+		if "xlim" 		in self.parameters: xlim  	   = self.parameters["xlim"		    ]
+		if "ylim" 		in self.parameters: ylim       = self.parameters["ylim"   		]
 		if "show" 			in self.parameters: show       = self.parameters["show"         ]
 		if "in_point"       in self.parameters: in_point   = self.parameters["in_point"     ]
 		if "fin_point"      in self.parameters: fin_point  = self.parameters["fin_point"    ]
