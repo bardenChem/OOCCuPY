@@ -36,6 +36,7 @@ class PMF:
 		self.LOG		= open( os.path.join(self.baseName,"FreeEnergy.log") ,"w" ) # free energy log
 		
 		pat = os.path.join( self.srcFolder,"frame*.ptRes" )
+		print(pat)
 		self.fileNames = glob.glob ( pat ) # ver como fica o nome dos arquivos de trejetória na nova versão
 		self.fileNames.sort()
 		
@@ -50,6 +51,8 @@ class PMF:
 		binslist.append(_nbins_x)		
 		if _nbins_y > 0:
 			binslist.append(_nbins_y)	
+		print(self.fileNames)
+		input()
 		#-----------------------------------------------------------------------------------------------
 		state = WHAM_ConjugateGradientMinimize(	self.fileNames 					  ,
                                          		bins          		= binslist	  ,

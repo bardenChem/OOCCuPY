@@ -163,7 +163,14 @@ class US:
                     self.molecule.qcModel.converger.energyTolerance  = 0.003
                     self.molecule.qcModel.converger.densityTolerance = 1e-04
                     self.molecule.qcModel.converger.diisDeviation    = 5e-04
-
+    #============================================================================
+    def MarkWindownEnd(self,_mdPath):
+        '''
+        '''
+        end_file = open( os.path.join( _mdPath + "production.ptGeo", "finished.txt" ), "w" )
+        end_text = "Finished."
+        end_file.write(end_text)
+        end_file.close()
     #============================================================================  
     def Run1DSampling(self,_trajFolder,_crdFormat,_sample):
         '''
@@ -188,13 +195,13 @@ class US:
             self.mdPaths.append(md_path)
 
         #------------------------------------------------------
-        if self.restart:               
+        if self.restart:
+            print(self.mdPaths)               
             for i in range( len(self.mdPaths) -1 , 0, -1 ):
-                if os.path.exists( self.mdPaths[i] ):
+                if os.path.exists( self.mdPaths[i] + "production.ptGeo", "finished.txt" ):
+                    print("found path!")
                     self.mdPaths.remove( self.mdPaths[i] ) 
-                    self.file_lists.remove( self.file_lists[i] ) 
-
-        
+                    self.file_lists.remove( self.file_lists[i] )         
         #-----------------------------------------------------
         if self.angle:self.Run1DSamplingDihedral()
         else:        
@@ -231,6 +238,7 @@ class US:
                 mdRun = MD(self.molecule,self.mdPaths[i],self.mdParameters)
                 mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=True)
                 mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True)
+                self.MarkWindownEnd(self.mdPaths[i])
         #------------------------------------------------------------
         self.molecule.DefineRestraintModel(None)
     #==============================================================================
@@ -267,6 +275,7 @@ class US:
                 mdRun = MD(self.molecule,self.baseName,self.mdParameters)
                 mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=True)
                 mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True) 
+                self.MarkWindownEnd(self.mdPaths[i])
         #------------------------------------------------------------
         self.molecule.DefineRestraintModel(None)
     #==============================================================================
@@ -303,6 +312,7 @@ class US:
                 mdRun = MD(self.molecule,self.mdPaths[i],self.mdMethod)
                 mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=True)
                 mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True)  
+                self.MarkWindownEnd(self.mdPaths[i])
         #---------------------------------------
         self.molecule.DefineRestraintModel(None)
     #==============================================================================
@@ -322,12 +332,13 @@ class US:
             temp    = os.path.basename(temp)
             md_path = os.path.join(self.baseName, temp )
             self.mdPaths.append(md_path)
-        
-        if self.restart:               
-            for i in range(len(self.mdPaths)-1,0,-1 ):
-                if os.path.exists( self.mdPaths[i] ):
+        if self.restart:
+            print(self.mdPaths)               
+            for i in range( len(self.mdPaths) -1 , 0, -1 ):
+                if os.path.exists( self.mdPaths[i] + "production.ptGeo", "finished.txt" ):
+                    print("found path!")
                     self.mdPaths.remove( self.mdPaths[i] ) 
-                    self.file_lists.remove( self.file_lists[i] )   
+                    self.file_lists.remove( self.file_lists[i] )         
 
         self.bins = len(self.file_lists)
         #-----------------------------------------------
@@ -396,6 +407,7 @@ class US:
                 mdRun = MD(self.molecule,self.mdPaths[i],self.mdParameters)
                 mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=True)
                 mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True)  
+                self.MarkWindownEnd(self.mdPaths[i])
         #.....................................................................
         self.molecule.DefineRestraintModel(None) 
         #---------------------------------------         
@@ -443,7 +455,8 @@ class US:
                 self.mdParameters["trajectory_name"] = self.mdPaths[i] 
                 mdRun = MD(self.molecule,self.mdPaths[i],self.mdParameters)
                 mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=True)
-                mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True)                 
+                mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True) 
+                self.MarkWindownEnd(self.mdPaths[i])          
         #---------------------------------------
         self.molecule.DefineRestraintModel(None)
         #.......................................
@@ -489,6 +502,7 @@ class US:
                 mdRun.ChangeDefaultParameters(self.mdParameters)
                 mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=True)
                 mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True)
+                self.MarkWindownEnd(self.mdPaths[i])
         #---------------------------------------
         self.molecule.DefineRestraintModel(None)
         #.......................................
@@ -539,6 +553,7 @@ class US:
                 mdRun.ChangeDefaultParameters(self.mdParameters)
                 mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=Trues)
                 mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True)
+                self.MarkWindownEnd(self.mdPaths[i])
         #---------------------------------------
         self.molecule.DefineRestraintModel(None)
 

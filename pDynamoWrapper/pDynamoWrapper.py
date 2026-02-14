@@ -27,7 +27,14 @@ class Wrapper:
 
 		if not _projectFolder: self.projectFolder = os.getcwd()
 		else: self.projectFolder = os.path.join( os.getcwd(), _projectFolder )		
-		if not os.path.exists(self.projectFolder): os.makedirs(self.projectFolder)
+		if not os.path.exists(self.projectFolder):
+			print("="*40)
+			print("Creating the project folder!\n")
+			os.makedirs(self.projectFolder)
+		print("="*40)
+		print("Project folder at: {}".format(self.projectFolder))
+		print("="*40)
+		input()
 		
 
 	#-----------------------------------------

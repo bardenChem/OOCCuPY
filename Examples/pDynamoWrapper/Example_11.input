@@ -2,8 +2,8 @@ Example 11
 --------------------------------
 #INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example3BbyInput/7tim_opt_pm6_PF.pkl
 #RUN_SIMULATION  Umbrella_Sampling
-#SET_REACTION_CRD distance yes 2 *:LIG.*:H02 *:GLU.164:OE2
-#SOURCE_FOLDER /home/igorchem/Dev/OOCCuPY/Examples/example5byInput/ScanTraj.ptGeo
+#SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
+#SOURCE_FOLDER @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example5BbyInput/ScanTraj.ptGeo
 #EQUILIBRATION_STEPS 1000
 #PRODUCTION_STEPS 2000
 #SAMPLING_EQUILIBRATION 200
@@ -13,7 +13,8 @@ Example 11
 #XNBINS 12
 #XNWINDOWS 12
 #NDIMS 1
-#ANALYSIS_ONLY no
+#ANALYSIS_ONLY yes
+#RESTART yes
 #MD_METHOD LeapFrog
 #TRAJECTORY_NAME US_TEST
 #MAX_NUM_OF_THREADS 8

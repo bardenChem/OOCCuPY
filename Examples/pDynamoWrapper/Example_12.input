@@ -9,7 +9,7 @@ Example 12
 #QC_CHARGE -3
 #SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
 #SET_REACTION_CRD distance yes 3 *:HIE.94:NE2 *:LIG.*:O06 *:HIE.94:HE2
-#SOURCE_FOLDER /home/igorchem/Dev/OOCCuPY/Examples/example6CbyInput/ScanTraj.ptGeo
+#SOURCE_FOLDER @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example6CbyInput/ScanTraj.ptGeo
 #EQUILIBRATION_STEPS 2000
 #PRODUCTION_STEPS 2000
 #SAMPLING_EQUILIBRATION 200
