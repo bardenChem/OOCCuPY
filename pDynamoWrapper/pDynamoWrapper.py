@@ -24,7 +24,7 @@ class Wrapper:
 		self.activeSystem    = None 
 		self.system_historic = []
 		self.projectFolder   = os.getcwd()
-
+		print("\n")
 		if not _projectFolder: self.projectFolder = os.getcwd()
 		else: self.projectFolder = os.path.join( os.getcwd(), _projectFolder )		
 		if not os.path.exists(self.projectFolder):
@@ -34,7 +34,7 @@ class Wrapper:
 		print("="*40)
 		print("Project folder at: {}".format(self.projectFolder))
 		print("="*40)
-		input()
+		print("\n")
 		
 
 	#-----------------------------------------

@@ -43,7 +43,7 @@ class US:
                  OPTIMIZE=False  ):
         '''
         Class constructor
-        '''
+        '''        
         self.baseName           = _baseFolder
         self.inputTraj          = " " #folder containing the pkls of the starting geometries
         self.molecule           = _system 
@@ -171,6 +171,20 @@ class US:
         end_text = "Finished."
         end_file.write(end_text)
         end_file.close()
+    #============================================================================
+    def Restart(self):
+        '''
+        '''        
+        print("="*40)
+        print("Initializing restart protocol!")
+        for i in range( len(self.mdPaths) -1 , 0, -1 ):
+                if os.path.exists( os.path.join(self.mdPaths[i] + "production.ptGeo", "finished.txt") ):  
+                    _file = self.file_lists[i]          
+                    self.mdPaths.remove( self.mdPaths[i] ) 
+                    self.file_lists.remove( self.file_lists[i] ) 
+                    print( "File removed: {}".format(_file))
+        print("="*40)     
+        
     #============================================================================  
     def Run1DSampling(self,_trajFolder,_crdFormat,_sample):
         '''
@@ -195,13 +209,7 @@ class US:
             self.mdPaths.append(md_path)
 
         #------------------------------------------------------
-        if self.restart:
-            print(self.mdPaths)               
-            for i in range( len(self.mdPaths) -1 , 0, -1 ):
-                if os.path.exists( self.mdPaths[i] + "production.ptGeo", "finished.txt" ):
-                    print("found path!")
-                    self.mdPaths.remove( self.mdPaths[i] ) 
-                    self.file_lists.remove( self.file_lists[i] )         
+        if self.restart: self.Restart()    
         #-----------------------------------------------------
         if self.angle:self.Run1DSamplingDihedral()
         else:        
@@ -332,13 +340,9 @@ class US:
             temp    = os.path.basename(temp)
             md_path = os.path.join(self.baseName, temp )
             self.mdPaths.append(md_path)
-        if self.restart:
-            print(self.mdPaths)               
-            for i in range( len(self.mdPaths) -1 , 0, -1 ):
-                if os.path.exists( self.mdPaths[i] + "production.ptGeo", "finished.txt" ):
-                    print("found path!")
-                    self.mdPaths.remove( self.mdPaths[i] ) 
-                    self.file_lists.remove( self.file_lists[i] )         
+
+
+        if self.restart: self.Restart()
 
         self.bins = len(self.file_lists)
         #-----------------------------------------------
