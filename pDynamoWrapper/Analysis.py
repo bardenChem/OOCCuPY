@@ -190,7 +190,7 @@ class Analysis:
 
 		if nDims  == 2:  ylims = [ np.min(EA.RC2), np.max(EA.RC2) ]	
 		#------------------------------------------
-		EAfe = EnergyAnalysis(xwin,ywin,_type=TYPE)
+		EAfe = EnergyAnalysis(self.parameters["xnbins"],ynbins,_type=TYPE)
 		EAfe.ReadLog( os.path.join(potmean.baseName,"FreeEnergy.log") ) 
 		#-------------------------------------------------------------
 		if nDims == 2: 
