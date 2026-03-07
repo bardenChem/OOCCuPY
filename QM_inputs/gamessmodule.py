@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+\"\"\"GAMESS Quantum Chemistry Interface Module.
+
+This module provides tools to parse GAMESS output files, manage molecular geometry
+data (XYZ, MOL2 formats), and generate GAMESS input files for various QC calculations
+(geometry optimization, frequency analysis, DFT, etc.).
+
+Classes:
+    xyz_parser: Parse and manipulate XYZ molecular structure files.
+    log_parser: Parse GAMESS output and log files.
+
+Functions:
+    gms_inp_writer: Generate GAMESS input files with flexible QC parameters.
+
+Constants:
+    atomnumber: Dictionary mapping element symbols to atomic numbers.
+\"\"\"
+
 # gamessmodule.py
 
 #=======================================================================
@@ -18,7 +35,27 @@ atomnumber = {'H':1,'C':6,'N':7,'O':8,'F':9,'P':15,'S':16,'Cl':17,'Br':36,'BR':3
 #=======================================================================
 
 class xyz_parser:
+	\"\"\"Parse and manipulate molecular geometry in XYZ and MOL2 formats.
+	
+	This class reads and stores molecular coordinates from various file formats,
+	calculates coordinate bounds, and generates GAMESS-compatible input strings
+	including electron density grid parameters.
+	
+	Attributes:
+		name (str): Input file name.
+		AtomLabels (list): Atomic element symbols.
+		AtomicN (list): Atomic numbers.
+		xCoord, yCoord, zCoord (list): Cartesian coordinates.
+		Natoms (int): Total number of atoms.
+		origin, xvec, yvec, zvec (list): Grid bounding box vectors.
+		elsden_text (str): Electron density grid string for GAMESS.
+	\"\"\"
 	def __init__(self,name):
+		\"\"\"Initialize xyz_parser.
+		
+		Args:
+			name (str): Path to input file (XYZ, MOL2, or GAMESS log format).
+		\"\"\"
 		self.name = name 
 		self.AtomLabels = []
 		self.AtomicN = []
@@ -35,6 +72,10 @@ class xyz_parser:
 		
 	
 	def parse_xyz(self):
+		\"\"\"Parse coordinates from XYZ format file.
+		
+		Reads standard XYZ format: element X Y Z (one atom per line after header).
+		\"\"\"
 		
 		logfile = self.name
 		log = open(logfile,'r')	
@@ -52,11 +93,20 @@ class xyz_parser:
 					
 					
 	def get_atomnumber(self):
+		\"\"\"Convert element symbols to atomic numbers.
+		
+		Uses the global atomnumber dictionary to map element names to atomic numbers.
+		\"\"\"
 		
 		for i in range(len(self.AtomLabels)):
 			self.AtomicN.append(atomnumber[self.AtomLabels[i]])
 	
 	def parse_log(self):
+		\"\"\"Parse geometry from GAMESS log file.
+		
+		Extracts final equilibrium geometry marked by '***** EQUILIBRIUM GEOMETRY LOCATED *****'
+		and atomic distances section.
+		\"\"\"
 				
 		logfile = self.name
 		
@@ -85,7 +135,11 @@ class xyz_parser:
 						self.yCoord.append(line2[3])
 						self.zCoord.append(line2[4])	
 	
-	def mol2(self):	
+	def mol2(self):
+		\"\"\"Parse coordinates from MOL2 (Tripos) format file.
+		
+		Reads MOL2 format, extracting element and coordinate information.
+		\"\"\"	
 						
 		logfile = self.name
 		log = open(logfile,'r')	
@@ -102,6 +156,15 @@ class xyz_parser:
 		self.Natoms = len(self.AtomLabels)						
 				
 	def write_text(self,filename = '',writefile = False):
+		\"\"\"Generate formatted molecular geometry string.
+		
+		Args:
+			filename (str, optional): Output file path if writefile=True.
+			writefile (bool, optional): Write to file. Defaults to False.
+			
+		Returns:
+			str: Formatted geometry text (XYZ or element listings).
+		\"\"\"
 		
 		if writefile == True:
 			text_to_return = str(len(self.AtomLabels)) + '\n \n'
@@ -119,7 +182,15 @@ class xyz_parser:
 		return(text_to_return)
 
 		
-	def get_origin(self): 
+	def get_origin(self):
+		\"\"\"Calculate grid origin and vectors for electron density cube files.
+		
+		Computes bounding box origin and axis vectors with 3 Å padding from atomic positions.
+		Generates GAMESS $grid section suitable for electron density calculations.
+		
+		Returns:
+			tuple: (origin, xvec, yvec, zvec) coordinate triples.
+		\"\"\"
 		
 		self.origin[0] = min(self.xCoord)-3
 		self.origin[1] = min(self.yCoord)-3
@@ -147,7 +218,12 @@ class xyz_parser:
 		
 		return(self.origin,self.xvec,self.yvec,self.zvec)
 		
-	def get_elecNumber(self): 
+	def get_elecNumber(self):
+		\"\"\"Calculate total number of electrons in system.
+		
+		Returns:
+			int: Total electron count (sum of atomic numbers).
+		\"\"\"
 		
 		self.ElNumb = sum(self.AtomicN)
 		

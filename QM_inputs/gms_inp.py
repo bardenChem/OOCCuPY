@@ -1,23 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# gms_in.py
-
-#=======================================================================
-# This script was produced by Igor Barden Grillo 
-# Computational chemistry Reactions Descriptor project 
-# Start date: 17.09.2017
-#=======================================================================
-
-# import modules 
-from xyz_class import *
-from scriptgenerator import *
-
-#=======================================================================
-#class and functions to create input fo gamess program 
-#=======================================================================
-
-
-path_to_dftb = "/home/barden/Dropbox/mestradoIgor/Revisão/dftb/mio-1-1"
+\"\"\"GAMESS quantum chemistry input file generator.\n\nThis module creates input files for GAMESS quantum chemistry calculations.\nSupports various QM methods (HF, DFT, MP2), basis sets, convergence options,\nand advanced features (PCM solvation, Fukui analysis, DFTB).\n\nClasses:\n    gms_inp: Main class for building and writing GAMESS input files.\n\nAuthor:\n    Igor Barden Grillo\n    Computational chemistry Reactions Descriptor project\n    Start date: 17.09.2017\n\"\"\"\n\nfrom xyz_class import *\nfrom scriptgenerator import *\n\npath_to_dftb = \"/home/barden/Dropbox/mestradoIgor/Revisão/dftb/mio-1-1\""
 
 class gms_inp:
 	

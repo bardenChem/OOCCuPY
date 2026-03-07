@@ -24,16 +24,30 @@ import numpy as np
 #=======================================================================
 
 class out_file: 
+	"""Parser for ORCA quantum chemistry output files.
 	
-	'''
-	Class to process and parse output files of orca QM runs 
-	'''
+	Extracts quantum mechanical properties from ORCA output files including
+	energies, molecular orbital data, frequency analysis, thermochemistry,
+	and charge/Fukui indices for reaction descriptor calculations.
+	
+	Attributes:
+		name (str): Output file path.
+		Energy (list): Total electronic energies.
+		MOoccupiedEnergy (list): Occupied MO orbital energies.
+		MOunnocupiedEnergy (list): Virtual MO orbital energies.
+		HOMO (float): Highest occupied molecular orbital energy.
+		LUMO (float): Lowest unoccupied molecular orbital energy.
+		vib_frequences (list): Vibrational frequencies for normal modes.
+		Fukui (list): Fukui indices for electrophile/nucleophile/radical attack.
+		LRD (list): Local reaction descriptors.
+		charges (list): Partial atomic charges (CHELPG).
+	"""
+	def __init__(self, filename):
+		"""Initialize ORCA output file parser.
 		
-	def __init__(self,filename):
-		
-		'''
-		Initialization method for the out_file class
-		'''
+		Args:
+			filename (str): Path to ORCA output file (.out).
+		"""
 		
 		self.name = filename
 		self.Energy                    = []
@@ -55,11 +69,15 @@ class out_file:
 
 	
 	def read_out(self):
+		"""Parse ORCA output file to extract quantum properties.
 		
-		'''
-		Method to extract the information required to compute 
-		the Reaction Descriptors from orca output file
-		'''
+		Extracts energies, molecular orbital energies, number of electrons,
+		thermochemistry data (enthalpy, entropy, Gibbs free energy).
+		Calculates HOMO and LUMO energies and orbital indices.
+		
+		Returns:
+			None (populates class attributes)
+		"""
 		outputFileName = self.name
 		outputFile = open(outputFileName, 'r')
 		
@@ -97,7 +115,19 @@ class out_file:
 		
 		outputFile.close()
 		
-	def Global_RD(self): 
+	def Global_RD(self):
+		"""Calculate global reaction descriptors from quantum properties.
+		
+		Computes global descriptors from HOMO/LUMO energies:
+		- Ionization Potential (IP)
+		- Electron Affinity (EA)
+		- Electronic Chemical Potential (ECP)
+		- Chemical Hardness (CH) and Softness (CS)
+		- Electronegativity, Electrophilicity, and related indices
+		
+		Returns:
+			tuple: (formatted_text, summary_text, IP, EA, ECP, CH, CS, ME, EPT, MER, ED, EAC, N, gap)
+		""" 
 		
 		''' 
 		Method for work over the parsed information of the orca out file
@@ -196,20 +226,27 @@ class out_file:
 		outputFile.close()
 	
 	def thermochemistry(self):
+		"""Extract thermochemistry data from FREQ analysis.
 		
-		'''
-		Method for calculate statistical thermodynamic properties from 
-		FREQ analysis from orca QM run 
-		'''	
+		Returns:
+			tuple: (total_enthalpy, total_entropy_correction, free_gibbs_enthalpy)
+		"""	
 		
 		print(self.total_enthalpy,self.total_entropy_correction,self.free_gibbs_enthalpy)
 		return(self.total_enthalpy,self.total_entropy_correction,self.free_gibbs_enthalpy)
 	
-	def xyz_parse(self,argname):
+	def xyz_parse(self, argname):
+		"""Extract final XYZ coordinates from ORCA output.
 		
-		'''
-		Method to create xyz file from orca out file 
-		'''
+		Parses Cartesian coordinates section to build XYZ representation
+		of the final optimized geometry.
+		
+		Args:
+			argname (str): Output file base name (without extension).
+			
+		Returns:
+			list: Lines containing atomic coordinates in CARTESIAN format.
+		"""
 		
 		outputFileName = argname + '.out'
 		
@@ -239,14 +276,20 @@ class out_file:
 						
 		return(xyzCO)		
 		
-	def Fukui_Extract (self):
-	
-	
-		'''
-		Method to extracts the output information for a Fukui 
-		indices	run and calculates the condesed forms of local 
-		descriptors
-		'''
+def Fukui_Extract(self):
+		"""Extract Fukui indices and local reaction descriptors.
+		
+		Parses CHELPG charges and calculates Fukui indices for electrophilic,
+		nucleophilic, and radical attack sites. Computes local susceptibility
+		and acidity indices.
+		
+		Returns:
+			tuple: (Fukui_list, LRD_list, formatted_text, charges)
+				- Fukui_list: [electrophile, nucleophile, radical] indices
+				- LRD_list: Local reaction descriptor arrays
+				- formatted_text: Formatted output string
+				- charges: Partial atomic charges
+		"""
 		
 		phrase = 'CHELPG Charges'
 		phrase2 = 'Total charge:'
@@ -379,16 +422,30 @@ class out_file:
 #=======================================================================
 
 class Elec_Cube:
+	"""Handler for electronic density cube files from QM calculations.
 	
-	'''
-	Class to read/write and modify .cube files from QM runs
-	'''
+	Reads, writes, and manipulates 3D grid data from .cube files
+	representing molecular orbitals or electron density. Supports
+	arithmetic operations on cube data (e.g., difference density).
+	
+	Attributes:
+		name (str): Cube file base name.
+		Header (str): Cube file header information.
+		Prog (str): Source program (Gaussian, ElecDensity, etc).
+		Typ (str): Type of data (MO or electron density).
+		natoms (int): Number of atoms in cube.
+		grid (int): Grid dimension (default 40x40x40).
+		scalar3d (array): 3D numpy array of density/orbital values.
+	"""
           
-	def __init__(self,Typ="MO",Prog="Gaussian",grid = 40):
+	def __init__(self, Typ="MO", Prog="Gaussian", grid=40):
+		"""Initialize Elec_Cube handler.
 		
-		'''
-		Initialization method for the Elec_Cube class
-		'''
+		Args:
+			Typ (str): Cube data type (MO or ElecDensity). Default: MO
+			Prog (str): Source program. Default: Gaussian
+			grid (int): Grid dimension for 3D array. Default: 40
+		"""
 		
 		self.name = ''
 		self.header = ''
@@ -402,12 +459,19 @@ class Elec_Cube:
 		self.MO = []
 		self.origin = []   
         
-	def Read_Elec_Cube (self,filename):
+	def Read_Elec_Cube(self, filename):
+		"""Parse electronic cube file and extract grid data.
 		
-		'''
-		Method to parse electronic data cube and fill the atributes
-		of Elec_cube class 
-		'''
+		Reads Gaussian-formatted .cube file, extracts header, atom positions,
+		grid specifications, and 3D density/orbital values. Populates class
+		attributes with parsed data.
+		
+		Args:
+			filename (str): Path to .cube file.
+			
+		Returns:
+			None
+		"""
 		
 		if self.Prog == 'ElecDensity':
 			self.name = filename[0:-12]
@@ -446,11 +510,15 @@ class Elec_Cube:
 		self.scalar3d.shape =(self.grid, self.grid, self.grid)
 
 
-	def write_cubeElec (self,filename2):
+	def write_cubeElec(self, filename2):
+		"""Write cube data to Gaussian-compatible cube file format.
 		
-		'''
-		Method to write the cube data in gaussian like style		
-		'''
+		Args:
+			filename2 (str): Output base filename (extension added).
+			
+		Returns:
+			None (writes .cube file)
+		"""
 		
 		text_to_write =''
 		text_to_write += self.header 
@@ -473,12 +541,18 @@ class Elec_Cube:
 		file_write = open(filename2+'.cube','w')
 		file_write.write(text_to_write)
         
-	def __sub__ (self,other):
+	def __sub__(self, other):
+		"""Subtract two cube objects to get difference density.
 		
-		'''
-		Overload method to operte subtraction of scalar data from different
-		Elec_Cube object
-		'''		
+		Overload subtraction operator to compute absolute difference
+		between scalar3d grids of two Elec_Cube objects.
+		
+		Args:
+			other (Elec_Cube): Another Elec_Cube object.
+			
+		Returns:
+			Elec_Cube: New object with difference density in scalar3d.
+		"""		
 		
 		z = Elec_Cube()
 		

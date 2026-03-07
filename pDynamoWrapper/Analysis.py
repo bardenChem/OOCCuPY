@@ -1,5 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Analysis module for molecular dynamics and quantum chemistry calculations.
+
+This module provides comprehensive analysis tools for molecular simulation data,
+including trajectory analysis, energy calculations, and potential of mean force (PMF)
+computation. It integrates multiple analysis methods to process simulation results
+from pDynamo-based calculations.
+
+Classes:
+    Analysis: Main analysis class for coordinating various analysis workflows.
+
+Attributes:
+    EnergyAnalysis: Energy visualization and 1D/2D plot generation.
+    TrajectoryAnalysis: Trajectory-based structural analysis.
+    PMF: Potential of mean force calculations from umbrella sampling.
+"""
 
 #FILE = Analysis.py
 ###
@@ -22,12 +37,29 @@ from pSimulation               	import *
 #-------------------------------------------------------------
 #=======================================================================
 class Analysis:
-	'''
-	'''
+	"""Coordinate and execute various molecular analysis workflows.
+	
+	This class orchestrates multiple analysis types including trajectory analysis,
+	energy plotting, PMF calculations, and trajectory splitting. It acts as a central
+	hub for accessing specialized analysis modules.
+	
+	Attributes:
+		parameters (dict): Configuration dictionary for analysis parameters.
+		molecule: Molecular system object from pDynamo.
+		baseFolder (str): Base directory for output files.
+	"""
 	def __init__(self,_parameters):
-		'''
-		Default Constructor
-		'''
+		"""Initialize Analysis object with required parameters.
+		
+		Args:
+			_parameters (dict): Configuration dictionary containing:
+				- 'active_system': Molecular system (required).
+				- 'analysis_type': Type of analysis to perform (required).
+				- 'folder': Output folder path (optional, defaults to current directory).
+		
+		Raises:
+			KeyError: If 'analysis_type' parameter is missing.
+		"""
 		self.parameters = _parameters
 		self.molecule   = _parameters["active_system"]
 
@@ -41,8 +73,17 @@ class Analysis:
 
 	#=========================================================================
 	def Execute(self):
-		'''
-		'''
+		"""Execute the specified analysis type.
+		
+		Dispatches to appropriate analysis method based on the 'analysis_type'
+		parameter set during initialization.
+		
+		Supported analysis types:
+			- 'Trajectory_Analysis': Analyze MD trajectory data.
+			- 'Energy_Plots': Generate energy landscapes.
+			- 'PMF': Calculate potential of mean force.
+			- 'Split_Traj': Split trajectory into subsets.
+		"""
 		Type = self.parameters["analysis_type"]
 		if   Type == "Trajectory_Analysis": self.TrajectoryPlots() 		
 		elif Type == "Energy_Plots":		self.EnergyPlots()
@@ -51,10 +92,21 @@ class Analysis:
 
 	#=========================================================================	
 	def TrajectoryPlots(self) :
-		'''
-		Mandatory keys in self.parameters:
-		Optional keys in self.parameters:
-		'''
+		"""Analyze and plot trajectory statistics (RG, RMSD, distances).
+		
+		Generates radius of gyration and root mean square deviation plots from
+		MD trajectory data. Can optionally calculate and plot reaction coordinate
+		distances.
+		
+		Required parameters:
+			nsteps (int): Total simulation time in picoseconds.
+		
+Optional parameters:
+			show (bool): Display plots interactively.
+			calculate_distances (bool): Calculate RC distances.
+			ATOMS_RC1 (list): Atom indices for first reaction coordinate.
+			ATOMS_RC2 (list): Atom indices for second reaction coordinate.
+		"""
 		RCs  = None
 		if "show" in self.parameters: show = self.parameters["show"]
 		t_time = self.parameters["nsteps"]*0.001
@@ -74,11 +126,24 @@ class Analysis:
 				DA.DistancePlots(RCs,show)
 	#=========================================================================
 	def EnergyPlots(self):
-		'''
-		Produce Energy plots from previus simulations log files
-		Mandatory keys in self.parameters:
-		Optional keys in self.parameters:
-		'''		
+		"""Generate 1D and 2D energy landscape plots from simulation logs.
+		
+		Creates potential energy surface (PES) visualizations with optional contour
+		lines and multiple plot support for comparing different calculation methods.
+		
+		Required parameters:
+			xsize (int): Number of points in first coordinate.
+			type (str): Plot type ('1D', '2D', etc.).
+			log_name (str): Path to energy log file.
+		
+Optional parameters:
+			ysize (int): Number of points in second coordinate for 2D plots.
+			contour_lines (int): Number of contour levels.
+			xlim, ylim (list): Axis limits.
+			show (bool): Display plots.
+			multiple_plot (bool): Plot multiple methods.
+			retrieve_path (str): Extract lowest-energy path.
+		"""		
 		multiPlot = False
 		ndim      = 1
 		try: crd1_label= self.molecule.reactionCoordinates[0].label
@@ -126,16 +191,24 @@ class Analysis:
 
 	#=========================================================================
 	def PMFAnalysis(self):
-		'''
-		Calculate potential of mean force and Free energy from restricted molecular dynamics
-		Mandatory keys: 
-			"source_folder"	:
-			"xbins"			:
-			"ybins"			:
-			"temperature"	:
-		Optinal keys        :
-		plot keys           :				
-		'''
+		"""Calculate and plot potential of mean force (PMF) from umbrella sampling data.
+		
+		Computes PMF and free energy surfaces using the WHAM algorithm from
+		restricted MD or umbrella sampling simulations.
+		
+		Required parameters:
+			source_folder (str): Folder containing umbrella sampling windows.
+			xnbins (int): Number of bins in first dimension.
+			temperature (float): Simulation temperature in Kelvin.
+		
+Optional parameters:
+			ynbins (int): Number of bins in second dimension (default=0 for 1D).
+			contour_lines (int): Number of contour levels for 2D plots.
+			xlim_list, ylim_list (list): Axis limits.
+			crd1_label, crd2_label (str): Axis labels.
+			show (bool): Display plots.
+			oneDimPlot (bool): Show 1D projection of 2D PMF.
+		"""
 		ynbins = 0 
 		if "ynbins" in self.parameters: ynbins = self.parameters["ynbins"]
 		potmean = PMF( self.molecule, self.parameters["source_folder"], self.baseFolder )

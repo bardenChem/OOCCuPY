@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+\"\"\"Umbrella Sampling Module for Restricted Molecular Dynamics.
 
+This module implements umbrella sampling methodology for calculating free energy
+surfaces and potential of mean force (PMF). It performs restrained MD simulations
+with Hamiltonian windows along reaction coordinates.
+
+Classes:
+    US: Umbrella sampling simulation manager.
+
+Features:
+    - 1D and 2D window-based sampling.
+    - Harmonic and other restraint models.
+    - Geometry optimization within windows.
+    - WHAM analysis support.
+    - Adaptive force constant adjustment.
+\"\"\"
 
 #FILE = UmbrellaSampling.py
 
@@ -29,9 +44,21 @@ from pScientific.Symmetry      import *
 from pSimulation               import *
 #********************************************************************************
 class US:
-    '''
-    Class for setup and execute Umbrella Sampling simulations 
-    ''' 
+    \"\"\"Execute umbrella sampling simulations for free energy calculations.
+    
+    This class manages umbrella sampling with Hamiltonian windows for computing
+    PMF surfaces. It sets up multiple harmonic restraints and performs restricted
+    MD for conformational sampling.
+    
+    Attributes:
+        baseName (str): Output directory for simulation results.
+        molecule: Molecular system object.
+        nDim (int): Number of reaction coordinates (1 or 2).
+        bins (int): Number of Hamiltonian windows.
+        forceC (list): Force constants for restraints [FC1, FC2].
+        temperature (float): Simulation temperature.
+        mdParameters (dict): MD simulation parameters.
+    \"\"\"
     #----------------------------------------------------------------------------   
     def __init__(self,_system     , 
                  _baseFolder      ,
@@ -41,9 +68,18 @@ class US:
                  RESTART=False    ,
                  ADAPTATIVE=False ,
                  OPTIMIZE=False  ):
-        '''
-        Class constructor
-        '''        
+        \"\"\"Initialize umbrella sampling object.
+        
+        Args:
+            _system (pDynamo System): Molecular system.
+            _baseFolder (str): Output directory for windows.
+            _equiSteps (int): Number of equilibration steps per window.
+            _prodSteps (int): Number of production steps per window.
+            mdMethod (str): MD algorithm ('Langevin', 'Verlet', 'LeapFrog').
+            RESTART (bool, optional): Resume incomplete sampling. Defaults to False.
+            ADAPTATIVE (bool, optional): Adapt force constants. Defaults to False.
+            OPTIMIZE (bool, optional): Optimize geometry before each window. Defaults to False.
+        \"\"\"        
         self.baseName           = _baseFolder
         self.inputTraj          = " " #folder containing the pkls of the starting geometries
         self.molecule           = _system 
@@ -72,9 +108,20 @@ class US:
 
     #====================================================================
     def ChangeDefaultParameters(self,_parameters):
-        '''
-        Set new values for default parameters
-        '''
+        \"\"\"Update umbrella sampling parameters from dictionary.
+        
+        Modifies MD parameters, restraint properties, and optimization settings.
+        Allows flexible configuration after object initialization.
+        
+        Args:
+            _parameters (dict): Parameter updates with keys like:
+                - 'NmaxThreads': Number of parallel threads.
+                - 'temperature': Simulation temperature.
+                - 'force_constant_1', 'force_constant_2': Restraint force constants.
+                - 'timeStep': MD time step.
+                - 'production_nsteps', 'equilibration_nsteps': MD step counts.
+                - 'optimizer': Geometry optimization method.
+        \"\"\"
         if "NmaxThreads"        in _parameters: self.nprocs     = _parameters["NmaxThreads"]
         if "save_format"        in _parameters: self.saveFormat = _parameters["save_format"]
         if "force_constant_1"   in _parameters: self.forceC[0]  = _parameters["force_constant_1"]
@@ -101,9 +148,15 @@ class US:
 
             #==========================================================================
     def SetMode(self,_RC):
-        '''
-        Class method to setup modes to be restrained
-        '''
+        \"\"\"Register a reaction coordinate for umbrella sampling.
+        
+        Defines which coordinate(s) to restrain with harmonic potentials during
+        umbrella sampling. Multiple windows will scan across this coordinate.
+        
+        Args:
+            _RC (ReactionCoordinate): Reaction coordinate object specifying atoms,
+                constraints, and restraint parameters.
+        \"\"\"
         #----------------------------------------------------------------------
         ndim = self.nDim # temp var to hold the index of the curren dim
         self.nDim += 1
@@ -187,9 +240,19 @@ class US:
         
     #============================================================================  
     def Run1DSampling(self,_trajFolder,_crdFormat,_sample):
-        '''
-        Class method to execute one-dimensional sampling
-        '''
+        \"\"\"Execute 1D umbrella sampling using existing starting geometries.
+        
+        Creates Hamiltonian windows from starting geometries and performs
+        restrained MD in each window. Results processed for WHAM analysis.
+        
+        Args:
+            _trajFolder (str): Folder containing starting coordinate files.
+            _crdFormat (str): File extension for coordinates (.pkl, .pdb, etc.).
+            _sample (int): Sampling frequency (save every N steps).
+            
+        Generates:
+            Multiple md_path folders, each containing equilibration and production trajectories.
+        \"\"\"
         #-----------------------------------------------
         self.inputTraj      = _trajFolder
         self.samplingFactor = _sample
@@ -220,9 +283,16 @@ class US:
     
     #==============================================================================
     def Run1DSamplingSimpleDistance(self):
-        '''
-        Execute sampling for one-dimensional simple distance reaction coordinate
-        '''
+        \"\"\"Execute umbrella sampling with simple 2-atom distance restraints.
+        
+        Sets up and runs MD simulations in multiple Hamiltonian windows,
+        each with a fixed distance between two atoms. Performs equilibration
+        and production phases for each window.
+        
+        Note:
+            Automatically called by Run1DSampling() when appropriate.
+            Results can be analyzed with WHAM to obtain PMF.
+        \"\"\"
         atom1 = self.atoms[0][0]
         atom2 = self.atoms[0][1]
         restraints = RestraintModel()

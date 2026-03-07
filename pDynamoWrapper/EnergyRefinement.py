@@ -1,5 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Energy Refinement Module for Structure-Activity Relationships.
+
+This module provides tools for refining structural geometries and calculating
+energies across entire reaction coordinate surfaces using various quantum chemical
+methods. It supports both pDynamo's internal QC methods and external software
+like MOPAC, enabling high-throughput energy calculations on structural ensembles.
+
+Classes:
+    EnergyRefinement: Main class for batch energy calculations and refinement.
+
+Supported methods:
+    - Internal SMO: Semi-empirical methods (AM1, RM1, PM3, etc.).
+    - DFT: Density functional theory calculations.
+    - MOPAC: External MOPAC QC calculations.
+"""
 
 #FILE = EnergyRefinement.py
 
@@ -18,20 +33,31 @@ from .QuantumMethods import *
 #================================
 #**********************************************************
 class EnergyRefinement:
-	'''
-	Energy calculations for a set of structures using several QC methods and or External softwares
-	'''
+	"""Perform energy refinement calculations on structural ensembles.
+	
+	This class manages energy calculations across 1D or 2D coordinate grids using
+	various quantum chemical methods. It handles parallel computation, data storage,
+	and supports both pDynamo-internal and external QC software.
+	
+	Attributes:
+		molecule: pDynamo System object containing molecular structure.
+		trajFolder (str): Path to folder containing structure files.
+		baseName (str): Output directory for results.
+		xlen, ylen (int): Grid dimensions for 1D/2D calculations.
+		energiesArray (ndarray): Shared array for parallel energy storage.
+		SMOenergies (dict): Dictionary storing energies by method name.
+	"""
 	def __init__(self,_refSystem,_trajFolder,_outFolder,_dims,_chg,_mult):
-		'''
-		Default constructor.
-		Parameters:
-			_refSystem : reference molecular information; System pDynamo class instance
-			_trajFolder: folder path of the structures; string or path
-			_outFolder : folder path where the results will be written; string or path
-			_dims      : reaction coordinates size; list of integers
-			_chg       : reference QC region charge; integer
-			_multi     : reference QC region multiplicity; integer
-		'''
+		"""Initialize EnergyRefinement object.
+		
+		Args:
+			_refSystem (pDynamo System): Reference molecular system.
+			_trajFolder (str): Path to folder containing structure files (.pkl).
+			_outFolder (str): Output directory for energy results.
+			_dims (list): [xlen, ylen] grid dimensions for coordinate surface.
+			_chg (int): Charge of QC region.
+			_mult (int): Multiplicity of QC region.
+		"""
 		self.molecule 	 = _refSystem
 		self.trajFolder  = _trajFolder  
 		self.pureQCAtoms = []
@@ -73,12 +99,21 @@ class EnergyRefinement:
 	
 	#=====================================================================================
 	def RunInternalSMO(self,_methods,_NmaxThreads):
-		'''
-		Run energy refinement with the semiempirical hamiltonians available wihthin pDynamo
-		Parameters:
-			_methods:     List of Hamiltoninas
-			_NmaxThreads: Number of maximum threds to be used in the parallel section
-		'''
+		"""Calculate energies using pDynamo's semi-empirical orbital methods.
+		
+		Parallelizes energy calculations across structure ensembles using available
+		MNDO-based Hamiltonians (AM1, RM1, PM3, etc.). Results stored in SMOenergies.
+		
+		Args:
+			_methods (list): List of MNDO Hamiltonian names (e.g., ['am1', 'rm1']).
+			_NmaxThreads (int): Maximum number of parallel threads to use.
+			
+		Raises:
+			KeyError: If structure files not found in trajFolder.
+			
+		Sets:
+			SMOenergies (dict): Dictionary with method names as keys and energy arrays as values.
+		"""
 		self.SMOenergies = {}
 		self.methods 	 = _methods
 
@@ -118,12 +153,19 @@ class EnergyRefinement:
 				continue		
 	#====================================================
 	def RunInternalDFT(self,_functional,_basis,_NmaxThreads):
-		'''
-		Run energy refinement with the semiempirical hamiltonians available wihthin pDynamo
-		Parameters:
-			_methods:     List of Hamiltoninas
-			_NmaxThreads: Number of maximum threds to be used in the parallel section
-		'''
+		"""Calculate energies using DFT with specified functional and basis set.
+		
+		Performs DFT calculations on all structures in ensemble using pDynamo's
+		DFT interface. Supports B3LYP, HF, and other functionals with various basis sets.
+		
+		Args:
+			_functional (str): DFT functional name ('hf', 'b3lyp', etc.).
+			_basis (str): Basis set identifier.
+			_NmaxThreads (int): Number of parallel threads.
+			
+		Sets:
+			SMOenergies[functional] (ndarray): DFT energies for all structures.
+		"""
 		self.SMOenergies = {}		
 		self.methods.append(_functional)
 
@@ -163,12 +205,21 @@ class EnergyRefinement:
 
 	#====================================================
 	def RunMopacSMO(self,_methods,_keyWords):
-		'''
-		Create input for Mopac with its available Hamiltonians enabling the QC(QM)/MM potential
-		Parameters:
-			_methods: List of hamiltonians available in MOPAC 
-			_NmaxThreads: Number of maximum threds to be used in the parallel section
-		'''
+		"""Calculate energies using external MOPAC quantum chemistry software.
+		
+		Generates MOPAC input files for each structure and performs QC/MM calculations
+		with hybrid Hamiltonians. Results are extracted from MOPAC output files.
+		
+		Args:
+			_methods (list): List of MOPAC Hamiltonian names.
+			_keyWords (str): MOPAC-specific keywords for QC setup.
+			
+		Sets:
+			SMOenergies (dict): Dictionary with MOPAC method names and energy arrays.
+			
+		Note:
+			Requires MOPAC executable and license. Input files written to current directory.
+		"""
 		self.SMOenergies = {}
 		self.methods     = _methods
 		NBmodel          = self.molecule.nbModel	

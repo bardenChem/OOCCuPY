@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+MolecularDynamics module - MD simulation control and orchestration.
+
+This module provides the MD class for setting up and executing molecular
+dynamics simulations using pDynamo. Supports multiple integrators (Velocity Verlet,
+Leap Frog, Langevin), temperature and pressure control, trajectory management,
+and soft constraints for restricted simulations.
+
+Authors: Igor Barden Grillo, contributors
+"""
+
 #FILE = MolecularDynamics.py
 
 
@@ -28,15 +39,37 @@ from pSimulation               import *
 
 #**************************************************************************
 class MD:
-    '''
-    Class to set up Molecular Dynamics Sumulations.
-    '''
+    """Manager for molecular dynamics simulations.
+    
+    Handles setup and execution of MD simulations with various integrators
+    (Velocity Verlet, Leap Frog, Langevin). Manages heating, equilibration,
+    and production stages with configurable temperature, pressure control,
+    and soft constraints for restricted simulations.
+    
+    Attributes:
+        molecule (System): Molecular system to simulate.
+        baseName (str): Base directory for output.
+        trajectory (Trajectory): Cartesian coordinate trajectory.
+        trajectorySoft (Trajectory): Soft-constraint trajectory.
+        algorithm (str): Integration algorithm.
+        Nsteps (int): Total number of simulation steps.
+        timeStep (float): Integration time step (ps).
+        temperature (float): Target temperature (K).
+        pressureControl (bool): Apply pressure coupling.
+        samplingFactor (int): Save frequency.
+    """
     #.---------------------------------------
     def __init__(self,_system,_baseFolder,_parameters):
-        '''
-        Default constructor. 
-        Receives a list of paramters to set the simulations.
-        '''        
+        """Initialize MD simulation manager.
+        
+        Args:
+            _system (System): Molecular system for MD.
+            _baseFolder (str): Directory for trajectory output.
+            _parameters (dict): MD configuration with keys like:
+                - trajectory_name, MD_method, temperature, timeStep
+                - pressure, pressure_coupling, seed, log_frequency
+                - coll_freq, temperature_scale_option, etc.
+        """        
         #Important parameters that are recurrently wanted to be change by the user
         self.molecule               = _system
         self.baseName               = _baseFolder     
@@ -72,10 +105,15 @@ class MD:
 
     #=============================================================================================    
     def HeatingSystem(self,_nsteps,_samplingFactor):
-        '''
-        Run a Velocity Verlet molecular dynamics simulation to gradually 
-        make the system reach certain temperature. 
-        '''
+        """Run heating simulation to bring system to target temperature.
+        
+        Performs Velocity Verlet MD with linear temperature scaling
+        from initial temperature to target temperature.
+        
+        Args:
+            _nsteps (int): Number of MD steps for heating.
+            _samplingFactor (int): Frequency for saving trajectory frames.
+        """
         self.nsteps             = _nsteps
         self.trajectoryNameCurr = os.path.join(self.baseName,self.trajName+"heating.ptGeo")  
         self.trajectory         = ExportTrajectory( self.trajectoryNameCurr, self.molecule,log=None )
@@ -95,9 +133,14 @@ class MD:
                                               temperatureStop           = self.temperature                       )            
     #===============================================================================================    
     def RunProduction(self,_prodSteps,_samplingFactor,_Restricted=False,_equi=False):
-        '''
-        Run a molecular dynamics simulation for data collection.
-        '''
+        """Execute production or equilibration MD simulation.
+        
+        Args:
+            _prodSteps (int): Number of MD steps.
+            _samplingFactor (int): Trajectory save frequency.
+            _Restricted (bool): Apply soft constraints. Default: False
+            _equi (bool): Whether this is equilibration (vs production). Default: False
+        """
         self.softConstraint     = _Restricted
         self.nsteps             = _prodSteps
         self.samplingFactor     = _samplingFactor
@@ -116,9 +159,14 @@ class MD:
         elif self.algorithm == "Langevin":    self.runLangevin()       
     #===================================================================================================
     def runVerlet(self):
-        '''
-        Execute velocity verlet molecular dynamics from pDynamo methods. 
-        '''
+        """Execute Velocity Verlet molecular dynamics.
+        
+        Runs Velocity Verlet integration with configurable temperature scaling,
+        trajectories, and soft constraints for restricted simulations.
+        
+        Returns:
+            None (trajectory saved to file)
+        """
         
         trajectory_list = [( self.trajectory, self.samplingFactor)]
         if   self.softConstraint and self.samplingFactor >  0:  trajectory_list = [ ( self.trajectory, self.samplingFactor ), (self.trajectorySoft, 1) ]
@@ -135,9 +183,14 @@ class MD:
 
     #====================================================================================================
     def runLeapFrog(self):
-        '''
-        Execute Leap Frog molecular dynamics from pDynamo methods.
-        '''
+        """Execute Leap Frog molecular dynamics integration.
+        
+        Performs Leap Frog integration with temperature and pressure control,
+        trajectories with optional soft constraints.
+        
+        Returns:
+            None (trajectory saved to file)
+        """
         #--------------------------------------------------------------------------------
         trajectory_list = [( self.trajectory, self.samplingFactor)]
         if   self.softConstraint and self.samplingFactor >  0:  trajectory_list = [ ( self.trajectory, self.samplingFactor ), (self.trajectorySoft, 1) ]
@@ -155,8 +208,14 @@ class MD:
                                         temperatureCoupling     = 0.1                   ) 
     #===================================================================================================
     def runLeapFrog_MT(self):
-        ''''
-        '''
+        """Execute parallel Leap Frog MD using multiple threads.
+        
+        Distributed version of Leap Frog integration for multi-threaded
+        trajectory generation (currently incomplete implementation).
+        
+        Returns:
+            None
+        """
         with pymp.Parallel(self.NDIM) as p:
             for i in p.range(self.NDIM):
                 trajectory_name = self.trajectoryNameCurr[:-6] + "_" +str(p)+ ".ptGeo" 
@@ -184,9 +243,14 @@ class MD:
     
     #======================================================================================
     def runLangevin(self):
-        '''
-        Execute Langevin molecular dynamics from pDynamo methods.
-        '''
+        """Execute Langevin molecular dynamics integration.
+        
+        Performs Langevin/stochastic MD with collision frequency control,
+        maintaining specified temperature through random forces.
+        
+        Returns:
+            None (trajectory saved to file)
+        """
         #-----------------------------------------------------------------------------
         trajectory_list = [( self.trajectory, self.samplingFactor)]
         if   self.softConstraint and self.samplingFactor >  0:  trajectory_list = [ ( self.trajectory, self.samplingFactor ), (self.trajectorySoft, 1) ]
@@ -202,8 +266,14 @@ class MD:
     
     #====================================================================================
     def Finalize(self):
-        '''
-        '''        
+        """Finalize trajectory and convert to output format.
+        
+        Converts trajectory to specified output format (DCD, MDCRD)
+        if different from native pDynamo format.
+        
+        Returns:
+            None
+        """        
         if self.saveFormat == ".dcd" or self.saveFormat == ".mdcrd":
             if self.saveFormat != self.trajName:
                 traj_save = os.path.join(self.baseName,self.trajName + self.saveFormat)
@@ -212,9 +282,15 @@ class MD:
         
     #=====================================================================================
     def Print(self):
-        '''
-        Print basic information and paremeters for the molecular dynamics.
-        '''
+        """Display MD simulation parameters and configuration.
+        
+        Prints to console: working directories, simulation time, timestep,
+        saving frequency, integrator choice, temperature, pressure settings,
+        and constraint information.
+        
+        Returns:
+            None
+        """
         ps_time = self.nsteps * self.timeStep
         print( "Molecular Dynamics working folder:{}".format(self.baseName) )
         print( "Molecular Dynamics production trajectory folder:{}".format(self.trajectoryNameCurr) )

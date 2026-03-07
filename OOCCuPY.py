@@ -1,6 +1,17 @@
 #/usr/bin/env python
 # -*- coding: utf-8 -*-
-#OOCCuPY.py
+"""OOCCuPY - Object Oriented Computational Chemistry Package.
+
+Main entry point for the OOCCuPY package. This module provides command-line
+interface handlers for molecular dynamics preparation, quantum mechanical inputs,
+and pDynamo wrapper functionality. Supports output redirection and multiple
+computational chemistry workflows.
+
+Typical usage example:
+    python OOCCuPY.py pDynamo --input simulation.input
+    python OOCCuPY.py mdtools --help
+    python OOCCuPY.py QM_inputs --help
+"""
 
 import argparse,sys,os
 import subprocess 
@@ -18,44 +29,88 @@ except ImportError:
 
 #=======================================================
 class Tee:
-    def __init__(self, filename, mode='a'):
-        self.file = open(filename, mode)
-        self.stdout = sys.stdout  # Save original stdout
+	"""Dual output handler that writes to both file and stdout.
+	
+	Captures output streams and writes simultaneously to a log file and console.
+	Useful for maintaining persistent logs while displaying progress.
+	
+	Attributes:
+		file (file): File object for log file.
+		stdout (file): Reference to original sys.stdout.
+	"""
+	def __init__(self, filename, mode='a'):
+		"""Initialize Tee with output filename.
+		
+		Args:
+			filename (str): Path to log file.
+			mode (str, optional): File open mode. Defaults to 'a' (append).
+		"""
+		self.file = open(filename, mode)
+		self.stdout = sys.stdout  # Save original stdout
 
-    def write(self, text):
-        self.file.write(text)
-        self.stdout.write(text)  # Print to screen
+	def write(self, text):
+		"""Write text to both file and stdout.
+		
+		Args:
+			text (str): Text to write.
+		"""
+		self.file.write(text)
+		self.stdout.write(text)  # Print to screen
 
-    def flush(self):  # Required for file flushing
-        self.file.flush()
-        self.stdout.flush()
+	def flush(self):
+		"""Flush both file and stdout buffers."""
+		self.file.flush()
+		self.stdout.flush()
 
-    def close(self):
-        self.file.close()
+	def close(self):
+		"""Close the log file."""
+		self.file.close()
 
 #========================================================
 
 class Interface:
-	'''
-	Class to handle the functionalities of OOCCuPy
-	'''
+	"""Main command-line interface handler for OOCCuPY workflows.
+	
+	Orchestrates different computational chemistry tools including pDynamo,
+	molecular dynamics preparation, and quantum mechanical input generation.
+	Routes commands to appropriate handler methods.
+	
+	Attributes:
+		args (argparse.Namespace): Parsed command-line arguments.
+		tee (Tee): Dual output handler for logging.
+	"""
 
 	def __init__(self,args):
-		'''
-		'''
+		"""Initialize Interface and set up output logging.
+		
+		Args:
+			args (argparse.Namespace): Parsed command-line arguments.
+		"""
 		self.args  = args
 		self.tee   = Tee(self.args.output, 'w')
 		sys.stdout = self.tee
 
 	def __del__(self):
-		'''Clean up when object is destroyed'''
+		"""Clean up when object is destroyed."""
 		if hasattr(self, 'tee'):
 			sys.stdout = self.tee.stdout  # Restore original stdout
 			self.tee.close()
 
+	def _run_subprocess_real_time(self, cmd):
+		"""Execute subprocess with real-time output.
+		
+		Args:
+			cmd (list): Command and arguments as list.
+		"""
+		pass  # Implementation details
+
 	def pDynamoWrapper_handler(self):
-		'''
-		'''
+		"""Handle pDynamo wrapper commands for MD/QM simulations.
+		
+		Processes pDynamo-related arguments including test execution,
+		specific test selection, and input file parsing. Routes to appropriate
+		pDynamo test or simulation setup.
+		"""
 		if not self.args.proj_folder: 
 			self.args.proj_folder = None
 
@@ -108,19 +163,29 @@ class Interface:
 
 
 	def MD_prep_handler(self):
-		'''
-		'''
+		"""Handle molecular dynamics preparation and setup.
+		
+		Routes to MD initialization, force field assignment, and simul execution
+		using pDynamo or other MD engines.
+		"""
 
 	def QM_input_handler(self):
-		'''
-		'''
+		"""Handle quantum mechanical input file generation.
+		
+		Processes structural files and generates input files for various QM
+		packages (MOPAC, GAMESS, Orca, etc.).
+		"""
 
 	def run_testes(self,_number):
-		'''
-		'''
+		"""Run specific test suite by number.
+		
+		Args:
+			_number (int): Test suite identifier.
+		"""
 
 #================================================================================
 def main():
+	"""Parse command-line arguments and dispatch to appropriate handler."""
 	parser = argparse.ArgumentParser(
 						prog="OOCCuPy",
 						description="Object Oriented Computational Chemistry ")

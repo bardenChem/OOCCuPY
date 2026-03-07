@@ -1,6 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# mopac_module.py
+"""MOPAC quantum chemistry input file generation module.
+
+This module provides tools for generating MOPAC input files for semi-empirical
+quantum mechanical calculations. Supports various charge states and calculation
+methods (PM7, PM6, etc.). Can process protein structures and generate multiple
+input files for neutral, cation, and anion states.
+
+Typical usage example:
+    mopac = mopac_inp('structure.xyz', charge=0, multi=1, 
+                      inpnam='output.mop', mozyme=True, method='PM7')
+    mopac.write_mop()
+"""
+
 #=======================================================================
 
 #load modules
@@ -12,6 +24,24 @@ from pdb_class import*
 #======================================================================
 
 class mopac_inp:
+	"""Generator for MOPAC semi-empirical QM input files.
+	
+	Reads molecular structures and creates MOPAC input files with specified
+	quantum mechanical parameters, charge state, and solvation model.
+	Supports MOZYME approximation for large systems.
+	
+	Attributes:
+		name (str): Input XYZ filename.
+		inpnam (str): Output MOPAC input filename.
+		charge (str): Charge specification for MOPAC.
+		multi (int): Multiplicity (1=singlet, 2=doublet, etc.).
+		mult (str): Multiplicity label for MOPAC format.
+		solvent (bool): Include implicit solvation (eps=78.4).
+		hamilt (str): QM method/hamiltonian (e.g., 'PM7', 'PM6').
+		xyz (xyz_parser): Parser object with molecular geometry.
+		mozyme (str): MOZYME keyword for large system approximation.
+		mgf (str): Graph format output flag.
+	"""
 
 	def __init__(self  ,
 				xyzfile,
@@ -21,6 +51,17 @@ class mopac_inp:
 				mozyme , 
 				mgf    , 
 				method):
+		"""Initialize MOPAC input generator from XYZ structure file.
+		
+		Args:
+			xyzfile (str): Path to input XYZ coordinate file.
+			charge (int): Formal charge on the system.
+			multi (int): Spin multiplicity (1=singlet, 2=doublet).
+			inpnam (str): Output MOPAC filename.
+			mozyme (bool): Enable MOZYME large-system approximation.
+			mgf (bool): Enable molecular graphics format output.
+			method (str): Quantum mechanical method (e.g., 'PM7', 'PM6', 'RM1').
+		"""
 
 		self.name    = xyzfile
 		self.inpnam  = inpnam
@@ -46,6 +87,11 @@ class mopac_inp:
 			self.mgf = "graphf"
 			
 	def write_mop(self):
+		"""Write MOPAC input file with atomic coordinates and parameters.
+		
+		Generates a MOPAC-formatted input file with method specification,
+		charge, solvation, and atomic coordinates in proper format.
+		"""
 
 		mop_inp = open(self.inpnam,'w')
 		mop_text = ''
@@ -59,6 +105,15 @@ class mopac_inp:
 
 
 def run_all(met):
+	"""Batch process all PDB files and generate MOPAC inputs for multiple charge states.
+	
+	Finds all PDB files in current directory, converts them to XYZ format, and
+	generates MOPAC input files for neutral, cation (charge=+1), and anion 
+	(charge=-1) states. Creates shell script to run all MOPAC jobs.
+	
+	Args:
+		met (str): Quantum mechanical method for all calculations (e.g., 'PM7').
+	"""
 	lists = glob.glob('*.pdb')
 	for pdb in lists:
 		a = protein(name=pdb,amber=True)

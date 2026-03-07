@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+\"\"\"Trajectory Analysis Module for Molecular Dynamics Post-Processing.
+
+This module provides tools for analyzing molecular dynamics trajectories, computing
+structural properties (RMS, radius of gyration, RDF, diffusion), extracting important
+frames, and generating publication-quality plots.
+
+Classes:
+    TrajectoryAnalysis: Main class for MD trajectory analysis.
+
+Capabilities:
+    - RMSD and radius of gyration calculations.
+    - Radial distribution functions (RDF).
+    - Self-diffusion calculations.
+    - Frame extraction based on structural similarity.
+    - Distance analysis along reaction coordinates.
+\"\"\"
 
 #FILE = Analysis.py
 
@@ -24,14 +40,31 @@ from pSimulation                import *
 
 #=====================================================================
 class TrajectoryAnalysis:
-	'''
-	Functions to perform analysis from molecular dynamics trajectories
-	'''
+	\"\"\"Analyze and visualize molecular dynamics trajectory data.
+	
+	This class processes MD trajectories to extract structural information including
+	radius of gyration, RMSD, RDF, self-diffusion, and distance evolution. It can
+	identify representative frames and generate analysis plots.
+	
+	Attributes:
+		trajFolder (str): Path to trajectory directory or file.
+		molecule: Molecular system object.
+		RG (list): Radius of gyration values per frame.
+		RMS (list): Root mean square deviation values per frame.
+		energies (list): Energy values per frame.
+		trajectory: pDynamo Trajectory object.
+		rc1_MF, rc2_MF: Mean field RC values.
+		rg_MF, rms_MF: Mean field structural parameters.
+	\"\"\"
 	#-----------------------------------------
 	def __init__(self,_trajFolder,_system,t_time):
-		'''
-		Default constructor. Initializa the atributes. 
-		'''
+		\"\"\"Initialize TrajectoryAnalysis object.
+		
+		Args:
+			_trajFolder (str): Path to trajectory file (.ptGeo, .dcd) or directory.
+			_system (pDynamo System): Molecular system for analysis.
+			t_time (float): Total simulation time in picoseconds.
+		\"\"\"
 		self.trajFolder = _trajFolder
 		self.molecule   = _system
 		self.RG         = []
@@ -59,8 +92,17 @@ class TrajectoryAnalysis:
 
 	#=================================================
 	def Split_Traj(self,_bp):
-		'''
-		'''
+		\"\"\"Split trajectory into two subsets at specified breakpoint.
+		
+		Divides trajectory frames into two separate trajectory folders,
+		useful for convergence analysis or comparing equilibration vs. production.
+		
+		Args:
+			_bp (int): Frame number at which to split trajectory.
+			
+		Generates:
+			Two trajectory folders with original basename + '_1st_trj.ptGeo' and '_2nd_trj.ptGeo'.
+		\"\"\"
 		first_part_trj  = self.trajFolder[:-4] + "_1st_trj.ptGeo"
 		second_part_trj = self.trajFolder[:-4] + "_2nd_trj.ptGeo"
 
@@ -83,9 +125,23 @@ class TrajectoryAnalysis:
 
     #=================================================
 	def CalculateRG_RMSD(self,qc_mm=False,protein=False):
-		'''
-		Get Radius of Gyration and Root Mean Square distance for the trajectory
-		'''
+		\"\"\"Calculate radius of gyration and RMSD for trajectory.
+		
+		Computes structural metrics for all frames: radius of gyration, RMSD relative
+		to first frame, and energies. Can focus on QC region, protein CA atoms, or
+		whole system.
+		
+		Args:
+			qc_mm (bool, optional): Analyze only QC region. Defaults to False.
+			protein (bool, optional): Analyze only protein CA atoms. Defaults to False.
+			
+		Generates:
+			trajFolder_MDanalysis: Log file with per-frame statistics and summary.
+			
+		Sets:
+			RG, RMS (list): Per-frame values.
+			rg_MF, rms_MF (float): Mean field values from KDE analysis.
+		\"\"\"
 		masses    = Array.FromIterable ( [ atom.mass for atom in self.molecule.atoms ] )
 		self.crd3 = Unpickle(os.path.join(self.trajFolder,"frame0.pkl"))[0]
 		system  = None 
@@ -142,8 +198,21 @@ class TrajectoryAnalysis:
 		textLog.close()
 	#===================================================================================================
 	def Calculate_RDF(self,_selection_1,_selection_2=None,_selection_name="",_box_size= 25.0):
-		'''
-		'''
+		\"\"\"Calculate radial distribution function (RDF) between atom selections.
+		
+		Computes RDF g(r) for specific atoms throughout the trajectory with periodic
+		boundary conditions. Generates both tabular data and visualization plots.
+		
+		Args:
+			_selection_1 (list): Atom indices for selection 1.
+			_selection_2 (list, optional): Atom indices for selection 2. If None, uses selection 1.
+			_selection_name (str, optional): Label for output files.
+			_box_size (float, optional): Simulation box size in Angstroms. Defaults to 25.0.
+			
+		Generates:
+			trajFolder_selection_name_rdf.log: RDF data (Distance, G(r)).
+			trajFolder_selection_name_rdf.png: RDF plot.
+		\"\"\"
 
 		self.molecule.symmetry =  PeriodicBoundaryConditions.WithCrystalSystem ( CrystalSystemCubic ( ) )
 		self.molecule.symmetryParameters = self.molecule.symmetry.MakeSymmetryParameters ( a = _box_size)
@@ -167,8 +236,19 @@ class TrajectoryAnalysis:
 
 	#-----------------------------------------------------------------------------------------------------
 	def Calculate_SD(self,_selection,_selection_name=""):
-		'''
-		'''		
+		"""Calculate self-diffusion from trajectory coordinates.
+		
+		Computes self-diffusion coefficient from mean square displacement of selected atoms
+		throughout the trajectory using Green-Kubo theory.
+		
+		Args:
+			_selection (list): Atom indices to track for diffusion.
+			_selection_name (str, optional): Label for output files.
+			
+		Generates:
+			trajFolder_selection_name_sdf.log: SDF data (Time, Dself).
+			trajFolder_selection_name_sdf.png: Self-diffusion plot.
+		"""		
 		rdf_dat = SelfDiffusionFunction( self.trajFolder, self.molecule, selection  = _selection )
 		
 		textLog = open( self.trajFolder+"_"+_selection_name+"_"+"_sdf.log", "w" )
@@ -187,8 +267,15 @@ class TrajectoryAnalysis:
 		fig1.clf()
 	#--------------------------------------------------
 	def ExtractFrames(self):
-		'''			
-        '''
+		"""Extract representative frames from trajectory using density estimation.
+		
+		Identifies most frequently sampled configurations using kernel density estimation
+		on RMSD and radius of gyration. Also saves average structure.
+		
+		Generates:
+			mostFrequentRMS.pdb, .pkl: Most probable structure.
+			Average.pdb, .pkl: Average structure from trajectory.
+		\"\"\"
 		try: 	from sklearn.neighbors import KernelDensity
 		except:	pass
 		kde = KernelDensity(bandwidth=1.0, kernel='gaussian')

@@ -1,6 +1,17 @@
 #/usr/bin/env python
 # -*- coding: utf-8 -*-
-#md_analysis.py
+"""Molecular dynamics trajectory analysis module.
+
+This module provides tools for analyzing molecular dynamics simulations using MDTraj.
+It includes functionality for computing key structural metrics (RMSD, radius of gyration),
+generating data files, and creating visualizations with density-based coloring.
+
+Typical usage example:
+    traj = md_analysis('trajectory.xtc', 'topology.pdb')
+    traj.get_rmsd_rg()
+    traj.write_data()
+    traj.plot_rmsd_rg()
+"""
 
 
 import os,glob,sys
@@ -16,7 +27,26 @@ trj_obj = []
 
 #=======================================================================
 class md_analysis:
+	"""Analyzes molecular dynamics trajectories.
+	
+	This class loads and analyzes MD trajectories using MDTraj, computing
+	structural metrics (RMSD, radius of gyration) and generating both data
+	files and visualizations.
+	
+	Attributes:
+		trj_obj (mdtraj.Trajectory): MDTraj trajectory object.
+		rg (numpy.ndarray): Radius of gyration values for each frame.
+		rmsd (numpy.ndarray): RMSD values for each frame.
+		name (str): Trajectory filename.
+		time (numpy.ndarray): Time values for each frame (ps).
+	"""
 	def __init__(self,name,tpl):
+		"""Initialize trajectory analysis object.
+		
+		Args:
+			name (str): Path to trajectory file (e.g., 'traj.xtc').
+			tpl (str): Path to topology file (e.g., 'topology.pdb').
+		"""
 		
 		self.trj_obj = md.load(name,top=tpl)
 		self.rg      = 0
@@ -27,6 +57,11 @@ class md_analysis:
 	#-------------------------------------------------------------------
 	
 	def get_rmsd_rg(self):
+		"""Compute radius of gyration and RMSD for the trajectory.
+		
+		Calculates structural metrics and prompts user for optional distance
+		pair calculations. Updates instance attributes: rg, rmsd, and time.
+		"""
 		self.rg   = md.compute_rg(self.trj_obj)
 		self.rmsd = md.rmsd(self.trj_obj,self.trj_obj)
 		self.time = self.trj_obj.time 
@@ -44,6 +79,12 @@ class md_analysis:
 	#-------------------------------------------------------------------
 	
 	def write_data(self):
+		"""Write RMSD and radius of gyration data to text files.
+		
+		Generates two output files:
+		  - 'rmsd': Time vs RMSD values
+		  - 'trj_rg_r': Time vs radius of gyration values
+		"""
 		
 		r_data     = "time "
 		r_data    += self.name + " \n"
@@ -69,6 +110,12 @@ class md_analysis:
 	#-------------------------------------------------------------------
 	
 	def plot_rmsd_rg(self):
+		"""Generate 2D scatter plot of RMSD vs radius of gyration.
+		
+		Creates a density-based scatter plot where point color represents
+		the probability density using kernel density estimation (KDE).
+		Uses Gaussian KDE to highlight regions of high occupance in phase space.
+		"""
 		
         # Color by the Probability Density Function. 
         # Kernel density estimation is a way to estimate 
