@@ -1,44 +1,89 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#OOCCuPY.py
+"""MD Preparation Module for OOCCuPY.
+
+Provides utilities for preparing molecular dynamics simulations using AMBER
+and GROMACS. This module handles ligand and protein preparation, parametrization
+with AMBER, and structure optimization.
+
+The module manages the complete MD preparation workflow:
+- Extraction and parametrization of ligands/substrates
+- Preparation of protein/enzyme structures
+- Creation of solvated protein-ligand complexes
+- Integration with AMBER and GROMACS for simulation setup
+
+Attributes:
+    cofac_list (list): List of known cofactors (ATP, NADPH, NAD+, etc.)
+        with pre-computed parameters available in the cofac/ directory.
+    atp_list (list): List of ATP ribose atom names for special handling.
+    path_amber (str): Path to AMBER binary executables.
+    path_cofac (str): Path to pre-computed cofactor parameter files.
+"""
 
 from pdb_class import *
 from gmx_module import *
 import parmed as pmd
 import glob
-import sys,os 
+import sys, os
 
 
-#Cofactor list
-cofac_list = ["ATP","atp","NADPH","NADP+","NADH","NAD+","ADP"]
-#ATP atoms list
-atp_list = ["O5'","C5'","C4'","O4'","C3'","O3'","C2'","O2'","C1'"]
+# Known cofactors with pre-computed parameters
+cofac_list = ["ATP", "atp", "NADPH", "NADP+", "NADH", "NAD+", "ADP"]
+# ATP ribose atom names for special processing
+atp_list = ["O5'", "C5'", "C4'", "O4'", "C3'", "O3'", "C2'", "O2'", "C1'"]
 
-#names of bin of amber and gromacs
+# AMBER and GROMACS binary paths
 path_amber = "/home/igorchem/programs/amber18/bin"
-Reduce     = path_amber + "/reduce "
-pdb4       = path_amber + "/pdb4amber "
-antech     = path_amber + "/antechamber "
-parmchk    = path_amber + "/parmchk2 "
-tleap      = path_amber + "/tleap "
-pymol      = "/home/igorchem/programs/bin/pymol "
-path_cofac = "/home/igorchem/OOCCuPY/cofac/"
-#=======================================================================
-#***********************************************************************
-def my_replace(fl,old,new):
-				   	
-	'''Function Doc
-	Move to another lib file 
-	'''
-	with open(fl, 'r+') as f:
-		s = f.read()
-		s = s.replace(old, new)
-		f.write(s)
+Reduce = path_amber + "/reduce"  # Hydrogen addition/removal tool
+pdb4 = path_amber + "/pdb4amber"  # PDB format converter
+antech = path_amber + "/antechamber"  # Ligand parametrization
+parmchk = path_amber + "/parmchk2"  # Parameter checking
+tleap = path_amber + "/tleap"  # AMBER simulation preparation
+pymol = "/home/igorchem/programs/bin/pymol"  # Molecular visualization
+path_cofac = "/home/igorchem/OOCCuPY/cofac/"  # Pre-computed cofactor parameters
+
+
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+
+
+def my_replace(fl, old, new):
+    """Replace text in a file.
+
+    Performs a simple find-and-replace operation on a text file.
+
+    Args:
+        fl (str): File path to edit.
+        old (str): Text to find and replace.
+        new (str): Replacement text.
+
+    Note:
+        This function should be relocated to a dedicated utilities library.
+    """
+    with open(fl, 'r+') as f:
+        s = f.read()
+        s = s.replace(old, new)
+        f.seek(0)
+        f.write(s)
 			
 #***********************************************************************
-def fix_cofac_atoms(lig):	
-	'''Function Doc	
-	'''
+def fix_cofac_atoms(lig):
+    """Fix atom types for cofactor molecules (ATP, NADPH, etc.).
+    
+    Processes cofactor PDB files to fix atom type nomenclature and rename
+    residues appropriately. Replaces prime notation in atom names (e.g., O5')
+    with asterisks (e.g., O5*) for AMBER compatibility.
+    
+    Args:
+        lig (str): Ligand name/identifier (e.g., 'ATP').
+    
+    Returns:
+        str: Modified ligand name for the processed PDB file.
+    
+    Raises:
+        FileNotFoundError: If expected cofactor parameter files are missing.
+    """
 	new_atoms   = []
 	result_text = ""
 	LIG         = lig
@@ -68,10 +113,20 @@ def fix_cofac_atoms(lig):
 	return(LIG)
 	
 #***********************************************************************
-def pdb_cat(pdb1,pdb2,flname):		
-	'''	Function Doc
-	Move to pdb_class file
-	'''
+def pdb_cat(pdb1, pdb2, flname):
+    """Concatenate two PDB files into a single structure.
+    
+    Combines two protein/ligand structures into one PDB file, useful for
+    creating protein-ligand complexes.
+    
+    Args:
+        pdb1 (str): Path to first PDB file (usually protein).
+        pdb2 (str): Path to second PDB file (usually ligand).
+        flname (str): Output file name for concatenated structure.
+    
+    Note:
+        This function should be refactored into the pdb_class module.
+    """
 	
 	pdba = protein(pdb1) 
 	pdbb = protein(pdb2) 
@@ -97,16 +152,30 @@ def pdb_cat(pdb1,pdb2,flname):
 #=======================================================================
 			
 class md_prep:
-	'''	
-	Classe para auxiliar na preparação de simulações de dinâmica molecular
-	'''
-	#-------------------------------------------
-	
-	def __init__(self,pdb):
-		'''
-		Construtor padrão da classe. 
-		Inicaliza o objeto com essas variáveis
-		'''
+    """Prepare molecular systems for AMBER/GROMACS molecular dynamics simulations.
+    
+    This class handles the complete workflow for preparing MD simulations:
+    1. Extraction and parametrization of ligands
+    2. Preparation of protein/enzyme structures
+    3. Creation of solvated complexes
+    4. Structure optimization and equilibration
+    
+    Attributes:
+        pdb (str): Input PDB file path.
+        current_pdb (str): Path to current PDB file being processed.
+        lig (list): List of ligand/substrate names.
+        net_charge (int): Net charge of the system.
+        lig_charge (list): Charge of each ligand.
+        num_lig (int): Number of ligands/substrates in system.
+    """
+    #-------------------------------------------
+    
+    def __init__(self, pdb):
+        """Initialize the md_prep object.
+        
+        Args:
+            pdb (str): Path to input PDB file containing protein structure.
+        """
 		self.pdb         = pdb
 		self.current_pdb = pdb 
 		self.lig         = []
@@ -116,9 +185,29 @@ class md_prep:
 		
 	#-------------------------------------------
 	
-	def prepare_lig(self,nlig,lign,chg,mult,rwat=True,lig_hy="False"):
-		'''Method Doc
-		'''
+    def prepare_lig(self, nlig, lign, chg, mult, rwat=True, lig_hy="False"):
+        """Prepare and parametrize ligand(s) and extract from protein structure.
+        
+        Processes ligands by:
+        1. Extracting from PDB structure
+        2. Adding/removing hydrogens as needed
+        3. Parametrizing with ANTECHAMBER or loading pre-computed parameters
+        4. Generating AMBER library and force field files
+        
+        Args:
+            nlig (int): Number of ligands to process.
+            lign (list): List of ligand residue names.
+            chg (list): List of ligand charges (one per ligand).
+            mult (list): List of ligand multiplicities (one per ligand).
+            rwat (bool, optional): Whether to remove water molecules. Defaults to True.
+            lig_hy (str, optional): Whether to add hydrogens to ligands ('T'/'F'). 
+                Defaults to "False".
+        
+        Note:
+            Known cofactors (ATP, NADPH, etc.) use pre-computed parameters
+            from the cofac/ directory. Unknown ligands are parametrized
+            with ANTECHAMBER and charge obtained from BCC method.
+        """
 		
 		lig_h = False
 		if lig_hy == "T":
@@ -278,9 +367,28 @@ class md_prep:
 		os.system("sed 's/OXT/O  /' "+self.current_pdb+" > "+self.pdb[:-4]+"_wl.pdb ")
 		self.current_pdb = self.pdb[:-4] +"_wl.pdb"
 
-	def build_complex(self,addH=True):
-		
-		print("=======================================================")
+    def build_complex(self, addH=True):
+        """Build complete solvated protein-ligand complex for simulation.
+        
+        Performs the following steps:
+        1. Adds hydrogens to protein structure using Reduce
+        2. Converts PDB format for AMBER compatibility
+        3. Concatenates protein and ligand(s) into complex
+        4. Generates AMBER topology and coordinate files
+        5. Converts to GROMACS format
+        
+        Args:
+            addH (bool, optional): Whether to add hydrogens to protein. 
+                Defaults to True.
+        
+        Generates:
+            prmtop: AMBER topology file
+            inpcrd: AMBER coordinate file
+            top: GROMACS topology file
+            gro: GROMACS coordinate file
+        """
+        
+        print("=======================================================")
 		print("Preparing Receptor/enzyme!")
 		print(Reduce +" -Trim "+self.current_pdb+  " > " +self.current_pdb[:-4]+"_p.pdb") 
 		os.system(Reduce+" -Trim "+self.current_pdb+" > "+self.current_pdb[:-4]+"_p.pdb")
@@ -342,9 +450,21 @@ class md_prep:
 			ap.save(self.pdb[:-4]+".top")
 			ap.save(self.pdb[:-4]+".gro")
 
-	def min_gromacs(self):
-		
-		gromacs_inp()
+    def min_gromacs(self):
+        """Perform energy minimization and equilibration with GROMACS.
+        
+        Executes the following GROMACS workflow:
+        1. Structure minimization (EM)
+        2. NVT equilibration (constant volume)
+        3. NPT equilibration (constant pressure)
+        4. MD production setup
+        
+        Requires pre-generated topology and coordinate files in GROMACS format.
+        Generates .mdp input files (em.mdp, nvt.mdp, npt.mdp, md.mdp) and
+        outputs final structures ready for production MD.
+        """
+        
+        gromacs_inp()
 		os.system("sed 's/WAT/SOL/' "+self.current_pdb+" > "+self.current_pdb[:-4]+"_t.pdb")
 		os.rename(self.current_pdb[:-4]+"_t.pdb",self.current_pdb)
 		os.system("sed 's/WAT/SOL/' "+self.pdb[:-4]+".top > "+self.pdb[:-4]+"_t.top")
@@ -393,14 +513,29 @@ class md_prep:
 		os.system("gmx grompp -f md.mdp -c npt.gro -p "+self.pdb[:-4]+".top -o md.tpr -maxwarn 50")
 		
 		
-	def production(self):
-		pass 
+    def production(self):
+        """Start production molecular dynamics simulation.
+        
+        Note:
+            This method is not yet implemented.
+        """
+        pass 
 		
-	def organize_files():
-		pass
+    def organize_files(self):
+        """Organize output files into directory structure.
+        
+        Note:
+            This method is not yet implemented.
+        """
+        pass
 		
-	def process_traj():
-		pass
+    def process_traj(self):
+        """Process molecular dynamics trajectory files.
+        
+        Note:
+            This method is not yet implemented.
+        """
+        pass
 		
 		
 

@@ -1,6 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Relaxed Surface Scan Module for Reaction Coordinate Exploration.
 
+This module implements relaxed surface scanning (RSS) methodology for exploring
+potential energy surfaces along molecular reaction coordinates. It performs
+iterative geometry optimization with fixed distance/angle constraints, enabling
+Construction of 1D and 2D energy surfaces and reaction pathways.
+
+Classes:
+    SCAN: Main class for managing and executing relaxed scans.
+
+Methods include:
+    - 1D/2D relaxed scan execution
+    - Adaptive convergence parameter adjustment
+    - Support for distance and dihedral reaction coordinates.
+"""
 
 #FILE = RelaxedScan.py
 
@@ -16,24 +30,32 @@ from pMolecule import *
 from pMolecule.QCModel import *
 #**************************************************************
 class SCAN:
-    '''
-    Class to setup and execute relaxed surface scan procedure
-    '''
-    #---------------------------------------------------------------
+    """Execute relaxed surface scan for reaction coordinate exploration.
+    
+    This class manages the setup and execution of relaxed scans along 1 or 2
+    reaction coordinates. It performs iterative geometry optimization with
+    distance/angle constraints to map potential energy surfaces.
+    
+    Attributes:
+        molecule: pDynamo System object.
+        baseName (str): Output directory for scan results.
+        nDim (int): Number of active reaction coordinates (1 or 2).
+        energiesMatrix (ndarray): 2D array storing energy values.
+        reactionCoordinate1, reactionCoordinate2 (list): RC values.
+        forceC (list): Harmonic restraint force constants.
+        nprocs (int): Number of parallel processors.
+        adaptative (bool): Enable adaptive convergence adjustment.
+    \"\"\"\n    #---------------------------------------------------------------
     def __init__(self,_system,_baseFolder,_optimizer,ADAPTATIVE=False,RESTART=False):
-        '''
-        Default constructor
-        Parameters:
-            _system    : reference molecular information ; System instance from pDynamo library
-            _baseFolser: path for the folder where the results will be written; string or os.path
-            _optmizer  : Geometry searcher optimizer algorithm to be used in the relaxation steps; string 
-            ADAPTATIVE : flag indicating whether the run is allowed to modified the convergence parameters in regions of high energy; boolean 
+        """Initialize SCAN object.
         
-        Future Development Notes: 
-            Implement the possibility of a third coordinate.
-            Implement the possibility to deal with other type of restraits               
-                Thether
-        '''
+        Args:
+            _system (pDynamo System): Molecular system for scanning.
+            _baseFolder (str): Output directory for results.
+            _optimizer (str): Geometry optimizer algorithm ('ConjugatedGradient', 'SteepestDescent').
+            ADAPTATIVE (bool, optional): Enable adaptive convergence. Defaults to False.
+            RESTART (bool, optional): Restart from previous scan. Defaults to False.
+        \"\"\"
         self.parameters         = None 
         
         self.baseName           = _baseFolder
@@ -70,9 +92,22 @@ class SCAN:
                               "rmsGradient"  :self.rmsGT   }
     #===========================================================================================
     def ChangeDefaultParameters(self,_parameters):
-        '''
-        Class method to alter deafult parameters
-        '''
+        """Modify default scan parameters.
+        
+        Updates scanning parameters including force constants, convergence criteria,
+        optimization method, and parallelization options.
+        
+        Args:
+            _parameters (dict): Dictionary with parameter updates. Supported keys:
+                - 'traj_folder_name': Trajectory folder name.
+                - 'rmsGradient': RMS gradient convergence threshold.
+                - 'maxIterations': Maximum optimization iterations.
+                - 'log_frequency': Logging frequency.
+                - 'optimizer': Geometry optimizer type.
+                - 'NmaxThreads': Number of parallel threads.
+                - 'save_format': Coordinate file format (.dcd, .ptGeo, etc.).
+                - 'force_constants': List containing [FC1, FC2] for restraints.
+        \"\"\"
         self.parameters = _parameters
         self.parameters["system_name"]         = self.molecule.label
         self.parameters["initial_coordinates"] = self.molecule.coordinates3 
@@ -93,8 +128,20 @@ class SCAN:
 
     #===========================================================================================
     def ChangeConvergenceParameters(self,_xframe,_yframe):
-        '''
-        '''
+        """Adaptively adjust convergence parameters based on energy barriers.
+        
+        Implements adaptive convergence scheme that loosens SCF/geometry convergence
+        in regions of high energy to improve computational efficiency while maintaining
+        accuracy at low energies.
+        
+        Args:
+            _xframe (int): Index of current X coordinate point.
+            _yframe (int): Index of current Y coordinate point.
+            
+        Note:
+            Convergence parameters are adjusted based on energy delta from reference.
+            Force constants may also be reduced in high-energy regions.
+        \"\"\"
         if not self.energiesMatrix[_xframe,_yframe] == 0.0:
             delta = self.energiesMatrix[_xframe,_yframe]  
             if delta < 150.0:
@@ -141,9 +188,23 @@ class SCAN:
     
     #=============================================================================================
     def SetReactionCoord(self,_RC):
-        '''
-        Set reaction coordinate, determining initial parameters from the atoms information
-        '''
+        """Define a reaction coordinate for the relaxed scan.
+        
+        Registers a reaction coordinate (distance, angle, or dihedral) and extracts
+        relevant structural parameters for constraining during the scan.
+        
+        Args:
+            _RC (ReactionCoordinate): Reaction coordinate object specifying atoms,
+                constraints, and restraint properties.
+                
+        Sets:
+            nDim: Increments dimension counter.
+            atoms: Adds atom indices for constraint.
+            DINCREMENT: Distance/angle increment value.
+            DMINIMUM: Minimum distance/angle value.
+            multipleDistance: Flag for 3-atom distance constraints.
+            dihedral: Flag for dihedral constraints.
+        \"\"\"
         #------------------------------------------------------------
         _RC.Print()
         ndim = self.nDim # temp var to hold the index of the curren dim
@@ -161,9 +222,21 @@ class SCAN:
         elif len(_RC.atoms) == 4: self.dihedral = True
     #===============================================================================================
     def Run1DScan(self,_nsteps):
-        '''
-        Manage and execute one-dimensional relaxed scan 
-        '''
+        """Execute one-dimensional relaxed surface scan.
+        
+        Performs iterative geometry optimization along a single reaction coordinate,
+        constraining the RC to fixed values while allowing all other coordinates to relax.
+        
+        Args:
+            _nsteps (int): Number of steps along the reaction coordinate.
+            
+        Generates:
+            Trajectory folder: Contains optimized structures at each RC point.
+            Log file: Energy values and RC coordinates for all steps.
+            
+        Note:
+            Handles both simple and multiple-distance constraints, as well as dihedral angles.
+        \"\"\"
         if not os.path.exists( os.path.join( self.baseName, self.trajFolder +".ptGeo" ) ):  os.makedirs(  os.path.join( self.baseName,self.trajFolder +".ptGeo"  ) )
 
         text_line = "{0:>3s} {1:>15s} {2:>15s}".format('x','RC1','Energy' )
@@ -182,9 +255,15 @@ class SCAN:
             
     #=================================================================================================
     def Run1DScanSimpleDistance(self):
-        '''
-        Execute the relaxed scan with one reaction coordinate
-        '''
+        """Execute relaxed scan with simple 2-atom distance constraint.
+        
+        Performs geometry optimization with a fixed distance constraint between
+        two atoms. This is the most common type of relaxed surface scan.
+        
+        Note:
+            This method is automatically called by Run1DScan() when appropriate.
+            Structures are saved as pickled coordinate objects at each RC point.
+        \"\"\"
         #-------------------------------------------------------------------------
         #Setting some local vars to ease the notation in the pDynamo methods
         #----------------------------------

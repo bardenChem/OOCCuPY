@@ -1,7 +1,16 @@
  #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#FILE = Simulation.py
+"""
+Simulation module - Main orchestration for pDynamo simulations.
+
+This module provides the Simulation class which serves as the main orchestrator
+for setting up and executing various types of molecular simulations including
+geometry optimization, molecular dynamics, umbrella sampling, energy refinement,
+and reaction pathway analysis using the pDynamo framework.
+
+Authors: Igor Barden Grillo, contributors
+"""
 
 #--------------------------------------------------------------
 import os, glob, sys
@@ -41,13 +50,31 @@ from pScientific.Symmetry      import *
 from pSimulation               import *
 #=============================================================
 class Simulation:
-	'''
-	Class to set up preset simulations to be perfomed
-	'''
+	"""Main simulation orchestration class for pDynamo.
+	
+	This class manages the setup and execution of preset simulations,
+	including parameter initialization, execution of various simulation
+	types (MD, geometry optimization, umbrella sampling, etc.), and
+	output handling.
+	
+	Attributes:
+		molecule (System): The molecular system to simulate.
+		parameters (dict): Dictionary containing all simulation parameters.
+		baseFolder (str): Base directory for output files.
+		restart (bool): Whether to restart from checkpoint.
+		adaptative (bool): Whether to use adaptive parameters.
+	"""
 	def __init__(self,_parameters):
-		'''
-		Deafault constructor
-		'''
+		"""Initialize Simulation instance with configuration parameters.
+		
+		Args:
+			_parameters (dict): Configuration dictionary containing:
+				- 'active_system': Molecular system to simulate
+				- 'project_folder': Base directory for output
+				- 'restart': Whether to restart from checkpoint
+				- 'adaptative': Whether to use adaptive parameters
+				- Other simulation-specific parameters
+		"""
 		self.molecule   = _parameters["active_system"]
 		self.parameters = None
 		self.Initiate_Parameters(_parameters)
@@ -61,9 +88,15 @@ class Simulation:
 
 	#======================================================================
 	def Initiate_Parameters(self,_parameters):
-		'''		
-		Initiate parameters attrubute dict and the deafult values of each entry.
-		'''	
+		"""Initialize and set default values for all simulation parameters.
+		
+		Creates a comprehensive dictionary of simulation parameters with sensible
+		defaults, then updates with user-provided values. Parameters cover MD,
+		geometry optimization, scan, energy refinement, and free energy calculations.
+		
+		Args:
+			_parameters (dict): User-provided parameter overrides.
+		"""	
 		
 		self.parameters = {
 			"restart":"not",
@@ -150,11 +183,19 @@ class Simulation:
 
 	#=======================================================================
 	def Execute(self):
-		'''
-		Function to call the class method to execute the preset simulation
-		Mandatory keys:
-			"simulation_type": Name of the simulation to execute
-		'''		
+		"""Execute the simulation based on the configured simulation type.
+		
+		Routes the simulation to the appropriate method based on
+		parameters['simulation_type']. Supports energy refinement, geometry
+		optimization, relaxed surface scans, MD, umbrella sampling, NEB,
+		and other advanced simulations.
+		
+		Returns:
+			System: The updated molecular system after simulation.
+			
+		Raises:
+			KeyError: If 'simulation_type' not specified in parameters.
+		"""		
 		#-------------------------------------------------------------------------------------------------------------------------
 		if 	 self.parameters["simulation_type"] == "Energy_Refinement": 			self.EnergyRefine()		
 		elif self.parameters["simulation_type"] == "Geometry_Optimization":			self.GeometryOptimization()
@@ -176,9 +217,17 @@ class Simulation:
 		
 	#=================================================================================================================
 	def EnergyRefine(self):
-		'''
-		Set up and execute energy refinement using a series of methods	
-		'''
+		"""Execute energy refinement over 1D or 2D reaction coordinate grid.
+		
+		Performs single-point energy calculations at gridpoints using specified
+		quantum chemistry methods (pDynamo, pySCF, ORCA, MOPAC, or DFTB). Results
+		are analyzed and plotted.
+		
+		Requires parameters:
+			- Software: QM package to use
+			- xnbins, ynbins: Grid dimensions
+			- methods_lists: List of QM methods
+		"""
 		
 		dimensions    = [ self.parameters["xnbins"], 0 ] 
 		nmaxthreads   =  self.parameters["NmaxThreads"]
@@ -241,9 +290,17 @@ class Simulation:
 		elif _type == "2DRef": EA.MultPlot2D(self.parameters["contour_lines"],crd1_label,crd2_label,_xlim=None,_ylim=None,_reverserc1=_reverse_rc1,_reverserc2=_reverse_rc2)	
 	#==================================================================
 	def GeometryOptimization(self):
-		'''
-		Set up and execture the search of local minima for the system passed						
-		'''
+		"""Set up and execute geometry optimization to reach local minima.
+		
+		Performs geometry optimization using the specified optimizer
+		(ConjugatedGradient by default) to find local minima on the
+		potential energy surface.
+		
+		Requires parameters:
+			- optmizer: Optimization algorithm
+			- trajectory_name: Output trajectory file base name
+			- maxIterations, rmsGradient: Convergence criteria
+		"""
 		_traj_name = None
 		if "optmizer" 		 in self.parameters: _Optimizer = self.parameters["optmizer"]
 		if "trajectory_name" in self.parameters: _traj_name = self.parameters["trajectory_name"]
@@ -255,11 +312,20 @@ class Simulation:
 
 	#==================================================================
 	def RelaxedSurfaceScan(self, plot = True):
-		'''
-		Set up and execute one/two-dimensional relaxed surface scans 
-		By the defualt the PKLs were saved on a child folder from the base path passed in the parameters, named "ScanTraj.ptGeo"
-		The trajectory can be saved as files of the formats allowed by pDynamo 3.0		
-		'''
+		"""Execute 1D or 2D relaxed surface scan with geometry optimization.
+		
+		Performs geometry optimization at each point along one or two reaction
+		coordinates to generate a relaxed potential energy surface. Results are
+		saved to 'ScanTraj.ptGeo' and plotted.
+		
+		Args:
+			plot (bool): Whether to generate plots. Default: True
+			
+		Requires parameters:
+			- nsteps_rc1, nsteps_rc2: Number of steps in each dimension
+			- dincre_rc1, dincre_rc2: Increment sizes
+			- optmizer: Geometry optimization method
+		"""
 		X = self.parameters["nsteps_rc1"]
 		Y = self.parameters["nsteps_rc2"]
 		if X > 0: 
@@ -312,9 +378,14 @@ class Simulation:
 		EA.Plot1D(crd1_label)
 	#==================================================================================	
 	def MolecularDynamics(self):
-		'''
-		Set up and execute molecular dynamics simulations		
-		'''				
+		"""Set up and execute molecular dynamics simulations.
+		
+		Runs heating, equilibration, and production MD phases with optional
+		trajectory analysis (radius of gyration, RMSD calculations).
+		
+		Returns:
+			None
+		"""				
 		MDrun = MD(self.molecule.system,self.baseFolder,self.parameters)		
 
 		if self.parameters["heating_nsteps"] 	   > 0: 
@@ -339,9 +410,14 @@ class Simulation:
 		MDrun.Finalize()			
 	#==================================================================
 	def RestrictedMolecularDynamics(self):
-		'''
-		Set up and execute molecular dynamics simulations.
-		'''
+		"""Execute MD with reaction coordinate restraints/constraints.
+		
+		Runs MD with one or two reaction coordinates held by harmonic
+		restraints to explore constrained regions of phase space.
+		
+		Returns:
+			None
+		"""
 		#----------------------------------------------------------------
 		restraints = RestraintModel()
 		self.molecule.system.DefineRestraintModel( restraints )		
@@ -416,9 +492,15 @@ class Simulation:
 
 	#=======================================================================
 	def UmbrellaSampling(self):
-		'''
-		Set up and execute umbrella sampling simulations and Free energy calculations for reaction path trajectory.		
-		'''
+		"""Execute umbrella sampling free energy calculations.
+		
+		Performs umbrella sampling simulations along one or two reaction
+		coordinates with force biasing, followed by WHAM analysis to obtain
+		free energy surface.
+		
+		Returns:
+			None
+		"""
 		#------------------------------------------------------------------
 		rc1 = self.molecule.reactionCoordinates[0]
 		rc1.GetRCLabel(self.molecule.system)

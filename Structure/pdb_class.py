@@ -1,6 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# pdb_class.py
+"""PDB structure parsing and manipulation module.
+
+This module provides classes for parsing and manipulating PDB (Protein Data Bank)
+structure files. It includes functionality for reading atomic coordinates, defining
+residues, calculating geometric properties, and performing various structural 
+modifications such as pruning water molecules, removing ions, and splitting complexes.
+
+Typical usage example:
+    protein_obj = protein('structure.pdb')
+    protein_obj.remove_waters()
+    protein_obj.prune_ions()
+    protein_obj.write_pdb('output.pdb')
+"""
 
 #=======================================================================
 
@@ -26,8 +38,26 @@ ions = ["K+","Cl-","CL-","Na+","Mg+"]
 # main classes coding
 
 class pdb_atom:
-	"""
-
+	"""Represents a single atom from a PDB structure file.
+	
+	This class stores all relevant atomic properties read from a PDB file including
+	coordinates, residue information, and chemical properties.
+	
+	Attributes:
+		name (str): Atom name/identifier.
+		Type (str): Atom type designation.
+		element (str): Chemical element symbol.
+		ptype (str): PDB atom type designation.
+		xcoord (float): X-coordinate in Angstroms.
+		ycoord (float): Y-coordinate in Angstroms.
+		zcoord (float): Z-coordinate in Angstroms.
+		num (int): Atom number/index.
+		resNum (int): Residue number this atom belongs to.
+		chain_t (str): Chain identifier.
+		resTyp (str): Residue type/name.
+		charge (float): Atomic charge.
+		occ (float): Occupancy from PDB file.
+		bfactor (float): B-factor/temperature factor.
 	"""
 	def __init__(self):
 		self.name      = ''
@@ -47,6 +77,27 @@ class pdb_atom:
 		self.bfactor   = 0
 
 class residue:
+	"""Represents a single amino acid residue in a protein structure.
+	
+	This class organizes atoms that belong to a single residue, including the
+	backbone atoms and side chain atoms, along with properties like charge and
+	hydrogen count.
+	
+	Attributes:
+		name (str): Residue identifier (e.g., 'ALA15').
+		typ (str): Residue type/name (e.g., 'ALA').
+		num (int): Residue sequence number.
+		alfaC (pdb_atom): Alpha carbon atom.
+		Nitrogen (pdb_atom): Backbone nitrogen atom.
+		carb (pdb_atom): Backbone carbon atom.
+		oxygen (pdb_atom): Backbone oxygen atom.
+		carbB (pdb_atom): Beta carbon atom (side chain start).
+		r_atoms (list): All ordered atoms in residue.
+		atomsNum (list): List of atom numbers belonging to this residue.
+		hydrogen (int): Count of hydrogen atoms in residue.
+		charge (float): Total charge of the residue.
+		side_chain (list): Side chain atoms.
+	"""
 
 	def __init__(self):
 
@@ -67,6 +118,11 @@ class residue:
 		self.side_chain  = []
 
 	def reorg(self):
+		"""Reorganize atoms into backbone-first, then side-chain order.
+		
+		Populates r_atoms list with backbone atoms (N, CA, C, O, CB) followed
+		by all side chain atoms in a consistent order suitable for analysis.
+		"""
 
 		self.r_atoms.append(self.Nitrogen)
 		self.r_atoms.append(self.alfaC)
@@ -79,8 +135,34 @@ class residue:
 			#print(self.r_atoms[i].ptype)
 
 class protein:
+	"""Represents a protein structure parsed from a PDB (Protein Data Bank) file.
+	
+	This class handles reading PDB files, organizing atoms into residues, calculating
+	geometric properties (center, bounding box), and provides methods for structure
+	manipulation including water removal, ion pruning, charge assignment, and file output.
+	
+	Attributes:
+		name (str): Path to the PDB file.
+		chain (list): List of residue objects.
+		resN (int): Number of residues in the chain.
+		atoms (list): All pdb_atom objects in the structure.
+		total_charge (float): Total charge of the protein.
+		waters (list): Water molecule residues.
+		up_vertice (list): Maximum coordinate box corner [x, y, z].
+		down_vertice (list): Minimum coordinate box corner [x, y, z].
+		protein_center (list): Geometric center of protein [x, y, z].
+	"""
 
 	def __init__(self,name,reorg=False):
+		"""Initialize protein object and parse PDB file.
+		
+		Reads a PDB file and populates atomic and residue data structures.
+		Calculates bounding box and geometric center of the structure.
+		
+		Args:
+			name (str): Path to the PDB file to parse.
+			reorg (bool, optional): Whether to reorganize atoms. Defaults to False.
+		"""
 		self.name           = name
 		self.chain          = []
 		self.resN           = 0
@@ -220,11 +302,21 @@ class protein:
 	#-------------------------------------------------------------------	
 	
 	def remove_atom(self,i):
+		"""Remove a single atom by index.
+		
+		Args:
+			i (int): Index of the atom to remove from the atoms list.
+		"""
 		del self.atoms[i]		
 		
 	#-------------------------------------------------------------------
 	
 	def remove_residue(self,i):
+		"""Remove a residue and all its atoms by residue index.
+		
+		Args:
+			i (int): Index of the residue to remove from the chain list.
+		"""
 		
 		k=0
 		while not k == len(self.atoms):
@@ -236,6 +328,11 @@ class protein:
 	#-------------------------------------------------------------------
 
 	def prune_pdb(self):
+		"""Remove atoms with alternate locations (B records) from structure.
+		
+		Scans atoms for residue types starting with 'B' (indicating alternate
+		conformations) and removes them.
+		"""
 		a = []
 		for i in range(len(self.atoms)):
 			if self.atoms[i].resTyp[0]=="B":
@@ -247,6 +344,16 @@ class protein:
 	#-------------------------------------------------------------------
 	
 	def prune_water(self,radius,res):
+		"""Remove water molecules beyond a specified distance threshold.
+		
+		Identifies water molecules (HOH/WAT/SOL) that are beyond the specified
+		radius from a reference point (protein center or specific residue) and
+		removes them along with their atoms.
+		
+		Args:
+			radius (float): Distance cutoff in Angstroms.
+			res (int): Residue index for reference point (0 = protein center).
+		"""
 		reference = [self.protein_center[0],self.protein_center[1],self.protein_center[2]]
 		if res > 0:
 			reference[0] = self.atoms[self.chain[res-1].atomsNum[0]].xcoord
@@ -280,6 +387,11 @@ class protein:
 	#-------------------------------------------------------------------
 	
 	def prune_ions(self):
+		"""Remove all ionic species from the structure.
+		
+		Identifies and removes all atoms with residue types matching known ions
+		(K+, Cl-, Na+, Mg+) from the structure.
+		"""
 		ions_rm    = []
 		for i in range(len(self.atoms)):
 			if self.atoms[i].resTyp in ions:
@@ -289,8 +401,16 @@ class protein:
 			del self.atoms[i]
 							
 	#-------------------------------------------------------------------
-		
+						
 	def split_complex(self,lign):
+		"""Extract and save a ligand/component as a separate PDB file.
+		
+		Separates a specific residue type from the protein structure and writes
+		it to a new PDB file with '_lig.pdb' suffix.
+		
+		Args:
+			lign (str): Three-letter residue code of ligand to extract (e.g., 'ATP').
+		"""
 		lig = []
 		atoms_swap = []
 		a   = []
@@ -314,6 +434,11 @@ class protein:
 		pdb.close()
 
 	def remove_waters(self):
+		"""Remove all water molecules from the structure.
+		
+		Identifies water residues (WAT, HOH, SOL) and removes them from both
+		the atoms and chain lists.
+		"""
 		a = []
 		for i in range(len(self.atoms)):
 			if self.atoms[i].resTyp=="WAT" or self.atoms[i].resTyp=="HOH" or self.atoms[i].resTyp=="SOL":
@@ -325,6 +450,12 @@ class protein:
 
 
 	def charge_res(self):
+		"""Assign formal charges to residues based on hydrogen count.
+		
+		Determines protonation state and formal charge of ionizable residues
+		(ASP, GLU, LYS, ARG, HIS, CYS) based on their hydrogen atom count.
+		Accounts for terminal residue special cases.
+		"""
 
 		for i in range(len(self.chain)):
 
@@ -445,6 +576,11 @@ class protein:
 
 
 	def write_xyz(self):
+		"""Write structure to XYZ format file.
+		
+		Exports atomic coordinates in extended XYZ format (element, x, y, z).
+		Output file is named with .xyz extension based on input pdb filename.
+		"""
 
 		input_text = '{0} \n \n'.format(len(self.atoms))
 		xyz=open(self.name[:-4] +'.xyz','w')
@@ -460,6 +596,14 @@ class protein:
 		xyz.close()
 
 	def write_pdb(self,filename):
+		"""Write structure to PDB format file.
+		
+		Exports the protein structure to a standard PDB format file with proper
+		formatting for atom records including coordinates, occupancy, and B-factors.
+		
+		Args:
+			filename (str): Path to the output PDB file.
+		"""
 
 		input_text ="HEADER {0} pdb file\n".format(self.name)
 
@@ -477,6 +621,18 @@ class protein:
 				  mozyme = True  ,
 				  solvent =True  ,
 				  method ="PM7"  ):
+		"""Generate MOPAC input file for semi-empirical quantum chemistry.
+		
+		Creates a MOPAC .mop input file for quantum mechanical calculations with
+		specified method and solvation model. Supports MOZYME approximation for
+		large systems.
+		
+		Args:
+			mode (str, optional): Calculation mode. Defaults to "SP" (single point).
+			mozyme (bool, optional): Enable MOZYME approximation. Defaults to True.
+			solvent (bool, optional): Include solvation (eps=78.4). Defaults to True.
+			method (str, optional): QM method (e.g., 'PM7', 'PM6'). Defaults to "PM7".
+		"""
 
 		sol  = ""
 		mozy = ""

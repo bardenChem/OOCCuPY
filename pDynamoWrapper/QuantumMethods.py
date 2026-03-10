@@ -1,6 +1,18 @@
  #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+QuantumMethods module - Quantum chemistry method interface and setup.
+
+This module provides the QuantumMethods class for configuring and applying
+various quantum chemistry methods to molecular systems. Supports semi-empirical
+methods (MOPAC, DFTB), ab initio methods (HF, DFT), external QM packages (ORCA),
+and pySCF interfaces. Enables QM/MM hybrid simulations with flexible QC region
+definition.
+
+Authors: Igor Barden Grillo, contributors
+"""
+
 #FILE = Analysis.py
 
 #--------------------------------------------------------------
@@ -22,13 +34,32 @@ from .MopacQCMMinput import MopacQCMMinput
 import pyscf
 #==============================================================
 class QuantumMethods:
-	'''
-	Classe to set up quantum chemical method to the system.
-	'''	
+	"""Interface for setting up quantum chemistry methods on molecular systems.
+	
+	Configures and applies various QM methods including semi-empirical (AM1, RM1),
+	ab initio (HF, DFT), external packages (ORCA), and pySCF. Supports QM/MM hybrid
+	simulations with automatic QC region extraction and charge balancing.
+	
+	Attributes:
+		methodClass (str): QM method class (SMO, HF, DFT, ORCA, DFTB, MOPAC, pySCF).
+		Hybrid (bool): Whether QM/MM hybrid setup is used.
+		selection (Selection): Atom selection for QM region.
+		system (System): The molecular system with QM methods defined.
+		qcModel (QCModel): The quantum chemistry model object.
+		converger (SCFConverger): SCF convergence settings.
+		pars (dict): Method parameters.
+	"""	
 	def __init__(self,_parameters):
-		'''
-		Default constructor
-		'''
+		"""Initialize QuantumMethods with configuration parameters.
+		
+		Args:
+			_parameters (dict): Configuration including:
+				- active_system: Molecular system
+				- method_class: QM method class
+				- region: QC region atom selection
+				- QCcharge, multiplicity: Electronic state
+				- Other method-specific parameters
+		"""
 		self.methodClass 	= "SMO" #  SMO, HF, DFT, ORCA, DFTB, MOPAC and PYSCF
 		self.Hybrid  		= False  
 		self.selection      = [] 
@@ -76,8 +107,11 @@ class QuantumMethods:
 
 	#--------------------------------------------------
 	def Check_Parameters(self,_parameters):
-		'''
-		'''
+		"""Validate and set default values for QM parameters.
+		
+		Args:
+			_parameters (dict): User-provided parameters to validate and merge.
+		"""
 		self.pars = {
 			"method_class":"SMO",
 			"region":None,
@@ -101,8 +135,11 @@ class QuantumMethods:
 
 	#------------------------------------------------------
 	def Set_QC_System(self):
-		'''
-		'''
+		"""Configure and apply the selected QC method to the system.
+		
+		Routes to appropriate method setup based on methodClass.
+		Supports SMO (semi-empirical), pySCF, ab initio DFT, and ORCA.
+		"""
 		if   self.methodClass == "SMO":     self.Set_SMO_internal()
 		elif self.methodClass == "pySCF":   self.Set_pySCF() 
 		elif self.methodClass == "abinitio":self.Set_Abinitio()
@@ -110,8 +147,11 @@ class QuantumMethods:
 
 	#------------------------------------------------------
 	def Set_SMO_internal(self):
-		'''
-		'''
+		"""Set up semi-empirical QC model using MNDO Hamiltonian.
+		
+		Configures MNDO-based quantum chemistry (AM1, RM1, etc.) with
+		specified convergence criteria and optional QM/MM hybrid setup.
+		"""
 		NBmodel             = self.system.nbModel
 		self.system.nbModel = None
 		self.qcModel = QCModelMNDO.WithOptions( hamiltonian = self.pars["Hamiltonian"],
@@ -127,8 +167,11 @@ class QuantumMethods:
 
 	#--------------------------------------------------------
 	def Set_pySCF(self):
-		'''
-		'''
+		"""Set up pySCF quantum chemistry interface.
+		
+		Configures pySCF with specified functional, orbital basis, and
+		DIIS acceleration. Enables both pure QC and QM/MM calculations.
+		"""
 		NBmodel = NBModelPySCF.WithDefaults( )			
 		qcModel = QCModelPySCF.WithOptions( deleteJobFiles = False       ,
 											functional     = self.pars["functional"],
@@ -147,8 +190,11 @@ class QuantumMethods:
 
 	#--------------------------------------------------------
 	def Set_Abinitio(self):
-		'''
-		'''
+		"""Set up ab initio DFT quantum chemistry method.
+		
+		Configures density functional theory with specified functional,
+		orbital basis, and grid integrator for use in simulations.
+		"""
 		NBmodel             = self.system.nbModel
 		self.system.nbModel = None
 
@@ -171,8 +217,11 @@ class QuantumMethods:
 
 	#.................................................................................
 	def Set_ORCA(self):
-		'''
-		'''
+		"""Set up ORCA external quantum chemistry interface.
+		
+		Configures ORCA for single-point and geometry optimization calculations
+		with specified method, basis, and output keywords.
+		"""
 		options = "\n% output\n"
 		options += "print [ p_mos ] 1\n"
 		options += "print [ p_overlap ] 5\n"
@@ -200,16 +249,22 @@ class QuantumMethods:
 			         
 	#----------------------------------------------------------------------------
 	def Export_QC_System(self,baseName = None):
-		'''
-		'''		
+		"""Export the QC system to PDB and PKL files.
+		
+		Args:
+			baseName (str): Base path for output files. Default: current directory
+		"""		
 		if baseName == None: baseName = os.getcwd()
 		self.qcSystem = PruneByAtom(self.system,self.selection)
 		ExportSystem( os.path.join( baseName,"qcSystem.pdb"), self.qcSystem ) 
 		ExportSystem( os.path.join( baseName,"qcSystem.pkl"), self.qcSystem )
 	#----------------------------------------------------------------------------
 	def Set_Converger(self):
-		'''
-		'''
+		"""Configure SCF convergence criteria based on convergence level.
+		
+		Sets energy tolerance, density tolerance, and maximum iterations
+		based on the convergence level (Very_Loose, Loose, standard, Tight, Very_Tight).
+		"""
 		EnergyTolerance  = 3.0e-4
 		DensityTolerance = 1.0e-8
 		MaxIterations    = 1000 
@@ -240,20 +295,25 @@ class QuantumMethods:
 												  	   maximumIterations = MaxIterations   )
 	#-------------------------------------------------------------------
 	def GetQCCharge(self,_system):
-		'''
-		'''
+		"""Calculate total charge of a molecular system.
+		
+		Args:
+			_system (System): System to calculate charge for.
+			
+		Returns:
+			int: Total charge as integer.
+		"""
 		qc_charge=0.0
 		mmCharges = _system.mmState.charges
 		for i in range( len(mmCharges) ): qc_charge += mmCharges[i]			
 		return( round(qc_charge) )
 	#--------------------------------------------------------------------
 	def Change_QC_Region(self):
-		'''
-		Redefine QC selection from a given atomic coordinates with a certain radius
-		Parameters:
-			_centerAtom:
-			_radius    :
-		'''
+		"""Redefine QC selection from atomic coordinates with specified radius.
+		
+		Dynamically selects QM region based on center atom coordinates
+		and a cutoff radius, enabling adaptive QC region definition.
+		"""
 		qcModel = None
 		if type(self.pars["center_atom"]) == list:  
 			_centerAtom = [ self.pars["center_atom"][0],

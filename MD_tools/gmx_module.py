@@ -1,20 +1,41 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# gmx_module.py
+"""GROMACS input file generation and protein preparation module.
 
+This module provides utilities for creating GROMACS molecular dynamics
+input files (.mdp) with various simulation stages (energy minimization,
+NVT equilibration, NPT equilibration, production MD) and a complete protein
+preparation workflow using the GROMACS software suite.
 
-#load modules
+Classes:
+    min_prot: Complete workflow for protein system setup and MD simulation.
 
-import os 
-from pdb_class import*
-from xyz_class import*
+Functions:
+    gromacs_inp: Generate default GROMACS .mdp input files for standard MD protocols.
+
+Authors:
+    Igor Barden Grillo, contributors
+"""
+
+import os
+from pdb_class import *
+from xyz_class import *
+
 
 def gromacs_inp():
-	'''Function Doc
-	Put options to change basic DM runs.
-		time in ns 
-		temperature in K
-	'''
+    """Generate GROMACS .mdp input files for standard MD simulation stages.
+    
+    Creates four GROMACS parameter files for typical MD workflows:
+    - em.mdp: Energy minimization with steepest descent integrator
+    - nvt.mdp: NVT equilibration with constant temperature (300 K)
+    - npt.mdp: NPT equilibration with constant pressure (1 bar)
+    - md.mdp: Production MD with 10 ns simulation time
+    
+    Notes:
+        - Time parameters in ps (picoseconds)
+        - Temperature in Kelvin
+        - All files written to current directory
+    """
 	
 	em_file    = open("em.mdp",'w')		
 	nvt_file   = open("nvt.mdp",'w')
@@ -181,55 +202,92 @@ def gromacs_inp():
 	
 
 class min_prot:
+    """Complete workflow for protein preparation and MD simulation with GROMACS.
+    
+    This class automates the entire process of protein system setup and simulation:
+    topology generation, solvation, ion addition, energy minimization, equilibration,
+    and production MD. Uses GROMACS command-line tools via system calls.
+    
+    Attributes:
+        pdb_code (str): Input PDB file name.
+        protein (str): Protein name extracted from pdb_code (without extension).
+        net_charge (int): Net charge of the protein system. Default: 0
+    """
 
-	def __init__(self,
-				 pdb_code):
+    def __init__(self, pdb_code):
+        """Initialize protein preparation workflow.
+        
+        Args:
+            pdb_code (str): Path or name of input PDB file.
+        """
+        self.pdb_code   = pdb_code
+        self.net_charge = 0
+        self.protein    = pdb_code[:-4]		
 
-		self.pdb_code   = pdb_code
-		self.net_charge = 0
-		self.protein    = pdb_code[:-4]		
+    def top_init(self):
+        """Initialize GROMACS topology from PDB file.
+        
+        Runs gmx pdb2gmx to generate molecular topology and parameter files
+        using TIP3P water model. Selects force field option 5 automatically.
+        
+        Returns:
+            None (generates _P.pdb and topol.top files)
+        """
+        text_to_run = "/usr/bin/gmx" + " pdb2gmx -ignh -f " + self.protein + ".pdb -o " + self.protein + "_P.pdb -water tip3p << EOF \n"
+        text_to_run += "5 \n"
+        text_to_run += "EOF"
 
-	def top_init(self):
+        os.system(text_to_run)
 
-		text_to_run = "/usr/bin/gmx" + " pdb2gmx -ignh -f " + self.protein + ".pdb -o " + self.protein + "_P.pdb -water tip3p << EOF \n"
-		text_to_run += "5 \n"
-		text_to_run += "EOF"
+    def solvate(self):
+        """Add water molecules and neutralize protein charge.
+        
+        Performs system box setup with 1.0 Angstrom padding, solvates with
+        SPC216 water model, and calculates net system charge for subsequent
+        ion addition.
+        
+        Returns:
+            None (generates _NB.pdb and _solv.pdb files, updates topol.top)
+        """
+        text_to_run = "/usr/bin/gmx" + " editconf -f " + self.protein + "_P.pdb -o " + self.protein + "_NB.pdb -c -d 1.0 -bt cubic"
 
-		os.system(text_to_run)
+        os.system(text_to_run)
 
-	def solvate(self):
+        text_to_run = "/usr/bin/gmx" + " solvate -cp " + self.protein + "_NB.pdb -cs spc216.gro -o " + self.protein + "_solv.pdb -p topol.top"
 
-		text_to_run = "/usr/bin/gmx" + " editconf -f " + self.protein + "_P.pdb -o " + self.protein +"_NB.pdb -c -d 1.0 -bt cubic"
+        os.system(text_to_run)
 
-		os.system(text_to_run)
+        topol_file = open("topol.top", 'r')
+        for line in topol_file:
+            line2 = line.split()
+            if len(line2) == 8:
+                if line2[1] == "residue":
+                    if line2[7] == "+1.0":
+                        self.net_charge += 1
+                    elif line2[7] == "+2.0":
+                        self.net_charge += 2
+                    elif line2[7] == "-1.0":
+                        self.net_charge -= 1
+                    elif line2[7] == "-2.0":
+                        self.net_charge -= 2		
 
-		text_to_run = "/usr/bin/gmx" + " solvate -cp " +  self.protein + "_NB.pdb -cs spc216.gro -o " + self.protein + "_solv.pdb -p topol.top"
+    def add_ions(self):
+        """Add counter ions to neutralize system charge.
+        
+        Uses gmx genion to add NA+ and CL- ions to neutralize the system
+        charge determined from solvate() step. Runs energy minimization
+        before ion placement.
+        
+        Returns:
+            None (generates _solv_ions.pdb file)
+        """
+        NN = 0
+        NP = 0
 
-		os.system(text_to_run)
-
-		topol_file = open("topol.top",'r')
-		for line in topol_file:
-			line2 = line.split()			
-			if len(line2) == 8:
-				if line2[1] == "residue":
-					if line2[7] == "+1.0":
-						self.net_charge +=1
-					elif line2[7] == "+2.0":
-						self.net_charge +=2
-					elif line2[7] == "-1.0":
-						self.net_charge -=1
-					elif line2[7] == "-2.0":
-						self.net_charge -=2		
-
-	def add_ions(self):
-
-		NN = 0
-		NP = 0
-
-		if self.net_charge > 0:
-			NN = self.net_charge
-		elif self.net_charge < 0:
-			NP = self.net_charge
+        if self.net_charge > 0:
+            NN = self.net_charge
+        elif self.net_charge < 0:
+            NP = self.net_charge
 
 		mdp_file =  "integrator = steep \n"
 		mdp_file += "emtol = 1000.0 \n"
@@ -255,9 +313,16 @@ class min_prot:
 		text_to_run = "/usr/bin/gmx" + " genion -s ions.tpr -o " + self.protein + "_solv_ions.pdb -p topol.top -pname NA -nname CL -nn {0} -np {1}".format(NN,NP)
 		os.system(text_to_run)
 
-	def Minimization(self):	
-
-		mdp_file =  "integrator = steep \n"
+    def Minimization(self):
+        """Run energy minimization on solvated system.
+        
+        Performs steepest descent minimization (50,000 steps) on the
+        solvated and ion-added system to remove steric clashes.
+        
+        Returns:
+            None (generates em.gro file)
+        """
+        mdp_file = "integrator = steep \n"
 		mdp_file += "emtol = 1000.0 \n"
 		mdp_file += "emstep = 0.0051 \n"
 		mdp_file += "nsteps = 50000 \n"		
@@ -279,7 +344,15 @@ class min_prot:
 		text_to_run = "/usr/bin/gmx" + " mdrun -v -deffnm em"
 		os.system(text_to_run)		
 		
-	def write_minStruct(self):
+    def write_minStruct(self):
+        """Convert minimized structure to PDB and XYZ formats.
+        
+        Extracts non-solvent atoms from minimized trajectory and writes
+        to both PDB and XYZ file formats for visualization.
+        
+        Returns:
+            None (generates _min.pdb and _min.xyz files)
+        """
 		
 		emgro = open("em.gro",'r')
 
@@ -333,16 +406,31 @@ class min_prot:
 		xyz_file.write(xyz_text)
 		xyz_file.close()
 
-	def rewrite_pdb(self):
+    def rewrite_pdb(self):
+        """Reorganize and rewrite PDB file with residue definitions.
+        
+        Parses minimized PDB file, reorganizes residue definitions,
+        and writes reorganized structure.
+        
+        Returns:
+            None (generates _\.pdb file)
+        """
+        a = protein(self.protein)
+        a.pdb_parse(self.protein + "_min.pdb")
+        a.residue_def(reorg=True)
+        a.write_pdb(self.protein + "_.pdb")
 
-		a = protein(self.protein)
-		a.pdb_parse(self.protein+"_min.pdb")
-		a.residue_def(reorg=True)
-		a.write_pdb(self.protein+"_.pdb")		
-
-	def equilibration(self):
-
-		equi_file = open("nvt.mdp",'w')
+    def equilibration(self):
+        """Perform NVT and NPT equilibration stages.
+        
+        Runs equilibration in two phases:
+        1. NVT (constant volume) for 100 ps at 300 K
+        2. NPT (constant pressure) for 100 ps at 300 K and 1 bar
+        
+        Returns:
+            None (generates nvt.gro and npt.gro trajectory files)
+        """
+        equi_file = open("nvt.mdp", 'w')
 		
 		equi_text = " define		= -DPOSRES	; position restrain the protein\n"
 		
@@ -453,7 +541,16 @@ class min_prot:
 		text_to_run = "/usr/bin/gmx" + " mdrun  -deffnm npt"
 		os.system(text_to_run)
 		
-	def production(self):
+    def production(self):
+        """Run production molecular dynamics simulation.
+        
+        Executes 10 ns production MD at 300 K and 1 bar constant pressure.
+        Generates trajectory files with 10 ps output frequency and final
+        PDB structure.
+        
+        Returns:
+            None (generates md_0_1.trr, md_0_1.tpr, output.pdb)
+        """
 		
 		equi_file3 = open("md.mdp",'w')
 				 
@@ -516,15 +613,21 @@ class min_prot:
 		text_to_run = "/usr/bin/gmx" + " trjconv -f  md_0_1.trr -s md_0_1.tpr -pbc mol -dt 10 -o output.pdb"
 		os.system(text_to_run)
 		
-	def run(self):
-		self.top_init()
-		self.solvate()
-		self.add_ions()
-		self.Minimization()
-		self.equilibration()
-		self.production()
-		#self.write_minStruct()
-		#self.rewrite_pdb()	
+    def run(self):
+        """Execute complete protein preparation and MD simulation workflow.
+        
+        Orchestrates all steps: topology generation, solvation, ion addition,
+        energy minimization, NVT/NPT equilibration, and production MD.
+        
+        Returns:
+            None (generates complete MD simulation output)
+        """
+        self.top_init()
+        self.solvate()
+        self.add_ions()
+        self.Minimization()
+        self.equilibration()
+        self.production()	
 		
 		os.system("/usr/bin/pymol "+self.protein+"_min.xyz")
 

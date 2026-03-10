@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Energy Analysis and Visualization Module.
+
+This module contains tools for analyzing and plotting energy data from molecular
+simulations. It supports 1D and 2D energy surfaces, multiple calculation methods,
+and various energy plot types including potentials, free energies, and PMF surfaces.
+
+Classes:
+    EnergyAnalysis: Central class for energy data management and visualization.
+
+Supported plot types:
+    - 1D/2D: Standard potential energy surfaces.
+    - WHAM1D/WHAM2D: PMF from WHAM analysis.
+    - FE1D/FE2D: Free energy surfaces.
+"""
 
 #FILE = Analysis.py
 
@@ -25,14 +39,30 @@ from pSimulation               import *
 
 #*********************************************************************
 class EnergyAnalysis:
-	'''
-	Centralize all plot functions for energy alaysis, one and two-dimensional
-	'''
+	"""Manage and visualize energy data from molecular simulations.
+	
+	This class handles reading, storing, and plotting 1D/2D energy surfaces from
+	simulation data. It supports multiple output formats and can generate contour
+	plots, free energy curves, and PMF surfaces using WHAM data.
+	
+	Attributes:
+		energies1D (list): 1D energy values.
+		energiesMatrix (ndarray): 2D energy grid.
+		RC1, RC2 (list): Reaction coordinate values.
+		xlen, ylen (int): Dimensions of energy grid.
+		Type (str): Plot type identifier.
+		dimensions (int): Number of coordinates (1 or 2).
+	"""
 	#------------------------------------------------
 	def __init__(self, x, y, _type="1D"):
-		'''
-		Desfault constructor initializing the atributes.
-		'''
+		"""Initialize EnergyAnalysis object.
+		
+		Args:
+			x (int): Number of steps in first coordinate.
+			y (int): Number of steps in second coordinate (0 for 1D).
+			_type (str, optional): Plot type. Options: '1D', '2D', 'WHAM1D', 'WHAM2D',
+			    'FE1D', 'FE2D', 'PMF', etc. Defaults to '1D'.
+		"""
 		self.energies1D 	= []						  # array for energy values from one-dimension coordinate simulation 
 		self.energiesMatrix = np.zeros( (y, x), dtype=float ) # array for energy values from two-dimension coordinate simulation
 		self.multiple1Dplot = []							  # List of one-dimension energy arrays, each one for a different energy method
@@ -58,9 +88,18 @@ class EnergyAnalysis:
 		
 	#================================================
 	def ReadLog(self, _fileName):
-		'''
-		Parse energy logs.
-		'''
+		"""Parse energy data from log files.
+		
+		Reads and processes energy log files in various formats (1D, 2D, WHAM, FE).
+		Automatically detects and handles different data organization schemes.
+		
+		Args:
+			_fileName (str): Path to energy log file.
+			
+		Sets:
+			RC1, RC2 (list): Reaction coordinate values from log.
+			energies1D, energiesMatrix: Parsed energy data.
+		"""
 		self.baseName = _fileName[:-4]
 		reading       = open(_fileName,'r')
 		i = 0 
@@ -194,8 +233,16 @@ class EnergyAnalysis:
 		self.nplots1D += 1	
 	#================================================
 	def ReadLogs(self,_folder):
-		'''
-		'''
+		"""Read multiple energy log files from a directory.
+		
+		Collects and processes multiple log files from a folder for batch processing.
+		
+		Args:
+			_folder (str): Path to folder containing log files.
+			
+		Note:
+			Log files should have .log extension.
+		"""
 		_path = os.path.join(_folder,"")
 		logs = glob.glob( _path + "*.log" )
 		for log in logs:

@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+ReactionCoordinate module - Definition and management of reaction coordinates.
+
+This module provides the ReactionCoordinate class for defining various types
+of reaction coordinates (distance, angle, dihedral, etc.) used in scanned
+simulations, umbrella sampling, and constraint-based calculations.
+
+Authors: Igor Barden Grillo, contributors
+"""
 
 #FILE = ReactionCoordinate.py
 
@@ -9,18 +18,33 @@ from .commonFunctions import *
 from pMolecule import *
 #*****************************************************************************
 class ReactionCoordinate:
-	'''
-	Class to set up and store reaction coordinate information
-	'''
+	"""Define and manage reaction coordinates for constrained simulations.
+	
+	Handles definition of various reaction coordinate types (distance, angle,
+	dihedral, multiple distance, etc.) with optional mass-weighted constraints.
+	Supports automatic labeling from system structure and parameter definition
+	for scanned and restricted simulations.
+	
+	Attributes:
+		atomsSel (list): Original atom selection.
+		atoms (list): Processed atom indices.
+		nAtoms (int): Number of atoms in coordinate definition.
+		Type (str): Coordinate type (Distance, Angle, Dihedral, etc.)
+		increment (float): Scan increment size.
+		minimumD (float): Initial/minimum value of coordinate.
+		label (str): Human-readable coordinate label.
+		label2 (str): Alternative coordinate label.
+		weight13, weight31 (float): Weights for multiple distance coordinate.
+	"""
 	def __init__(self,_atoms,_massConstraint,_type="Distance"):
-		'''
-		Types:
-			distance
-			multipleDistance
-			Angle
-			Dihedral
-			Thether
-		'''
+		"""Initialize ReactionCoordinate object.
+		
+		Args:
+			_atoms (list): Atom indices or patterns defining coordinate.
+			_massConstraint (bool): Apply mass-weighted constraint.
+			_type (str): Coordinate type. Options: Distance, Angle, Dihedral,
+				multipleDistance, Tether. Default: "Distance"
+		"""
 		self.atomsSel	    = _atoms
 		self.atoms          = []
 		self.nAtoms 		= len(_atoms)
@@ -44,9 +68,14 @@ class ReactionCoordinate:
 				self.Type = "multipleDistance"
 	#==========================================================================================================
 	def GetRCLabel(self,_molecule):
-		'''
-		Get the names of atoms and its residues from the molecule sequence object
-		'''
+		"""Generate human-readable labels for the reaction coordinate.
+		
+		Extracts atom names and residue information from the molecular system
+		to create informative labels for plots and output files.
+		
+		Args:
+			_molecule (System): Molecular system for label extraction.
+		"""
 		sequence = getattr( _molecule, "sequence", None )		
 		if self.Type == "multipleDistance":
 			A1 = _molecule.atoms.items[ self.atoms[0] ]
@@ -94,9 +123,15 @@ class ReactionCoordinate:
 			else: self.label =  A1.label + "-" + A2.label +"-" + A3.label +"-"+A4.label + "$\AA$"
 	#==================================================================================================
 	def SetInformation(self,_molecule,_dincre,_dminimum=None,_sigma_pk1_pk3=None,_sigma_pk3_pk1=None):
-		'''
-		Define the values required for the reaction coordinate		
-		'''	
+		"""Define coordinate values and scanning parameters.
+		
+		Args:
+			_molecule (System): Molecular system for coordinate calculation.
+			_dincre (float): Scan increment size.
+			_dminimum (float): Initial coordinate value. If None, calculated.
+			_sigma_pk1_pk3 (float): Weight for first atom pair (multiple distance).
+			_sigma_pk3_pk1 (float): Weight for second atom pair (multiple distance).
+		"""	
 		self.increment = _dincre		
 		set_pars = True
 		if not _dminimum == None:  
@@ -131,9 +166,7 @@ class ReactionCoordinate:
 			elif self.Type == "Dihedral": self.minimumD = _molecule.coordinates3.Dihedral(self.atoms[0],self.atoms[1],self.atoms[2],self.atoms[3])
 	#==================================================================================================
 	def Print(self):
-		'''
-		Printing information to the screen.
-		'''
+		"""Print reaction coordinate information to console."""
 		print( "Printing reaction coordinate information:")
 		print( "\tAtoms Indices: {}".format(self.atoms) )
 		print( "\tLabel: {}".format(self.label) )
