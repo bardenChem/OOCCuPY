@@ -45,7 +45,8 @@ class SCAN:
         forceC (list): Harmonic restraint force constants.
         nprocs (int): Number of parallel processors.
         adaptative (bool): Enable adaptive convergence adjustment.
-    \"\"\"\n    #---------------------------------------------------------------
+    """
+    #---------------------------------------------------------------
     def __init__(self,_system,_baseFolder,_optimizer,ADAPTATIVE=False,RESTART=False):
         """Initialize SCAN object.
         
@@ -55,7 +56,7 @@ class SCAN:
             _optimizer (str): Geometry optimizer algorithm ('ConjugatedGradient', 'SteepestDescent').
             ADAPTATIVE (bool, optional): Enable adaptive convergence. Defaults to False.
             RESTART (bool, optional): Restart from previous scan. Defaults to False.
-        \"\"\"
+        """
         self.parameters         = None 
         
         self.baseName           = _baseFolder
@@ -107,7 +108,7 @@ class SCAN:
                 - 'NmaxThreads': Number of parallel threads.
                 - 'save_format': Coordinate file format (.dcd, .ptGeo, etc.).
                 - 'force_constants': List containing [FC1, FC2] for restraints.
-        \"\"\"
+        """
         self.parameters = _parameters
         self.parameters["system_name"]         = self.molecule.label
         self.parameters["initial_coordinates"] = self.molecule.coordinates3 
@@ -141,7 +142,7 @@ class SCAN:
         Note:
             Convergence parameters are adjusted based on energy delta from reference.
             Force constants may also be reduced in high-energy regions.
-        \"\"\"
+        """
         if not self.energiesMatrix[_xframe,_yframe] == 0.0:
             delta = self.energiesMatrix[_xframe,_yframe]  
             if delta < 150.0:
@@ -204,7 +205,7 @@ class SCAN:
             DMINIMUM: Minimum distance/angle value.
             multipleDistance: Flag for 3-atom distance constraints.
             dihedral: Flag for dihedral constraints.
-        \"\"\"
+        """
         #------------------------------------------------------------
         _RC.Print()
         ndim = self.nDim # temp var to hold the index of the curren dim
@@ -236,7 +237,7 @@ class SCAN:
             
         Note:
             Handles both simple and multiple-distance constraints, as well as dihedral angles.
-        \"\"\"
+        """
         if not os.path.exists( os.path.join( self.baseName, self.trajFolder +".ptGeo" ) ):  os.makedirs(  os.path.join( self.baseName,self.trajFolder +".ptGeo"  ) )
 
         text_line = "{0:>3s} {1:>15s} {2:>15s}".format('x','RC1','Energy' )
@@ -263,7 +264,7 @@ class SCAN:
         Note:
             This method is automatically called by Run1DScan() when appropriate.
             Structures are saved as pickled coordinate objects at each RC point.
-        \"\"\"
+        """
         #-------------------------------------------------------------------------
         #Setting some local vars to ease the notation in the pDynamo methods
         #----------------------------------
