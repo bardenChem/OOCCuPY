@@ -233,13 +233,17 @@ class SimulationSystem:
         #-----------------------------------------------------
         atomref = AtomSelection.FromAtomPattern(self.system, _centerAtom)
         core    = AtomSelection.Within(self.system,atomref,_radius)        
-        mobile  = AtomSelection.ByComponent(self.system,core)  
+        mobile  = AtomSelection.ByComponent(self.system,core)
+        mobile  = AtomSelection.ByBondedNeighbor(self.system,mobile,iterations=10) 
+        mobileSystem = PruneByAtom( self.system, mobile )
+        ExportSystem(self.baseName+"_mobile.pdb", mobileSystem)
         
         #-----------------------------------------------------
         newLabel= self.system.label + "_fixed"       
         #------------------------------------------------------        
         self.system.freeAtoms = mobile       
         self.system.label     = newLabel  
+        
     #=========================================================================
     def Set_QC_Method(self,_parameters,_DEBUG=False):
         """Define quantum chemistry method for QM/MM simulations.
