@@ -442,6 +442,27 @@ class EnergyAnalysis:
 		if SHOW: plt.show()	
 		plt.clf()
 		plt.close()
+	
+	#---------------------------------------------------------------------------------------
+	def Calulate_Kcat(self, energy_barrier, T=300, kT=0.593):
+		'''
+		Calculate kcat from the free energy barrier using Eyring equation
+		Parameters:
+			energy_barrier: Free energy barrier in kJ/mol
+			T: Temperature in Kelvin
+			kT: Boltzmann constant in kcal/mol
+		Returns:
+			kcat in s^-1
+		'''
+		R = 8.31446261815324 # J/(mol*K)
+		kB = 1.380649e-23 # J/K
+		h = 6.62607015e-34 # J*s
+		
+		prefactor = (kB * T) / h # in s^-1
+		exponent = - (energy_barrier ) / (R * T) # already is in kJ/mol, so no need to convert
+		kcat = prefactor * math.exp(exponent)
+		return kcat
+
 	#----------------------------------------------------------------------------------------
 	def Path_From_PES(self, in_point,fin_point,_path,_folder_dst,_system):
 		''''
@@ -495,6 +516,7 @@ class EnergyAnalysis:
 		
 		#---------------------------------------------------------------
 		if not os.path.exists( os.path.join(_folder_dst,"traj1d.ptGeo") ): os.makedirs( os.path.join(_folder_dst,"traj1d.ptGeo") )
+		kcats = []
 		new_idx = 0
 		for indx in range(len(pathx)):
 			pkl = _path + "/frame{}_{}.pkl".format(pathx[indx],pathy[indx])			
@@ -504,17 +526,28 @@ class EnergyAnalysis:
 			ExportSystem( pdb_file,_system,log=None)
 			shutil.copy(pkl,finalPath)
 			new_idx +=1
+			if indx > 0 and indx < (len(pathx)-1):
+				if (self.energies1D[indx] > (self.energies1D[indx-1] + 1.0) ) and \
+					(self.energies1D[indx] < (self.energies1D[indx+1]- 1.0 ) ):
+					print("Found potential barrier at frame {} with energy {}".format(indx, self.energies1D[indx] ) )
+					kcats.append( self.Calulate_Kcat( self.energies1D[indx] ) )
+					print("Calculated kcat for this barrier is: {} s^-1".format(kcats[-1]) )
+				else:
+					kcats.append(0.0)
+			else:
+				kcats.append(0.0)	
 
-			
+				
 		trajName = os.path.join( _folder_dst, "traj1d.dcd" )
 		trajpath = os.path.join( _folder_dst, "traj1d.ptGeo" )
 		try: Duplicate( trajpath, trajName, _system ) 
 		except: pass
 
-		log_text = "x Energy method\n"
+		log_text = "x Energy method Energy_kcal kcat \n"
 		new_log  = open( os.path.join(_folder_dst,"traj1D.log"), 'w' )
 		for i in range(len(self.energies1D)):
-			log_text += "{} {} {}\n".format(i,self.energies1D[i],"pickPath")
+			energy_kcal = self.energies1D[i] * 0.239006
+			log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
 		new_log.write(log_text)
 		self.Type = "1DRef"
 		self.Plot1D("Reaction Path frames (n)")

@@ -136,8 +136,6 @@ class SimulationSystem:
         """
         self = selfClass()
         parameters   = GromacsParameterFileReader.PathToParameters ( _topologyFile )
-        print(parameters)
-        input()
         self.system  = GromacsDefinitionsFileReader.PathToSystem   ( _topologyFile, parameters = parameters )
         self.system.coordinates3 = ImportCoordinates3              ( _coordinateFile )
         if self.system.symmetryParameters is not None: self.system.DefineNBModel ( NBModelCutOff.WithDefaults ( ) )

@@ -87,13 +87,13 @@ class EnergyRefinement:
 			self.fileLists.append(_trajFolder+".pkl")		
 		#----------------------------------------------------------------------
 		if self.ylen  == 0:
-			self.energiesArray = pymp.shared.array( (self.xlen) , dtype='float')
-			self.indexArrayX   = pymp.shared.array( (self.xlen) , dtype='uint8')
-			self.indexArrayY   = pymp.shared.array( (self.xlen) , dtype='uint8')
+			self.energiesArray 		= pymp.shared.array( (self.xlen) , dtype='float')
+			self.indexArrayX  		= pymp.shared.array( (self.xlen) , dtype='uint8')
+			self.indexArrayY   		= pymp.shared.array( (self.xlen) , dtype='uint8')
 		else:
-			self.energiesArray = pymp.shared.array( (self.xlen,self.ylen) , dtype='float')
-			self.indexArrayX   = pymp.shared.array( (self.xlen,self.ylen) , dtype='uint8')
-			self.indexArrayY   = pymp.shared.array( (self.xlen,self.ylen) , dtype='uint8')
+			self.energiesArray 		= pymp.shared.array( (self.xlen,self.ylen) , dtype='float')
+			self.indexArrayX   		= pymp.shared.array( (self.xlen,self.ylen) , dtype='uint8')
+			self.indexArrayY   		= pymp.shared.array( (self.xlen,self.ylen) , dtype='uint8')
 		self.SMOenergies   = None
 	
 	
@@ -134,12 +134,14 @@ class EnergyRefinement:
 						qcSystem.system.coordinates3 = ImportCoordinates3( self.fileLists[i], log=None )
 						lsFrames= GetFrameIndex(self.fileLists[i][:-4])						
 						if self.ylen > 0:
-							try:  self.energiesArray[ lsFrames[0], lsFrames[1] ]   = qcSystem.system.Energy(log=None)
+							try:  
+								self.energiesArray[ lsFrames[0], lsFrames[1] ]   = qcSystem.system.Energy(log=None)
 							except: self.energiesArray[ lsFrames[0], lsFrames[1] ] = self.energiesArray[0,0] + 1000
 							self.indexArrayX[ lsFrames[0], lsFrames[1] ] = lsFrames[0]
 							self.indexArrayY[ lsFrames[0], lsFrames[1] ] = lsFrames[1]							
 						else:
-							try: 	self.energiesArray[ lsFrames[0] ] = qcSystem.system.Energy(log=None)
+							try: 	
+								self.energiesArray[ lsFrames[0] ] = qcSystem.system.Energy(log=None)
 							except: self.energiesArray[ lsFrames[0] ] = self.energiesArray[0] + 1000
 							self.indexArrayX[ lsFrames[0] ] 		  = lsFrames[0]	
 				#-----------------------------------------
@@ -469,16 +471,21 @@ class EnergyRefinement:
 		Write calculate energies to file.
 		'''
 		if self.ylen > 0:
-			self.text += "x y Enrgy method\n"
+			self.text += "x y Enrgy Energy_kcal method\n"
 			for smo in self.methods:
 				for i in range(self.xlen):
 					for j in range(self.ylen):
-						self.text +="{} {} {} {}\n".format(self.indexArrayX[ i, j ],self.indexArrayY[ i,j ], self.SMOenergies[smo][i,j] - self.SMOenergies[smo][0,0], smo)
+						energy_kj = self.SMOenergies[smo][i,j]  -  self.SMOenergies[smo][0,0]
+						energy_kcal = energy_kj * 0.239006
+						self.text +="{} {} {} {}\n".format(self.indexArrayX[ i, j ],self.indexArrayY[ i,j ], energy_kj, energy_kcal, smo)
 		else:
-			self.text += "x y Enrgy method\n"
+			self.text += "x y Enrgy Energy_kcal method\n"
 			for smo in self.methods:
 				for i in range(self.xlen):
-					self.text +="{} {} {}\n".format(self.indexArrayX[i], self.SMOenergies[smo][i] - self.SMOenergies[smo][0], smo)
+					energy_kj = self.SMOenergies[smo][i]  -  self.SMOenergies[smo][0]
+					energy_kcal = energy_kj * 0.239006
+					self.text +="{} {} {} {}\n".format(self.indexArrayX[i], energy_kj, energy_kcal, smo)
+		
 		#--------------------------------------------------------------
 		_filename = os.path.join(self.baseName,"energy.log")
 		#----------------------------

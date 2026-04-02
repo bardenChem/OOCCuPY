@@ -86,6 +86,7 @@ class SCAN:
         self.saveFormat         = None
         self.trajFolder         = "ScanTraj"
         self.restart            = RESTART
+        self.DMAXIMUM           = [ 0.0, 0.0 ]                       # List with the Maximum distances for the reaction coordinates
                
         #------------------------------------------------------------------------  
         #set the parameters dict for the geometry search classes
@@ -217,10 +218,25 @@ class SCAN:
         self.sigma_a3_a1[ndim]      = _RC.weight31
         self.DMINIMUM[ndim]         = _RC.minimumD
         self.massConstraint         = _RC.massConstraint
+        self.DMAXIMUM[ndim]         = _RC.maximumD
 
 
         if len(_RC.atoms)   == 3: self.multipleDistance[ndim] = True
         elif len(_RC.atoms) == 4: self.dihedral = True
+    #==============================================================================================
+    def DefineSteps(self):
+        '''
+
+        '''
+        print("Defining steps for the scan...")
+        for i in range(self.nDim):
+            if self.multipleDistance[i]: 
+                 # For multiple distance RCs, the number of steps is determined by the range of the first distance component
+                self.nsteps[i] = int( abs(self.DMAXIMUM[i] / self.DINCREMENT[i]) ) + 1 
+            else:
+                # For simple distance or dihedral RCs, the number of steps is determined by the range of the RC    
+                self.nsteps[i] = int( abs(self.DMAXIMUM[i] / self.DINCREMENT[i]) ) + 1
+
     #===============================================================================================
     def Run1DScan(self,_nsteps):
         """Execute one-dimensional relaxed surface scan.
@@ -246,12 +262,14 @@ class SCAN:
         self.energiesMatrix      = pymp.shared.array( (_nsteps), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (_nsteps), dtype=float )
         self.nsteps[0] = _nsteps
+        if self.nsteps[0] == -1: self.DefineSteps() 
         if self.dihedral:  self.Run1DScanDihedral()
         else:
             if    self.multipleDistance[0]:  self.Run1DScanMultipleDistance()
-            else: self.Run1DScanSimpleDistance()        
-        for i in range(_nsteps):              
-            text_line =  "{0:3d} {1:15.8f} {2:15.8f}".format( i,self.reactionCoordinate1[i], self.energiesMatrix[i])
+            else: self.Run1DScanSimpleDistance()
+        for i in range(_nsteps):
+            kcal = self.energiesMatrix[i]/4.184              
+            text_line =  "{0:3d} {1:15.8f} {2:15.8f} {3:15.8f}".format( i,self.reactionCoordinate1[i], self.energiesMatrix[i], kcal)
             self.text += text_line+ '\n'
             
     #=================================================================================================
@@ -397,9 +415,15 @@ class SCAN:
 
         self.text += text_line+"\n"
         #------------------------------------------------------               
-            
-        self.nsteps[0] = X = _nsteps_x   
-        self.nsteps[1] = Y = _nsteps_y 
+
+        if _nsteps_x == -1: 
+            self.DefineSteps()
+        if _nsteps_y == -1: 
+            self.DefineSteps()
+        
+        X = self.nsteps[0] 
+        Y = self.nsteps[1]        
+
         self.energiesMatrix = pymp.shared.array( (X,Y), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (X,Y), dtype=float )   
         self.reactionCoordinate2 = pymp.shared.array( (X,Y), dtype=float )   
@@ -412,7 +436,8 @@ class SCAN:
             #------------------------------------
             for i in range(X):
                 for j in range(Y):
-                    text_line =  "{0:3d} {1:3d} {2:15.8f} {3:15.8f} {4:15.8f}".format( i,j,self.reactionCoordinate1[i,j], self.reactionCoordinate2[i,j], self.energiesMatrix[i,j])
+                    kcal = self.energiesMatrix[i,j]/4.184
+                    text_line =  "{0:3d} {1:3d} {2:15.8f} {3:15.8f} {4:15.8f} {5:15.8f}".format( i,j,self.reactionCoordinate1[i,j], self.reactionCoordinate2[i,j], self.energiesMatrix[i,j], kcal)
                     self.text += text_line+ '\n'
     #=============================================================================
     def Run2DSimpleDistance(self, X, Y ):

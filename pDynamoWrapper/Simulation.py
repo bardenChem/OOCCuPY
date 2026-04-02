@@ -174,7 +174,7 @@ class Simulation:
 			"RMS_growing_intial_string":None,
 			"reverse_rc1":"no",
 			"reverse_rc2":"no",
-			"contour_lines":15,
+			"contour_lines":18,
 			"fig_size":[7,5],
 			"crd_labels":[],
 		}
@@ -328,7 +328,7 @@ class Simulation:
 		"""
 		X = self.parameters["nsteps_rc1"]
 		Y = self.parameters["nsteps_rc2"]
-		if X > 0: 
+		if X > 0 or X == -1: 
 			_type = "1D"		
 			scan = SCAN(self.molecule.system,self.baseFolder,self.parameters)
 			crd2_label = None
@@ -348,7 +348,9 @@ class Simulation:
 			else: 
 				print("One dimension relaxed surface scan!")
 				scan.Run1DScan(self.parameters["nsteps_rc1"])
-			log_path = scan.Finalize()			
+			log_path = scan.Finalize()
+			X = scan.nsteps[0]
+			Y = scan.nsteps[1]			
 			#-------------------------------------------------------
 			EA = EnergyAnalysis( X, Y, _type=_type)		
 			EA.ReadLog(log_path)

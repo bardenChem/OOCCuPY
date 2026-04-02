@@ -55,6 +55,7 @@ class ReactionCoordinate:
 		self.period 		= 360.0
 		self.increment      = 0.0
 		self.minimumD  		= 0.0
+		self.maximumD		= 0.0
 		self.label 			= "Reaction Coordinate"
 		self.label2         = "ReactionCoordinate"
 
@@ -153,15 +154,22 @@ class ReactionCoordinate:
 					self.weight31 = self.weight31*-1
 					dist_a1_a2 = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
 					dist_a2_a3 = _molecule.coordinates3.Distance( self.atoms[1], self.atoms[2] )
-					self.minimumD = ( self.weight13 * dist_a1_a2 ) - ( self.weight31 * dist_a2_a3*-1)	
+					self.minimumD = ( self.weight13 * dist_a1_a2 ) - ( self.weight31 * dist_a2_a3*-1)
+					self.maximumD = ( dist_a2_a3 - 1.0 ) # Assuming maximumD is the distance between a2 and a3 minus a small buffer (e.g., 1.0 Å)
 					
             		#.------------------------------------------------
 				else:
 					dist_a1_a2 = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
 					dist_a2_a3 = _molecule.coordinates3.Distance( self.atoms[1], self.atoms[2] )
-					self.minimumD =  dist_a1_a2 - dist_a2_a3					
+					self.minimumD =  dist_a1_a2 - dist_a2_a3
+					self.maximumD = dist_a2_a3 - 1.0 					
 				#.-------------------------------------------------------------      
-			elif self.Type == "Distance" or self.Type == "distance": self.minimumD = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
+			elif self.Type == "Distance" or self.Type == "distance": 
+				self.minimumD = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
+				if self.minimumD < 1.5:
+					self.maximumD = self.minimumD + 2.5 # maximum distance for dissociation is set to 2.5 Å beyond the initial distance
+				elif self.minimumD > 1.5:
+					self.maximumD = self.minimumD - 1.0 # distance to cover for association is set to the initial distance minus the distance of a bond of 1.0 Å
 			#.--------------------------
 			elif self.Type == "Dihedral": self.minimumD = _molecule.coordinates3.Dihedral(self.atoms[0],self.atoms[1],self.atoms[2],self.atoms[3])
 	#==================================================================================================
@@ -175,6 +183,7 @@ class ReactionCoordinate:
 		print( "\tWeight N2:{} ".format(self.weight31) )
 		print( "\tIncrement:{} ".format(self.increment) )
 		print( "\tInitial distance:{}".format(self.minimumD) )		
+		print( "\tMaximum distance:{}".format(self.maximumD) )	
 
 
 #==================================================================================
