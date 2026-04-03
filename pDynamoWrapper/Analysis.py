@@ -101,7 +101,7 @@ class Analysis:
 		Required parameters:
 			nsteps (int): Total simulation time in picoseconds.
 		
-Optional parameters:
+		Optional parameters:
 			show (bool): Display plots interactively.
 			calculate_distances (bool): Calculate RC distances.
 			ATOMS_RC1 (list): Atom indices for first reaction coordinate.
@@ -136,14 +136,58 @@ Optional parameters:
 			type (str): Plot type ('1D', '2D', etc.).
 			log_name (str): Path to energy log file.
 		
-Optional parameters:
+		Optional parameters:
 			ysize (int): Number of points in second coordinate for 2D plots.
 			contour_lines (int): Number of contour levels.
 			xlim, ylim (list): Axis limits.
 			show (bool): Display plots.
 			multiple_plot (bool): Plot multiple methods.
 			retrieve_path (str): Extract lowest-energy path.
-		"""		
+		"""
+		#-------------------------------------------------------------------
+		#detect xsize and ysize if not provided
+		xindx= []
+		yindx= []
+		if self.parameters["xsize"] < 0:
+			print("Auto-detecting xsize from log file...")
+			with open(self.parameters["log_name"], 'r') as log_file:				
+				lines = log_file.readlines()
+				if lines[0].split()[0] == "x":
+					for line in lines:
+						line2 = line.split()
+						try: xindx.append(int(line2[0]))
+						except: pass
+				if lines[0].split()[1] == "y":
+					for line in lines:
+						line2 = line.split()
+						try: yindx.append(int(line2[1]))
+						except: pass
+		self.parameters["xsize"] = max(xindx) + 1
+		if len(yindx) > 0: self.parameters["ysize"] = max(yindx) + 1
+		#-------------------------------------------------------------------
+		#detect xlim and ylim if not provided
+		if not "xlim" in self.parameters: self.parameters["xlim"] = [0,0]
+		if not "ylim" in self.parameters: self.parameters["ylim"] = [0,0]
+		if self.parameters["xlim"] == [0,0]:
+			rc1 = [] 
+			rc2 = []
+			with open(self.parameters["log_name"], 'r') as log_file:				
+				lines = log_file.readlines()
+				if lines[0].split()[2] == "RC1":
+					for line in lines:
+						line2 = line.split()
+						try: rc1.append(float(line2[2]))
+						except: pass
+				if lines[0].split()[3] == "RC2":
+					for line in lines:
+						line2 = line.split()
+						try: rc2.append(float(line2[3]))
+						except: pass
+
+			self.parameters["xlim"] = [ rc1[0] , rc1[-1] ]
+			if self.parameters["ysize"] > 0:
+				self.parameters["ylim"] = [rc2[0] , rc2[-1] ]
+			
 		multiPlot = False
 		ndim      = 1
 		try: crd1_label= self.molecule.reactionCoordinates[0].label
@@ -187,6 +231,8 @@ Optional parameters:
 		elif ndim == 2:	EA.Plot2D(cnt_lines,crd1_label,crd2_label,xlim,ylim,show)
 
 		if  "retrieve_path" in self.parameters: 
+			if fin_point[0] < 0: fin_point[0] = self.parameters["xsize"] - 1
+			if fin_point[1] < 0: fin_point[1] = self.parameters["ysize"] - 1
 			EA.Path_From_PES(in_point,fin_point,self.parameters["retrieve_path"],self.baseFolder,self.molecule.system)
 
 	#=========================================================================

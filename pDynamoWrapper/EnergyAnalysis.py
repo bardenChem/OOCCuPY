@@ -457,9 +457,9 @@ class EnergyAnalysis:
 		R = 8.31446261815324 # J/(mol*K)
 		kB = 1.380649e-23 # J/K
 		h = 6.62607015e-34 # J*s
-		
+		energy_barrier_J = energy_barrier * 1000  # Convert kJ/mol to J/mol
 		prefactor = (kB * T) / h # in s^-1
-		exponent = - (energy_barrier ) / (R * T) # already is in kJ/mol, so no need to convert
+		exponent = - (energy_barrier_J ) / (R * T)
 		kcat = prefactor * math.exp(exponent)
 		return kcat
 
@@ -478,7 +478,6 @@ class EnergyAnalysis:
 		dirs = [ [1,0] ,[0,1], [1,1] ]
 
 		print(cp, fin_point)
-		input()
 		while not cp == fin_point:
 
 			print( "Current Point is: {} {} ".format(cp[0], cp[1] ) )
@@ -526,9 +525,9 @@ class EnergyAnalysis:
 			ExportSystem( pdb_file,_system,log=None)
 			shutil.copy(pkl,finalPath)
 			new_idx +=1
-			if indx > 0 and indx < (len(pathx)-1):
+			if indx > 0 and indx < (len(pathx)-2):
 				if (self.energies1D[indx] > (self.energies1D[indx-1] + 1.0) ) and \
-					(self.energies1D[indx] < (self.energies1D[indx+1]- 1.0 ) ):
+					(self.energies1D[indx] >  (self.energies1D[indx+1]+ 1.0 ) ):
 					print("Found potential barrier at frame {} with energy {}".format(indx, self.energies1D[indx] ) )
 					kcats.append( self.Calulate_Kcat( self.energies1D[indx] ) )
 					print("Calculated kcat for this barrier is: {} s^-1".format(kcats[-1]) )
