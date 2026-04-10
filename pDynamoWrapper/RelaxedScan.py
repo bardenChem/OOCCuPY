@@ -411,19 +411,22 @@ class SCAN:
         #------------------------------------------------------
         #self.text += "x y RC1 RC2 Energy\n" 
         
-        text_line = "{0:>3s} {1:>3s} {2:>15s} {3:>15s} {4:>15s}".format('x', 'y', 'RC1', 'RC2', 'Energy' )
+        text_line = "{0:>3s} {1:>3s} {2:>15s} {3:>15s} {4:>15s} {5:>15s}".format('x', 'y', 'RC1', 'RC2', 'Energy', "Energy(kcal/mol)" )
 
         self.text += text_line+"\n"
         #------------------------------------------------------               
-
-        if _nsteps_x == -1: 
+        X, Y = _nsteps_x, _nsteps_y
+        if X == -1: 
             self.DefineSteps()
-        if _nsteps_y == -1: 
+            X = self.nsteps[0] 
+        elif X > 0:
+            self.nsteps[0] = X
+        if Y == -1: 
             self.DefineSteps()
-        
-        X = self.nsteps[0] 
-        Y = self.nsteps[1]        
-
+            Y = self.nsteps[1]
+        elif Y > 0:
+            self.nsteps[1] = Y
+                
         self.energiesMatrix = pymp.shared.array( (X,Y), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (X,Y), dtype=float )   
         self.reactionCoordinate2 = pymp.shared.array( (X,Y), dtype=float )   

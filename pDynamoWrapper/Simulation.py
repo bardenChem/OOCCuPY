@@ -328,6 +328,9 @@ class Simulation:
 		"""
 		X = self.parameters["nsteps_rc1"]
 		Y = self.parameters["nsteps_rc2"]
+		print("Starting relaxed surface scan with parameters:")
+		print("nsteps_rc1: {}".format(X))
+		print("nsteps_rc2: {}".format(Y))		
 		if X > 0 or X == -1: 
 			_type = "1D"		
 			scan = SCAN(self.molecule.system,self.baseFolder,self.parameters)

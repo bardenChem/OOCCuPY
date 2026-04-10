@@ -347,7 +347,7 @@ class EnergyRefinement:
 				self.fileLists.remove(fle)			
 		
 	#====================================================
-	def RunORCA(self,_method,_base,_NmaxThreads,_restart="no"):
+	def RunORCA(self,_method,_base,_NmaxThreads,_restart="no",_QMMM_E=True):
 		'''
 		Perform energy refinement using the interface available on the pDynamo with the ORCA software, enabling QC(QM)/MM potential.
 		Parameters:
@@ -359,7 +359,6 @@ class EnergyRefinement:
 			self.SetRestart4Orca()	
 		self.SMOenergies = {}	
 		#self.Print_Debug()
-		input()		
 		#---------------------------------------------------------
 		#Initiate parallel run
 		with pymp.Parallel(_NmaxThreads) as p:
@@ -397,20 +396,26 @@ class EnergyRefinement:
 				#...............................................................................................
 				NBmodel = NBModelORCA.WithDefaults()
 				self.molecule.DefineQCModel( QCmodel , qcSelection=Selection(self.pureQCAtoms) )
-				self.molecule.DefineNBModel( NBmodel)
+				self.molecule.DefineNBModel( NBmodel )
 				self.molecule.coordinates3 = ImportCoordinates3( self.fileLists[i] )
 				#---------------------------------------------------------------------------
-				if self.ylen > 1:
-					self.molecule.Energy()
-					self.energiesArray[ lsFrames[0], lsFrames[1] ] = self.molecule.scratch.energyTerms["ORCA QC"]			
+				if self.ylen > 1:					
+					if _QMMM_E:
+						self.energiesArray[ lsFrames[0], lsFrames[1] ] = self.molecule.Energy()	
+					else:
+						self.molecule.Energy()				
+						self.energiesArray[ lsFrames[0], lsFrames[1] ] = self.molecule.scratch.energyTerms["ORCA QC"]			
 					self.indexArrayX[ lsFrames[0], lsFrames[1] ]   = lsFrames[0]
 					self.indexArrayY[ lsFrames[0], lsFrames[1] ]   = lsFrames[1]
 					tmpText = "{}".format(self.energiesArray[ lsFrames[0], lsFrames[1] ])
 					tmpLog.write(tmpText)
 					tmpLog.close()
 				else:
-					self.molecule.Energy()			
-					self.energiesArray[ lsFrames[0] ] = self.molecule.scratch.energyTerms["ORCA QC"]	
+					if _QMMM_E:
+						self.energiesArray[ lsFrames[0] ] = self.molecule.Energy()	
+					else:
+						self.molecule.Energy()			
+						self.energiesArray[ lsFrames[0] ] = self.molecule.scratch.energyTerms["ORCA QC"]	
 					self.indexArrayX[ lsFrames[0] ]   = lsFrames[0]
 					tmpText = "{}".format(self.energiesArray[ lsFrames[0] ])
 					tmpLog.write(tmpText)
@@ -477,9 +482,9 @@ class EnergyRefinement:
 					for j in range(self.ylen):
 						energy_kj = self.SMOenergies[smo][i,j]  -  self.SMOenergies[smo][0,0]
 						energy_kcal = energy_kj * 0.239006
-						self.text +="{} {} {} {}\n".format(self.indexArrayX[ i, j ],self.indexArrayY[ i,j ], energy_kj, energy_kcal, smo)
+						self.text +="{} {} {} {} {}\n".format(self.indexArrayX[ i, j ],self.indexArrayY[ i,j ], energy_kj, energy_kcal, smo)
 		else:
-			self.text += "x y Enrgy Energy_kcal method\n"
+			self.text += "x Enrgy Energy_kcal method\n"
 			for smo in self.methods:
 				for i in range(self.xlen):
 					energy_kj = self.SMOenergies[smo][i]  -  self.SMOenergies[smo][0]

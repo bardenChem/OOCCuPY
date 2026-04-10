@@ -162,7 +162,7 @@ class Analysis:
 						line2 = line.split()
 						try: yindx.append(int(line2[1]))
 						except: pass
-		self.parameters["xsize"] = max(xindx) + 1
+			self.parameters["xsize"] = max(xindx) + 1
 		if len(yindx) > 0: self.parameters["ysize"] = max(yindx) + 1
 		#-------------------------------------------------------------------
 		#detect xlim and ylim if not provided
@@ -247,7 +247,7 @@ class Analysis:
 			xnbins (int): Number of bins in first dimension.
 			temperature (float): Simulation temperature in Kelvin.
 		
-Optional parameters:
+		Optional parameters:
 			ynbins (int): Number of bins in second dimension (default=0 for 1D).
 			contour_lines (int): Number of contour levels for 2D plots.
 			xlim_list, ylim_list (list): Axis limits.

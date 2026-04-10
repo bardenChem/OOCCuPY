@@ -125,8 +125,8 @@ class EnergyAnalysis:
 				if i > 0:
 					lns = line.split()
 					if oldMethod == "none":
-						oldMethod = lns[2]
-					method = lns[2]
+						oldMethod = lns[3]
+					method = lns[3]
 					if not method == oldMethod:
 						self.multiple1Dplot.append(energyTmp)
 						self.identifiers.append(oldMethod)
@@ -159,8 +159,8 @@ class EnergyAnalysis:
 				if i > 0:
 					lns = line.split()
 					if oldMethod == "none":
-						oldMethod = lns[3]
-					method = lns[3]
+						oldMethod = lns[4]
+					method = lns[4]
 					if not method == oldMethod:
 						self.multiple2Dplot.append(self.energiesMatrix)
 						self.identifiers.append(oldMethod)
