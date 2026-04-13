@@ -397,11 +397,11 @@ class EnergyAnalysis:
 		# Set the tick labels font
 		axis_font = {'fontname':'Michroma', 'size':14}
 		for tick in (ax0.xaxis.get_major_ticks()):
-			tick.label.set_fontname('Arial')
-			tick.label.set_fontsize(14)
+			tick.label1.set_fontname('Arial')
+			tick.label1.set_fontsize(14)
 		for tick in (ax0.yaxis.get_major_ticks()):
-			tick.label.set_fontname('Dejavu')
-			tick.label.set_fontsize(14) 
+			tick.label1.set_fontname('Dejavu')
+			tick.label1.set_fontsize(14) 
 		#---------------------------------------------				
 		ax0.set_xlabel(crd1label, **axis_font)
 		ax0.set_ylabel(crd2label, **axis_font)
