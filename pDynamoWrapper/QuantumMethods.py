@@ -256,8 +256,8 @@ class QuantumMethods:
 		"""		
 		if baseName == None: baseName = os.getcwd()
 		self.qcSystem = PruneByAtom(self.system,self.selection)
-		ExportSystem( os.path.join( baseName,"qcSystem.pdb"), self.qcSystem ) 
-		ExportSystem( os.path.join( baseName,"qcSystem.pkl"), self.qcSystem )
+		ExportSystem( os.path.join( baseName,self.pars["molden_name"][:-4] + ".pdb"), self.qcSystem ) 
+		ExportSystem( os.path.join( baseName,self.pars["molden_name"][:-4] + ".pkl"), self.qcSystem )
 	#----------------------------------------------------------------------------
 	def Set_Converger(self):
 		"""Configure SCF convergence criteria based on convergence level.
