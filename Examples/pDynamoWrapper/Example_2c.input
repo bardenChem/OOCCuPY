@@ -1,7 +1,7 @@
 Example 2 
 --------------------------------
 #INPUT_TYPE geometry @OOCCUPY_ROOT@/data/cyclohexane_single_frame.xyz
-#SET_ENERGY_MODEL_QM ORCA
-#ORCA_METHOD b3lyp
+#SET_ENERGY_MODEL_QM pySCF
+#FUNCTIONAL b3lyp
 #BASIS 6-31G*
 _____________________________

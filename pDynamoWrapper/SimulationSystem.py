@@ -256,7 +256,7 @@ class SimulationSystem:
         qs = QuantumMethods(_parameters)
         qs.Set_QC_System()
         if not "method_class" in _parameters: _parameters["method_class"] = "SMO"
-        qs.Export_QC_System()
+        if len(self.quantumRegion) > 0: qs.Export_QC_System()
         newLabel = self.system.label + "QC_system_"
         if "Hamiltonian" in _parameters: newLabel += _parameters["Hamiltonian"] 
         if "functional"  in _parameters: newLabel += _parameters["functional"] 
