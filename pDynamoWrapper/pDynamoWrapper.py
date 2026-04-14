@@ -226,7 +226,7 @@ class Wrapper:
 			self.Run_Analysis(_parameters)	
 
 		if not _parameters["set_energy_model"] == "pySCF":
-		self.SaveSystem(save_name)
+			self.SaveSystem(save_name)
 		inpFile.close()		
 
 	#-----------------------------------------
