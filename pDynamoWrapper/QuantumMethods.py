@@ -172,6 +172,8 @@ class QuantumMethods:
 		Configures pySCF with specified functional, orbital basis, and
 		DIIS acceleration. Enables both pure QC and QM/MM calculations.
 		"""
+		print(self.pars["pySCF_method"])
+		print("="*40)
 		NBmodel = NBModelPySCF.WithDefaults( )			
 		qcModel = QCModelPySCF.WithOptions( deleteJobFiles = False       ,
 											functional     = self.pars["functional"],

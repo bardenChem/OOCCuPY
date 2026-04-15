@@ -265,6 +265,8 @@ class Wrapper:
 			elif input_type == "gromacs":
 				_system4load = load_function(_parameters["top_file"], _parameters["crd_file"])
 			elif input_type == "pkl":
+				if not os.path.exists(_parameters["pkl_file"]):
+					raise FileNotFoundError(f"PKL file not found: {_parameters['pkl_file']}")
 				_system4load = load_function(_parameters["pkl_file"])
 			elif input_type == "protein":
 				_system4load = load_function(_parameters["pdb_file"])

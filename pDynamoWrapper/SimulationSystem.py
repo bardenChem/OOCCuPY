@@ -253,7 +253,7 @@ class SimulationSystem:
         """
         if len(self.quantumRegion) > 0: _parameters["region"] = self.quantumRegion
         _parameters["active_system"] = self.system 
-        _parameters["molden_name"]   = self.baseName + "qcRegion.molden"
+        _parameters["molden_name"]   = self.baseName + "_qcRegion.molden"
         qs = QuantumMethods(_parameters)
         qs.Set_QC_System()
         if not "method_class" in _parameters: _parameters["method_class"] = "SMO"

@@ -638,7 +638,9 @@ class Simulation:
 		RSrun = GeometrySearcher(self.molecule.system,self.baseFolder,_trajName=_traj_name)		
 		RSrun.ChangeDefaultParameters(self.parameters)		
 
-		if   self.parameters["simulation_type"] == "NEB"                : RSrun.NudgedElasticBand(self.parameters)
+		if   self.parameters["simulation_type"] == "NEB"                :
+			print("Running Nudged Elastic Band Simulation") 
+			RSrun.NudgedElasticBand(self.parameters)
 		elif self.parameters["simulation_type"] == "SAW"                : RSrun.SelfAvoidWalking(self.parameters)
 		elif self.parameters["simulation_type"] == "SteepDescent_path"  : RSrun.SteepestDescentPathSearch(self.parameters)
 		elif self.parameters["simulation_type"] == "Baker_Saddle"       : RSrun.BakerSaddleOptimizer(self.parameters) 
