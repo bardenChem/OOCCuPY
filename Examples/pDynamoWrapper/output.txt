@@ -2,51 +2,16 @@ Starting pDynamoWrapper_handler - output will be saved to output.txt
 
 
 ========================================
-Project folder at: /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper
+Project folder at: /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/neb_test
 ========================================
 
 
-Current energy convergence tolerance: 1e-09
-Current gradient convergence tolerance: None
-
-
-******** <class 'pyscf.scf.uhf.UHF'> ********
-method = UHF
-initial guess = minao
-damping factor = 0
-level_shift factor = 0
-DIIS = <class 'pyscf.scf.diis.CDIIS'>
-diis_start_cycle = 1
-diis_space = 8
-diis_damp = 0
-SCF conv_tol = 1e-06
-SCF conv_tol_grad = 0.001
-SCF max_cycles = 100
-direct_scf = True
-direct_scf_tol = 1e-13
-chkfile to save SCF result = /tmp/tmpkxmsihr9
-max_memory 4000 MB (current use 178 MB)
-number electrons alpha = 24  beta = 24
-init E= -234.883385082258
-  alpha nocc = 24  HOMO = -0.308626691560887  LUMO = 0.127656658414956
-  beta  nocc = 24  HOMO = -0.311875019337035  LUMO = 0.130734013616532
-cycle= 1 E= -234.144161302777  delta_E= 0.739  |g|= 0.272  |ddm|= 2.36
-  alpha nocc = 24  HOMO = -0.425118578885719  LUMO = 0.213101237158409
-  beta  nocc = 24  HOMO = -0.425459733341476  LUMO = 0.213231773703698
-cycle= 2 E= -234.197235443372  delta_E= -0.0531  |g|= 0.0732  |ddm|= 0.289
-  alpha nocc = 24  HOMO = -0.407501916247028  LUMO = 0.227708730190394
-  beta  nocc = 24  HOMO = -0.40760513264143  LUMO = 0.22770817830596
-cycle= 3 E= -234.200914119582  delta_E= -0.00368  |g|= 0.0268  |ddm|= 0.0966
-  alpha nocc = 24  HOMO = -0.418714250169901  LUMO = 0.223944681055963
-  beta  nocc = 24  HOMO = -0.418760538175618  LUMO = 0.223926085162393
-cycle= 4 E= -234.2013026777  delta_E= -0.000389  |g|= 0.00284  |ddm|= 0.0287
-  alpha nocc = 24  HOMO = -0.419041290429024  LUMO = 0.223936370233915
-  beta  nocc = 24  HOMO = -0.419055638441447  LUMO = 0.223919307677316
-cycle= 5 E= -234.201308851866  delta_E= -6.17e-06  |g|= 0.000788  |ddm|= 0.00424
-  alpha nocc = 24  HOMO = -0.419080489782925  LUMO = 0.223936290860104
-  beta  nocc = 24  HOMO = -0.419081475962352  LUMO = 0.223921755511574
-cycle= 6 E= -234.201309701899  delta_E= -8.5e-07  |g|= 0.00042  |ddm|= 0.0015
-  alpha nocc = 24  HOMO = -0.419093218036121  LUMO = 0.2239303423934
-  beta  nocc = 24  HOMO = -0.41909171568398  LUMO = 0.223919387970327
-Extra cycle  E= -234.201309939687  delta_E= -2.38e-07  |g|= 0.000282  |ddm|= 0.000675
-converged SCF energy = -234.201309939687  <S^2> = 1.2075206e-06  2S+1 = 1.0000024
+Running Nudged Elastic Band Simulation
+Warning: Initial function value or RMS gradient is None. This may indicate an issue with the objective function evaluation.
+Root Mean Sqaute of Deviation of the optimized structure from the initial: 0.0920679294123979
+Error in importing seaborn package!
+Skipping biplot distribution plot!
+/home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/neb_test/NEB.ptGeo
+Root Mean Sqaute of Deviation of the optimized structure from the initial: 0.09206792941239784
+Error in importing seaborn package!
+Skipping biplot distribution plot!

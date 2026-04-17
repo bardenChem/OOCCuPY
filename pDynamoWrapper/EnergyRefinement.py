@@ -23,7 +23,7 @@ import pymp
 from .commonFunctions import *
 from pMolecule import *
 from pMolecule.QCModel import *
-
+from pScientific.Geometry3 import Coordinates3
 from .MopacQCMMinput import MopacQCMMinput
 import os, glob, sys, shutil
 import numpy as np 
@@ -130,8 +130,14 @@ class EnergyRefinement:
 					for i in p.range( len(self.fileLists) ):
 						_qc_parameters["Hamiltonian"] = smo
 						qcSystem = QuantumMethods(_qc_parameters)
-						qcSystem.Set_QC_System()	
-						qcSystem.system.coordinates3 = ImportCoordinates3( self.fileLists[i], log=None )
+						qcSystem.Set_QC_System()
+						obj = Unpickle( self.fileLists[i] )	
+						if isinstance(obj, Coordinates3):
+							qcSystem.system.coordinates3 = obj
+						elif isinstance(obj, (tuple,list)) and len(obj) > 1:
+							qcSystem.system.coordinates3 = obj[0]																			
+						else:
+							qcSystem.system.coordinates3 = ImportCoordinates3( self.fileLists[i], log=None )
 						lsFrames= GetFrameIndex(self.fileLists[i][:-4])						
 						if self.ylen > 0:
 							try:  

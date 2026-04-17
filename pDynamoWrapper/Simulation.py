@@ -640,12 +640,23 @@ class Simulation:
 
 		if   self.parameters["simulation_type"] == "NEB"                :
 			print("Running Nudged Elastic Band Simulation") 
+			RSrun.saveFormat = ".dcd"
+			RSrun.saveFrequency = 1
+			RSrun.savePdb = True
 			RSrun.NudgedElasticBand(self.parameters)
+			RSrun.Finalize()
 		elif self.parameters["simulation_type"] == "SAW"                : RSrun.SelfAvoidWalking(self.parameters)
 		elif self.parameters["simulation_type"] == "SteepDescent_path"  : RSrun.SteepestDescentPathSearch(self.parameters)
 		elif self.parameters["simulation_type"] == "Baker_Saddle"       : RSrun.BakerSaddleOptimizer(self.parameters) 
 
-		
+		'''
+		print( os.path.join(self.baseFolder,RSrun.trajectoryName,"frame0.pkl") )
+		molCRD = Unpickle( os.path.join(self.baseFolder,RSrun.trajectoryName,"frame0.pkl") )
+		print(molCRD)
+		print(molCRD[0])
+		self.molecule.system.coordinates3 = molCRD
+		'''
+
 		nmaxthreads = 1
 		if "NmaxThreads" in self.parameters: nmaxthreads = self.parameters["NmaxThreads"]
 
@@ -653,7 +664,7 @@ class Simulation:
 		if "methods_lists" in self.parameters: refMethod = self.parameters["methods_lists"]
 		if len(refMethod) > 0: 
 			ER = EnergyRefinement(self.molecule.system  					        ,
-								  RSrun.trajectoryName                      ,
+								  os.path.join(self.baseFolder, RSrun.trajectoryName ),
 								  self.baseFolder                           ,
 								  [self.parameters["traj_bins"],0]          ,
 								  self.molecule.system.electronicState.charge      ,

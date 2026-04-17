@@ -181,7 +181,7 @@ class GeometrySearcher:
         if "RMS_growing_intial_string"  in _parameters: rmsGIS        = _parameters["RMS_growing_intial_string"]
         if "spline_redistribution"      in _parameters: useSpline     = _parameters["spline_redistribution"]
 
-        self.trajectoryName = os.path.join(self.baseName,self.trajectoryName+".ptGeo")        
+        self.trajectoryName = os.path.join(self.baseName,"NEB.ptGeo")        
         trajectory = None
         #-----------------------------------------------------------------------------------------
         if not "traj_source" in _parameters:
@@ -207,6 +207,7 @@ class GeometrySearcher:
                                                     splineRedistributionTolerance=spline_tol            ,
                                                     forceSplineRedistributionCheckPerIteration=useSpline,
                                                     rmsGradientTolerance = self.rmsGrad   )
+        
     #========================================================================================
     def SelfAvoidWalking(self,_parameters):
         '''
