@@ -645,6 +645,20 @@ class Simulation:
 			RSrun.savePdb = True
 			RSrun.NudgedElasticBand(self.parameters)
 			RSrun.Finalize()
+			pymol_text = "preset.publication(selection='all')\n"
+			pymol_text+= "set sticks\n"
+			pymol_text+= "set label_size, 20\n"
+			pymol_text+= "set sphere_scale, 0.2\n"
+			pymol_text+= "set bg_rgb, white\n" 
+			pymol_text+= "set stick_radius, 0.18\n"
+			pymol_text+= "load {}".format( "NEB*.pdb" )
+			pymol_text+= "\nload_traj {}, ".format( "NEB.dcd" )
+			pymol_text+= "frame0, 1, start=1, stop=-1, interval=1"
+
+			pymols_file = open( os.path.join(self.baseFolder,"traj1DNeb.pym"), "w") 
+			pymols_file.write(pymol_text)
+			pymols_file.close()
+
 		elif self.parameters["simulation_type"] == "SAW"                : RSrun.SelfAvoidWalking(self.parameters)
 		elif self.parameters["simulation_type"] == "SteepDescent_path"  : RSrun.SteepestDescentPathSearch(self.parameters)
 		elif self.parameters["simulation_type"] == "Baker_Saddle"       : RSrun.BakerSaddleOptimizer(self.parameters) 

@@ -208,6 +208,7 @@ class GeometrySearcher:
                                                     forceSplineRedistributionCheckPerIteration=useSpline,
                                                     rmsGradientTolerance = self.rmsGrad   )
         
+        
     #========================================================================================
     def SelfAvoidWalking(self,_parameters):
         '''
@@ -285,7 +286,7 @@ class GeometrySearcher:
         #Save structures and/or trajectories
         if self.savePdb:
             pdbFile = self.baseName + "opt_{}.pdb".format(self.optAlg)
-            i = 0;
+            i = 0
             while os.path.exists(pdbFile):
                 pdbFile = self.baseName + "_#{}_opt_{}.pdb".format(i,self.optAlg)
                 i += 1
