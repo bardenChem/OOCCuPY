@@ -213,7 +213,6 @@ class SimulationSystem:
             self.center_atom = self.system.atoms.items[_centerAtom]
             self.center_atom = "*:"+ self.center_atom.parent.label +":" + self.center_atom.label 
             print(f"Center atom index: {_centerAtom}, label: {self.center_atom}")
-            input()
 
         if atomref is None:
             atomref      = AtomSelection.FromAtomPattern( oldSystem, _centerAtom )
