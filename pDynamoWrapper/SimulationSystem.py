@@ -17,7 +17,6 @@ Authors: Igor Barden Grillo, contributors
 
 import os, glob, sys
 
-from torch import Type
 #--------------------------------------------------------------
 #Loading own libraries
 from .commonFunctions import *
@@ -226,8 +225,7 @@ class SimulationSystem:
         self.system = None
         self.system = PruneByAtom( oldSystem,Selection(core2) )
         self.system.DefineNBModel( NBmodel )      
-        self.label  = newLabel
-        
+        self.label  = newLabel        
 
     #======================================================================================
     def Setting_Free_Atoms(self,_centerAtom,_radius,_DEBUG=False):
