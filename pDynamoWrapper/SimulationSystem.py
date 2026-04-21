@@ -16,6 +16,8 @@ Authors: Igor Barden Grillo, contributors
 
 
 import os, glob, sys
+
+from torch import Type
 #--------------------------------------------------------------
 #Loading own libraries
 from .commonFunctions import *
@@ -76,6 +78,7 @@ class SimulationSystem:
         self.reactionCoordinates = [] 
         self.refEnergy           = 0.0 
         self.rcs                 = 0 
+        self.center_atom         = None
 
     #===================================================================================
     @classmethod
@@ -173,7 +176,7 @@ class SimulationSystem:
             SimulationSystem: Initialized protein instance with OPLS parameters.
         """
         self = selfClass()
-        self.system      = ImportSystem(_coordinateFile, modelNumber = _modelNumber, useComponentLibrary = True)
+        self.system  = ImportSystem(_coordinateFile, modelNumber = _modelNumber, useComponentLibrary = True)
         self.system.DefineMMModel( MMModelOPLS.WithParameterSet("protein") )
         self.system.DefineNBModel( NBModelCutOff.WithDefaults() )                   
         _name        = os.path.basename(_coordinateFile)
@@ -204,8 +207,17 @@ class SimulationSystem:
         """
         #---------------------------------------------------
         oldSystem = Clone(self.system)
+        atomref   = None
         #---------------------------------------------------
-        atomref      = AtomSelection.FromAtomPattern( oldSystem, _centerAtom )
+        if isinstance(_centerAtom, int):
+            atomref = Selection.FromIterable([_centerAtom])
+            self.center_atom = self.system.atoms.items[_centerAtom]
+            self.center_atom = "*:"+ self.center_atom.parent.label +":" + self.center_atom.label 
+            print(f"Center atom index: {_centerAtom}, label: {self.center_atom}")
+            input()
+
+        if atomref is None:
+            atomref      = AtomSelection.FromAtomPattern( oldSystem, _centerAtom )
         core         = AtomSelection.Within(oldSystem,atomref,_radius)
         core2        = AtomSelection.ByComponent(oldSystem,core)
         #---------------------------------------------------
@@ -229,7 +241,16 @@ class SimulationSystem:
             _DEBUG (bool): Print debug information. Default: False
         """
         #-----------------------------------------------------
-        atomref = AtomSelection.FromAtomPattern(self.system, _centerAtom)
+        atomref = None
+    
+        #---------------------------------------------------
+        if isinstance(_centerAtom, int) and self.center_atom is None:            
+            atomref = Selection.FromIterable([_centerAtom])
+        elif self.center_atom is not None:
+            atomref = AtomSelection.FromAtomPattern(self.system, self.center_atom)
+
+        if atomref is None:
+            atomref = AtomSelection.FromAtomPattern(self.system, _centerAtom)
         core    = AtomSelection.Within(self.system,atomref,_radius)        
         mobile  = AtomSelection.ByComponent(self.system,core)
         mobile  = AtomSelection.ByBondedNeighbor(self.system,mobile,iterations=10) 

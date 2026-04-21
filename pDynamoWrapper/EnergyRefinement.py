@@ -124,6 +124,10 @@ class EnergyRefinement:
 							"multiplicity":self.multiplicity,
 							"QCcharge":self.charge       }	
 		#--------------------------------------------------------------------
+		if pymp.Parallel._level > 0:
+    		# Already in parallel context - run single-threaded
+			_NmaxThreads = 1
+
 		for smo in _methods:
 			if VerifyMNDOKey(smo):
 				with pymp.Parallel(_NmaxThreads) as p:

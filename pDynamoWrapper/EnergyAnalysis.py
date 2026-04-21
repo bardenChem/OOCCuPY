@@ -514,9 +514,11 @@ class EnergyAnalysis:
 			pathy.append(cp[1])
 		
 		#---------------------------------------------------------------
-		if not os.path.exists( os.path.join(_folder_dst,"traj1d.ptGeo") ): os.makedirs( os.path.join(_folder_dst,"traj1d.ptGeo") )
+		if not os.path.exists( os.path.join(_folder_dst,"traj1d.ptGeo") ): 
+			os.makedirs( os.path.join(_folder_dst,"traj1d.ptGeo") )
 		kcats = []
 		new_idx = 0
+		min_energy = self.energies1D[0]
 		for indx in range(len(pathx)):
 			pkl = _path + "/frame{}_{}.pkl".format(pathx[indx],pathy[indx])			
 			finalPath = os.path.join( _folder_dst , "traj1d.ptGeo/frame{}.pkl".format(new_idx) )			
@@ -525,11 +527,13 @@ class EnergyAnalysis:
 			ExportSystem( pdb_file,_system,log=None)
 			shutil.copy(pkl,finalPath)
 			new_idx +=1
+			if self.energies1D[indx] < min_energy:
+				min_energy = self.energies1D[indx]				
 			if indx > 0 and indx < (len(pathx)-2):
 				if (self.energies1D[indx] > (self.energies1D[indx-1] + 1.0) ) and \
 					(self.energies1D[indx] >  (self.energies1D[indx+1]+ 1.0 ) ):
 					print("Found potential barrier at frame {} with energy {}".format(indx, self.energies1D[indx] ) )
-					kcats.append( self.Calulate_Kcat( self.energies1D[indx] ) )
+					kcats.append( self.Calulate_Kcat( self.energies1D[indx] - min_energy ) )
 					print("Calculated kcat for this barrier is: {} s^-1".format(kcats[-1]) )
 				else:
 					kcats.append(0.0)
@@ -541,10 +545,9 @@ class EnergyAnalysis:
 		trajpath = os.path.join( _folder_dst, "traj1d.ptGeo" )
 		try: Duplicate( trajpath, trajName, _system ) 
 		except: pass
-
 		log_text = "x Energy method Energy_kcal kcat \n"
 		new_log  = open( os.path.join(_folder_dst,"traj1D.log"), 'w' )
-		for i in range(len(self.energies1D)):
+		for i in range(len(self.energies1D)):						
 			energy_kcal = self.energies1D[i] * 0.239006
 			log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
 		new_log.write(log_text)
