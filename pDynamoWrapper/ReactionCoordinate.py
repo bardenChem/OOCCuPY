@@ -14,9 +14,7 @@ Authors: Igor Barden Grillo, contributors
 #FILE = ReactionCoordinate.py
 
 #=============================================================================
-from tomlkit import key
-
-from tomlkit import key
+#from tomlkit import key
 
 from .commonFunctions import *
 from pMolecule import *
@@ -266,7 +264,7 @@ class ReactionCoordinate:
 		final_RC = self.weight13 * self.BC + self.weight31 * self.AB
     
 		scan_range = abs(final_RC - self.minimumD)
-		buffer = max(0.2, scan_range * 0.1)   # at least 0.2 Å buffer
+		buffer = max(0.2, scan_range * 0.05)   # at least 0.2 Å buffer
     
 		if final_RC > self.minimumD:
 			self.minimumD = self.minimumD - buffer
@@ -334,7 +332,7 @@ class ReactionCoordinate:
 			nsteps = int(abs(coordinate_range / self.increment)) + 1
             
 			# Safety: limit maximum steps to reasonable number
-			max_steps = 40  # Prevent runaway calculations
+			max_steps = 36  # Prevent runaway calculations
 			if nsteps > max_steps:
 				print(f"Warning: {nsteps} steps exceeds maximum ({max_steps})")
 				print(f"  Adjusting increment from {self.increment:.3f}")
