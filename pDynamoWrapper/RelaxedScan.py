@@ -416,7 +416,6 @@ class SCAN:
             self.nsteps[1] = Y
 
         print("Running 2D Scan with {} steps in RC1 and {} steps in RC2".format(X,Y))
-        input()
                 
         self.energiesMatrix = pymp.shared.array( (X,Y), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (X,Y), dtype=float )   
