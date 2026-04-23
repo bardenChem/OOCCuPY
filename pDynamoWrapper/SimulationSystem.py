@@ -319,7 +319,11 @@ class SimulationSystem:
             try:
                 pat= int(atom)
             except:
-                pat=AtomSelection.FromAtomPattern(self.system, atom)[0]
+                try:
+                    pat = AtomSelection.FromAtomPattern(self.system, atom)[0]
+                except:
+                    print(f"Error in selection of atom pattern: {atom}")
+                    pat = -1
             if (pat ==-1): 
                 print("Error in selection of atom pattern!!")
             _atom_pat.append(pat )

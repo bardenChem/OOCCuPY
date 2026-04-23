@@ -219,23 +219,12 @@ class SCAN:
         self.DMINIMUM[ndim]         = _RC.minimumD
         self.massConstraint         = _RC.massConstraint
         self.DMAXIMUM[ndim]         = _RC.maximumD
+        self.nsteps[ndim]           = _RC.nsteps  
 
 
         if len(_RC.atoms)   == 3: self.multipleDistance[ndim] = True
         elif len(_RC.atoms) == 4: self.dihedral = True
-    #==============================================================================================
-    def DefineSteps(self):
-        '''
-
-        '''
-        print("Defining steps for the scan...")
-        for i in range(self.nDim):
-            if self.multipleDistance[i]: 
-                 # For multiple distance RCs, the number of steps is determined by the range of the first distance component
-                self.nsteps[i] = int( abs(self.DMAXIMUM[i] / self.DINCREMENT[i]) ) + 1 
-            else:
-                # For simple distance or dihedral RCs, the number of steps is determined by the range of the RC    
-                self.nsteps[i] = int( abs(self.DMAXIMUM[i] / self.DINCREMENT[i]) ) + 1
+ 
 
     #===============================================================================================
     def Run1DScan(self,_nsteps):
@@ -261,8 +250,9 @@ class SCAN:
         
         self.energiesMatrix      = pymp.shared.array( (_nsteps), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (_nsteps), dtype=float )
-        self.nsteps[0] = _nsteps
-        if self.nsteps[0] == -1: self.DefineSteps() 
+        
+        if _nsteps == -1:
+            _nsteps = self.nsteps[0]
         if self.dihedral:  self.Run1DScanDihedral()
         else:
             if    self.multipleDistance[0]:  self.Run1DScanMultipleDistance()
@@ -417,15 +407,16 @@ class SCAN:
         #------------------------------------------------------               
         X, Y = _nsteps_x, _nsteps_y
         if X == -1: 
-            self.DefineSteps()
             X = self.nsteps[0] 
         elif X > 0:
             self.nsteps[0] = X
         if Y == -1: 
-            self.DefineSteps()
             Y = self.nsteps[1]
         elif Y > 0:
             self.nsteps[1] = Y
+
+        print("Running 2D Scan with {} steps in RC1 and {} steps in RC2".format(X,Y))
+        input()
                 
         self.energiesMatrix = pymp.shared.array( (X,Y), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (X,Y), dtype=float )   

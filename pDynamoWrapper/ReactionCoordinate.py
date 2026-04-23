@@ -14,6 +14,10 @@ Authors: Igor Barden Grillo, contributors
 #FILE = ReactionCoordinate.py
 
 #=============================================================================
+from tomlkit import key
+
+from tomlkit import key
+
 from .commonFunctions import *
 from pMolecule import *
 #*****************************************************************************
@@ -58,6 +62,10 @@ class ReactionCoordinate:
 		self.maximumD		= 0.0
 		self.label 			= "Reaction Coordinate"
 		self.label2         = "ReactionCoordinate"
+		self.reaction_type 	= "unknown"
+		self.nsteps		    = 0
+		self.AB             = 0.0
+		self.BC			    = 0.0
 
 		for atom in self.atomsSel:
 			try: self.atoms.append( atom )
@@ -141,49 +149,221 @@ class ReactionCoordinate:
 		if not _sigma_pk1_pk3 == None: 	self.weight13 = _sigma_pk1_pk3
 		if not _sigma_pk3_pk1 == None:	self.weight31 = _sigma_pk3_pk1		
 		if set_pars: 
-			if self.Type == "multipleDistance":				
-				#.-------------------------------------------------
-				if self.massConstraint:			
-					#------------------------------------------------
-					atomic_n1 = _molecule.atoms.items[ self.atoms[0] ].atomicNumber
-					atomic_n3 = _molecule.atoms.items[ self.atoms[2] ].atomicNumber
+			
+			# ============================================================
+			# TWO-CENTER REACTIONS (Association/Dissociation)
+        	# ============================================================
+			if self.Type == "Distance" or self.Type == "distance":
+				dist_initial = _molecule.coordinates3.Distance(self.atoms[0], self.atoms[1])
+            
+            	# Detect if we're starting with bonded or non-bonded atoms
+            	# Typical bond lengths: H-H ~0.74 Å, C-H ~1.09 Å, O-H ~0.96 Å, C-C ~1.54 Å
+				is_bonded = dist_initial < 2.0 
+
+				if is_bonded:
+					self.reaction_type = "dissociation"
+					self.minimumD = dist_initial
+					self.maximumD = dist_initial + 2.5 # Set maximum distance for dissociation
+				else:
+					self.reaction_type = "association"
+					self.minimumD = dist_initial
+					self.maximumD = dist_initial - 1.0 # Set maximum distance for association
+
+				if self.maximumD <= self.minimumD:
+
+					# Fallback logic
+					self.maximumD = self.minimumD + 2.0 if is_bonded else max(self.minimumD - 1.0, 0.5)
+			
+			elif self.Type == "multipleDistance":
+				if self.massConstraint:
+					# Mass-weighted coordinates (for H-transfer)
+					atomic_n1 = _molecule.atoms.items[self.atoms[0]].atomicNumber
+					atomic_n3 = _molecule.atoms.items[self.atoms[2]].atomicNumber
 					mass_a1 = GetAtomicMass(atomic_n1)
 					mass_a3 = GetAtomicMass(atomic_n3)
 					self.weight13 = mass_a1/(mass_a1+mass_a3)
 					self.weight31 = mass_a3/(mass_a1+mass_a3)
-					self.weight31 = self.weight31*-1
-					dist_a1_a2 = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
-					dist_a2_a3 = _molecule.coordinates3.Distance( self.atoms[1], self.atoms[2] )
-					self.minimumD = ( self.weight13 * dist_a1_a2 ) - ( self.weight31 * dist_a2_a3*-1)
-					self.maximumD = ( dist_a2_a3 - 1.0 ) # Assuming maximumD is the distance between a2 and a3 minus a small buffer (e.g., 1.0 Å)
-					
-            		#.------------------------------------------------
+
+					self.AB = _molecule.coordinates3.Distance(self.atoms[0], self.atoms[1])
+					self.BC = _molecule.coordinates3.Distance(self.atoms[1], self.atoms[2])					
+					# Transfer coordinate: weighted difference
+					self.minimumD = (self.weight13 * self.AB) - (self.weight31 * self.BC )
+					print(f"DEBUG: d(A-B) = {self.AB:.3f}, d(B-C) = {self.BC:.3f}")
+					print(f"DEBUG: weight13 = {self.weight13:.3f}, weight31 = {self.weight31:.3f}")
+					print(f"DEBUG: Calculated RC = {self.minimumD:.3f}")
+					print(f"DEBUG: Expected RC = {self.AB - self.BC:.3f}")
+					# For transfer, we scan from initial to final state
+					self.reaction_type = "transfer"
+					self.SetTransferLimits()
 				else:
-					dist_a1_a2 = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
-					dist_a2_a3 = _molecule.coordinates3.Distance( self.atoms[1], self.atoms[2] )
-					self.minimumD =  dist_a1_a2 - dist_a2_a3
-					self.maximumD = dist_a2_a3 - 1.0 					
-				#.-------------------------------------------------------------      
-			elif self.Type == "Distance" or self.Type == "distance": 
-				self.minimumD = _molecule.coordinates3.Distance( self.atoms[0], self.atoms[1] )
-				if self.minimumD < 1.5:
-					self.maximumD = self.minimumD + 2.5 # maximum distance for dissociation is set to 2.5 Å beyond the initial distance
-				elif self.minimumD > 1.5:
-					self.maximumD = self.minimumD - 1.0 # distance to cover for association is set to the initial distance minus the distance of a bond of 1.0 Å
-			#.--------------------------
-			elif self.Type == "Dihedral": self.minimumD = _molecule.coordinates3.Dihedral(self.atoms[0],self.atoms[1],self.atoms[2],self.atoms[3])
+					# Simple coordinate: d(A-B) - d(B-C)
+					self.AB = _molecule.coordinates3.Distance(self.atoms[0], self.atoms[1])
+					self.BC = _molecule.coordinates3.Distance(self.atoms[1], self.atoms[2])
+					self.minimumD = self.AB - self.BC					              
+					# Transfer limits
+					self.reaction_type = "transfer"
+					self.SetTransferLimits()
+			
+			elif self.Type == "Dihedral": 
+				self.minimumD = _molecule.coordinates3.Dihedral(self.atoms[0],self.atoms[1],self.atoms[2],self.atoms[3])
+	
+		self.DefineSteps()
+	#--------------------------------------------------------------------------------------
+	def GetDissociationLimit(self, bond_length):
+		"""Set maximum distance for bond breaking based on bond type."""
+    
+   		# Different bonds break at different distances
+		# Typically 1.5-2.5 times the equilibrium bond length
+    
+		if bond_length < 1.0:
+		# Very short bond (H-H, etc.)
+			return bond_length + 2.0
+		elif bond_length < 1.3:
+        # Typical C-H, N-H, O-H
+			return bond_length + 2.0
+		elif bond_length < 1.6:
+		# C-C, C-N, C-O single bonds
+			return bond_length + 2.2
+		elif bond_length < 2.0:
+			# Longer bonds (metal-ligand, etc.)
+			return bond_length + 2.5
+		else:
+			# Unusually long - fallback
+			return bond_length * 2.0  # Use multiplier to avoid "exploding"
+		
+
+	def GetAssociationLimit(self, current_distance):
+		"""Set maximum approach distance for bond formation."""    
+	
+		# For association, we scan from current distance DOWN to bond length
+		# The "maximum" in your coordinate might actually be the STARTING point
+		# while "minimum" is the target bond length
+    
+    	# Typical bond lengths for common pairs (in Å)
+		typical_bonds = {
+			('H', 'H'): 0.74, ('H', 'C'): 1.09, ('H', 'N'): 1.01, ('H', 'O'): 0.96,
+			('C', 'C'): 1.54, ('C', 'N'): 1.47, ('C', 'O'): 1.43,
+			('N', 'N'): 1.45, ('N', 'O'): 1.40, ('O', 'O'): 1.48
+		}
+    
+    	# Estimate target bond length
+		target_bond_length = self.EstimateBondLength(current_distance, typical_bonds)
+    
+		if current_distance > target_bond_length:
+        	# We're scanning towards shorter distances
+        	# Current distance is maximum, target bond length is minimum
+			return target_bond_length
+		else:
+        	# Already closer than typical bond - unusual
+        	# Scan slightly closer to find optimal bond
+			return max(current_distance - 1.0, 0.5)
+		
+	#--------------------------------------------------------------------------------------
+	def SetTransferLimits(self):
+		"""Set appropriate limits for 3-center transfer reactions."""
+    
+		# Correct swapped coordinate
+		final_RC = self.weight13 * self.BC + self.weight31 * self.AB
+    
+		scan_range = abs(final_RC - self.minimumD)
+		buffer = max(0.2, scan_range * 0.1)   # at least 0.2 Å buffer
+    
+		if final_RC > self.minimumD:
+			self.minimumD = self.minimumD - buffer
+			self.maximumD = final_RC + buffer	
+		else:
+			self.minimumD = final_RC - buffer
+			self.maximumD = self.minimumD + buffer
+    
+    # Ensure we cross zero (important for TS)
+		if self.minimumD > 0:
+			self.minimumD = -abs(self.minimumD)
+		if self.maximumD < 0:
+			self.maximumD = abs(self.maximumD)
+    
+    # Optional: clamp only if extremely large (> 5 Å total)
+		max_range = 5.0
+		if abs(self.maximumD - self.minimumD) > max_range:
+			print(f"  Large scan range ({abs(self.maximumD - self.minimumD):.2f}) for transfer")
+			print(f"  Clamping to ±{max_range/2:.1f}")
+			self.minimumD = max(self.minimumD, -max_range/2)
+			self.maximumD = min(self.maximumD, max_range/2)
+#---------------------------------------------------------------------------------------
+	def EstimateBondLength(self, current_distance, typical_bonds_dict):
+		"""Estimate expected bond length from atomic numbers."""
+    
+		# Try to get atom types from your molecule object
+		# This assumes you have access to atomic numbers
+		try:
+			atom1 = self.atoms[0]
+			atom2 = self.atoms[1]
+			# You'll need to get element symbols from your molecule object
+			# This is pseudocode - adapt to your actual data structure
+			elem1 = self.GetElementSymbol(atom1)
+			elem2 = self.GetElementSymbol(atom2)
+        
+			key = tuple(sorted([elem1, elem2]))
+			if key in typical_bonds_dict:
+				return typical_bonds_dict[key]
+		except:
+			pass
+    
+    	# Fallback based on current distance
+		if current_distance < 1.5:
+			return current_distance  # Assume we're scanning from near equilibrium
+		else:
+			return 1.5  # Generic bond length
+		
+	def DefineSteps(self):
+		"""Calculate number of steps for the scan."""
+    
+		print("Defining steps for the scan...")
+    
+		# Calculate range
+		if self.reaction_type == "association":
+		# For association, we're going from large to small distance
+			coordinate_range = abs(self.maximumD - self.minimumD)
+		elif self.reaction_type == "dissociation":
+			coordinate_range = abs(self.minimumD - self.maximumD)
+		elif self.reaction_type == "transfer":
+			coordinate_range = abs(self.maximumD - self.minimumD)
+       
+
+		# Calculate steps with safety check
+		if self.increment > 0:
+			nsteps = int(abs(coordinate_range / self.increment)) + 1
+            
+			# Safety: limit maximum steps to reasonable number
+			max_steps = 40  # Prevent runaway calculations
+			if nsteps > max_steps:
+				print(f"Warning: {nsteps} steps exceeds maximum ({max_steps})")
+				print(f"  Adjusting increment from {self.increment:.3f}")
+				self.increment = coordinate_range / (max_steps - 1)
+				nsteps = max_steps
+				print(f"  New increment: {self.increment:.3f}")            
+			self.nsteps = nsteps
+		else:
+			raise ValueError(f"Increment must be positive, got {self.increment}")
+		
 	#==================================================================================================
 	def Print(self):
 		"""Print reaction coordinate information to console."""
 		print( "Printing reaction coordinate information:")
 		print( "\tAtoms Indices: {}".format(self.atoms) )
 		print( "\tLabel: {}".format(self.label) )
-		print( "\tType: {}".format(self.Type) )
+		print( "\tType: {}".format(self.reaction_type) )
 		print( "\tWeight N1:{} ".format(self.weight13) )
 		print( "\tWeight N2:{} ".format(self.weight31) )
 		print( "\tIncrement:{} ".format(self.increment) )
 		print( "\tInitial distance:{}".format(self.minimumD) )		
 		print( "\tMaximum distance:{}".format(self.maximumD) )	
+		if self.reaction_type == "transfer":
+			print( "\tScan range: {:.2f} to {:.2f} ({} steps)".format(self.minimumD, self.maximumD, self.nsteps) )
+			print( "\tInitial AB: {:.3f}, BC: {:.3f}".format(self.AB, self.BC) )
+		elif self.reaction_type == "association":
+			print( "\tScanning from {:.2f} to {:.2f} ({} steps)".format(self.maximumD, self.minimumD, self.nsteps) )	
+		elif self.reaction_type == "dissociation":
+			print( "\tScanning from {:.2f} to {:.2f} ({} steps)".format(self.minimumD, self.maximumD, self.nsteps) )
 
 
 #==================================================================================
