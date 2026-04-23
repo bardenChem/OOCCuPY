@@ -80,6 +80,7 @@ class EnergyAnalysis:
 		self.identifiers    = []                              # List of string identifiers 
 		self.fig_size_x     = 0 
 		self.fig_size_y     = 0 
+		self.resumedTrajectory = None
 		if self.ylen > 0:
 			self.dimensions = 2
 		else:
@@ -465,7 +466,7 @@ class EnergyAnalysis:
 
 	#----------------------------------------------------------------------------------------
 	def Path_From_PES(self, in_point,fin_point,_path,_folder_dst,_system):
-		''''
+		'''
 		'''
 		#setting current point as initial
 		cp = in_point
@@ -568,6 +569,22 @@ class EnergyAnalysis:
 		pymols_file = open( os.path.join(_folder_dst,"traj1d.pym"), "w") 
 		pymols_file.write(pymol_text)
 		pymols_file.close()
+
+	def Analyze_Path(self, path, in_point=None, fin_point=None):
+		'''
+		Analyze the reaction path and identify potential energy barriers,
+		  intermediates, and transition states.
+		  Use the identified features to estimate reaction rates, calculate kcat values, and generate a report.
+		  calculate kcat values, and export resumed trajectory.
+		'''
+		if self.Type == "2D" or self.Type == "WHAM2D" or self.Type == "FE2D" or self.Type == "2DRef":
+			if in_point == None:
+				in_point = [0,0]
+			if fin_point == None:
+				fin_point = [self.xlen-1,self.ylen-1]
+			self.Path_From_PES(in_point,fin_point,path,"path_analysis",_system=None)
+
+		pass
 
 #================================================================================================#
 #======================================END OF THE FILE===========================================#
