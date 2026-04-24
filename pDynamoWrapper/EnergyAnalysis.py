@@ -569,6 +569,73 @@ class EnergyAnalysis:
 		pymols_file = open( os.path.join(_folder_dst,"traj1d.pym"), "w") 
 		pymols_file.write(pymol_text)
 		pymols_file.close()
+	
+		return(pathx, pathy, self.energies1D, kcats)
+
+
+	def ResamplePath(self, path_indices,min_points=15, max_points=20, include_curvature=True):
+		"""
+		Reduce number of points in a reaction path while preserving key features.
+    
+    	Args:
+        	path_indices (list of tuples): (x, y) grid indices along path.
+        	max_points (int): Maximum number of points to keep.
+        	include_curvature (bool): Keep points where path changes direction.
+    
+    	Returns:
+        	list of indices into the original path to keep.
+    	"""
+		n = len(self.energies1D)
+     
+		keep = set()
+		keep.add(0)                 # first point
+		keep.add(n-1)               # last point
+    
+    	# 1. Local extrema (minima and maxima)
+		for i in range(1, n-1):
+			e_prev, e_curr, e_next = self.energies1D[i-1], self.energies1D[i], self.energies1D[i+1]
+			if (e_curr > e_prev and e_curr > e_next) or (e_curr < e_prev and e_curr < e_next):
+				keep.add(i)
+    
+		# 2. Direction changes (curvature)
+		if include_curvature and n > 3:
+			for i in range(1, n-1):
+				v1 = np.array(path_indices[i]) - np.array(path_indices[i-1])
+				v2 = np.array(path_indices[i+1]) - np.array(path_indices[i])
+				n1 = np.linalg.norm(v1)
+				n2 = np.linalg.norm(v2)
+			if n1 > 0 and n2 > 0:
+				cos_angle = np.dot(v1, v2) / (n1 * n2)
+				if cos_angle < 0.707:   # angle > 45°
+					keep.add(i)
+    
+		kept = sorted(keep)
+
+
+		# 3. If still too few, add evenly spaced points from the original path
+		if len(kept) < min_points:
+		# Always keep the original first and last
+			needed = min_points - len(kept)
+			# Create a set of additional indices to add, choosing from those not already kept
+			candidates = set(range(n)) - keep
+			if candidates:
+				# Sort candidates (they are naturally in order)
+				candidates = sorted(candidates)
+				# Choose evenly spaced indices from the candidate list
+				step = len(candidates) / (needed + 1)
+				add_indices = [candidates[int(i*step)] for i in range(1, needed+1)]
+				keep.update(add_indices)
+				kept = sorted(keep)
+    
+    	# 3. If still too many, subsample evenly
+		if len(kept) > max_points:
+			step = len(kept) / max_points
+			kept = [kept[int(i*step)] for i in range(max_points-1)] + [kept[-1]]
+
+		
+
+    
+		return kept
 
 	def Analyze_Path(self, path, in_point=None, fin_point=None):
 		'''
