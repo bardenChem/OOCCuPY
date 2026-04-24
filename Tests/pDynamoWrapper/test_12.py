@@ -2,12 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
 import os, sys
 
-folder = os.path.join("Tests","pDynamoWrapper","test_12")
-folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
-folder06 = os.path.join("Tests","pDynamoWrapper","test_06")
+from config import get_config
+config = get_config()
+ooccupy_root = config.get_ooccupy_root()
+
+folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_12")
+folder05 = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_05")
+folder06 = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_06")
 
 #===================================
 def info():

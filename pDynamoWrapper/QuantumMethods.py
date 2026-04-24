@@ -128,7 +128,8 @@ class QuantumMethods:
 			"new_radius_qc":0.0,
 			"pySCF_method":"RHF",
 			"NmaxThreads":1,
-			"molden_name":"file.molden"
+			"molden_name":"file.molden",
+			"orca_method":"HF",
 		}
 		for key in _parameters.keys(): self.pars[key] = _parameters[key]
 		self.methodClass = self.pars["method_class"]

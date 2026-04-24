@@ -2,8 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
 import os
+
+from config import get_config
+config = get_config()
+ooccupy_root = config.get_ooccupy_root()
+folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_20")
+folder05 = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_05")
 #===================================
 def info():
 	print_message = "OOCCuPy pDynamoWrapper Libray test #20:\t "
@@ -28,14 +33,14 @@ def Run_Test():
 	}
 	_parameters["set_qc_region"]    = "yes"
 	_parameters["residue_patterns"] = ["*:LIG.248:*","*:GLU.164:*","*:HIE.94:*","*:ASN.9:*"]
-	_parameters["pkl_file"]         = "Test/pDynamoWrapper/test_05/qcmm_optam1/7tim_am1_opt_PF.pkl"
+	_parameters["pkl_file"]         = os.path.join(folder05, "qcmm_optam1", "7tim_am1_opt_PF.pkl")
 
-	_path   = "Test/pDynamoWrapper/test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
+	_path   = os.path.join(folder05, "Multiple_Distance_rm1", "ScanTraj.ptGeo")
 	if not os.path.exists(_path): os.system("python3 test_05")
 
 	simulation_parameters = { "xnbins":20			    ,
 				   "source_folder":_path                , 
-				   "folder":"test_20"                   ,
+				   "folder":str(ooccupy_root / "Tests" / "pDynamoWrapper" / "test_20"),
 				   "QCcharge":-3		                ,
 				   "multiplicity":1 	                ,
 				   "basis":"6-31G*"						,
@@ -44,7 +49,7 @@ def Run_Test():
 				   "simulation_type":"Energy_Refinement",
 				   "Software":"pySCF"					}	
 
-	test_03 = Wrapper("test_20")
+	test_03 = Wrapper(folder)
 	test_03.Set_System(_parameters)
 	test_03.Run_Simulation(simulation_parameters)
 	

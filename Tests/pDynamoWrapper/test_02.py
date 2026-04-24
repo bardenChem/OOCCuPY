@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
 from pDynamoWrapper import Wrapper
 import os,sys
 
 folder = os.path.join("Tests","pDynamoWrapper","test_02")
+from config import get_config
 
 #===================================
 def info():
@@ -18,10 +20,17 @@ def Run_Test():
 	'''
 	'''
 	info()
+	config = get_config()
+	ooccupy_root = config.get_ooccupy_root()
+
+	# Build paths using ooccupy_root
+	folder = ooccupy_root / "Tests" / "pDynamoWrapper" / "test_01"
+	data_dir = ooccupy_root / "data"
+	
 	SMOmodels = ["am1","am1dphot","pddgpm3","pm3","rm1","pm6"]		
 	_parameters = {
 		"Input_Type":"geometry",
-		"crd_file":os.path.join("Tests","pDynamoWrapper","data","cyclohexane_single_frame.xyz"),
+		"crd_file":os.path.join(data_dir,"cyclohexane_single_frame.xyz"),
 		"set_energy_model":"QM",
 		"Hamiltonian":"am1",
 		"method_class":"SMO"
@@ -32,12 +41,13 @@ def Run_Test():
 		test_01.Set_System(_parameters)
 	#------------------------------------	
 	_parameters["method_class"]="ORCA"
-	_parameters["functional"]  ="HF"
+	_parameters["orca_method"]  ="HF"
 	_parameters["basis"]       ="6-31G*"
 	test_03 = Wrapper(folder)
 	test_03.Set_System(_parameters)	
 	#--------------------------------
 	_parameters["method_class"]="pySCF"
+	_parameters["pySCF_method"]="RKS"
 	_parameters["functional"]  ="b3lyp"
 	_parameters["basis"]       ="6-31G*"
 	test_04 = Wrapper(folder)

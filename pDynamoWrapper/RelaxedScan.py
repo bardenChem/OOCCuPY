@@ -87,7 +87,7 @@ class SCAN:
         self.trajFolder         = "ScanTraj"
         self.restart            = RESTART
         self.DMAXIMUM           = [ 0.0, 0.0 ]                       # List with the Maximum distances for the reaction coordinates
-               
+        self.RCs                = []                                 # List to hold the reaction coordinate objects       
         #------------------------------------------------------------------------  
         #set the parameters dict for the geometry search classes
         self.GeoOptPars =   { "maxIterations":self.maxIt  ,
@@ -208,7 +208,7 @@ class SCAN:
             dihedral: Flag for dihedral constraints.
         """
         #------------------------------------------------------------
-        _RC.Print()
+        self.RCs.append(_RC)
         ndim = self.nDim # temp var to hold the index of the curren dim
         self.nDim += 1
         self.atoms.append(_RC.atoms)
@@ -220,6 +220,7 @@ class SCAN:
         self.massConstraint         = _RC.massConstraint
         self.DMAXIMUM[ndim]         = _RC.maximumD
         self.nsteps[ndim]           = _RC.nsteps  
+
 
 
         if len(_RC.atoms)   == 3: self.multipleDistance[ndim] = True
@@ -248,11 +249,14 @@ class SCAN:
         text_line = "{0:>3s} {1:>15s} {2:>15s}".format('x','RC1','Energy' )
         self.text += text_line+"\n"
         
+        if _nsteps == -1:
+
+            _nsteps = self.nsteps[0]
+
         self.energiesMatrix      = pymp.shared.array( (_nsteps), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (_nsteps), dtype=float )
         
-        if _nsteps == -1:
-            _nsteps = self.nsteps[0]
+        
         if self.dihedral:  self.Run1DScanDihedral()
         else:
             if    self.multipleDistance[0]:  self.Run1DScanMultipleDistance()

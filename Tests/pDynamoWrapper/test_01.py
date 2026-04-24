@@ -27,11 +27,11 @@ def Run_Test():
 
 	# Build paths using ooccupy_root
 	folder = ooccupy_root / "Tests" / "pDynamoWrapper" / "test_01"
-	data_dir = ooccupy_root / "data" / "pDynamoWrapper" / "data"
+	data_dir = ooccupy_root / "data"
 
 	_parameters = {
 		"Input_Type":"geometry",
-		"crd_file":os.path.join(ooccupy_root, "data", "cyclohexane_single_frame.xyz"),
+		"crd_file":os.path.join(data_dir, "cyclohexane_single_frame.xyz"),
 	}
 	#test load xyz
 	test_01 = Wrapper(folder)
@@ -39,22 +39,22 @@ def Run_Test():
 	test_01.SaveSystem()
 	#test load gromacs topology and coordinate files 
 	_parameters["Input_Type"] = "gromacs"
-	_parameters["crd_file"] = os.path.join(ooccupy_root, "data", "1atp_peptide.gro")
-	_parameters["top_file"] = os.path.join(ooccupy_root, "data", "1atp_peptide.top")	
+	_parameters["crd_file"] = os.path.join(data_dir, "1atp_peptide.gro")
+	_parameters["top_file"] = os.path.join(data_dir, "1atp_peptide.top")	
 	test_02 = Wrapper(folder)
 	test_02.Set_System(_parameters)
 	test_02.SaveSystem()
 	#test load amber force field topology and coordinate files 
 	_parameters["Input_Type"] = "amber"
-	_parameters["crd_file"] = os.path.join(ooccupy_root, "data", "7tim.crd")
-	_parameters["top_file"] = os.path.join(ooccupy_root, "data", "7tim.top")
+	_parameters["crd_file"] = os.path.join(data_dir, "7tim.crd")
+	_parameters["top_file"] = os.path.join(data_dir, "7tim.top")
 	test_03 = Wrapper(folder)
 	test_03.Set_System(_parameters)
 	test_03.SaveSystem()
 	#test load pkl and test spherical pruning and fixed atoms
 
 	_parameters["Input_Type"] = "protein"
-	_parameters["pdb_file"]   = os.path.join(ooccupy_root, "data", "1l2y.pdb")
+	_parameters["pdb_file"]   = os.path.join(data_dir, "1l2y.pdb")
 	test_04 = Wrapper(folder)
 	test_04.Set_System(_parameters)
 	test_04.SaveSystem()

@@ -146,8 +146,7 @@ class ReactionCoordinate:
 			set_pars      = False
 		if not _sigma_pk1_pk3 == None: 	self.weight13 = _sigma_pk1_pk3
 		if not _sigma_pk3_pk1 == None:	self.weight31 = _sigma_pk3_pk1		
-		if set_pars: 
-			
+		if set_pars:			
 			# ============================================================
 			# TWO-CENTER REACTIONS (Association/Dissociation)
         	# ============================================================
@@ -205,7 +204,6 @@ class ReactionCoordinate:
 			elif self.Type == "Dihedral": 
 				self.minimumD = _molecule.coordinates3.Dihedral(self.atoms[0],self.atoms[1],self.atoms[2],self.atoms[3])
 	
-		self.DefineSteps()
 	#--------------------------------------------------------------------------------------
 	def GetDissociationLimit(self, bond_length):
 		"""Set maximum distance for bond breaking based on bond type."""
@@ -341,7 +339,16 @@ class ReactionCoordinate:
 				print(f"  New increment: {self.increment:.3f}")            
 			self.nsteps = nsteps
 		else:
-			raise ValueError(f"Increment must be positive, got {self.increment}")
+			if not self.reaction_type == "association":
+				print(f"Warning: Non-positive increment ({self.increment}) for non-dissociation")
+				print("  Setting default increment to 0.1 Å")
+				self.increment = 0.1
+				self.nsteps = int(abs(coordinate_range / self.increment)) + 1
+			else:
+				pass  # For association, we can allow non-positive increment since we're scanning down to bond length
+
+
+
 		
 	#==================================================================================================
 	def Print(self):

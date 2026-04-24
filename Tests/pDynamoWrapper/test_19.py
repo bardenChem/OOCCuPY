@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
+
 import os
 
-folder = os.path.join("Tests","pDynamoWrapper","test_19")
+from config import get_config
+config = get_config()
+ooccupy_root = config.get_ooccupy_root()
+folder = os.path.join(ooccupy_root,"Tests","pDynamoWrapper","test_19")
 
 #===================================
 def info():
@@ -21,13 +24,13 @@ def Run_Test():
 	info()
 	_parameters = {
 		"Input_Type":"geometry",
-		"crd_file":os.path.join("Test","pDynamoWrapper","data","cyclohexane_single_frame.xyz"),
+		"crd_file":os.path.join(ooccupy_root, "data", "cyclohexane_single_frame.xyz"),
 		"set_energy_model":"QM",
 		"functional":"HF",
 		"method_class":"ORCA",
 		"basis":"6-31G*",
 		"save_frequency":5,
-		"scratch":"Test/pDynamoWrapper/test_02_orca_cyclohex",
+		"scratch":os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_02_orca_cyclohex"),
 		"NmaxThreads":1
 	}
 	
@@ -43,7 +46,7 @@ def Run_Test():
 	_parameters["set_qc_region"]   ="yes"
 	_parameters["residue_patterns"]=["*:ARG.19:*"]
 	_parameters["QCcharge"]        = 1
-	_parameters["scratch"]		   = "test_19_orca_qmmm_1atp"
+	_parameters["scratch"]		   = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_19_orca_qmmm_1atp")
 
 	test_03 = Wrapper(folder)
 	test_03.Set_System(_parameters)

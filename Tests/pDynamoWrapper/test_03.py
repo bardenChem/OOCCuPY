@@ -4,7 +4,10 @@
 from pDynamoWrapper import Wrapper
 import os, sys
 
-folder = os.path.join("Tests","pDynamoWrapper","test_03")
+from config import get_config
+config = get_config()
+ooccupy_root = get_config().get_ooccupy_root()
+folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_03")
 
 #===================================
 def info():
@@ -18,13 +21,23 @@ def Run_Test():
 	Test geometry optimization algorithms
 	'''
 	info()
+	
+	# Get OOCCuPY root from config
+	config = get_config()
+	ooccupy_root = config.get_ooccupy_root()
+	
+	# Build paths using ooccupy_root
+	folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_03")
+	test_01_folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_01")
+	test_18_folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_18")
+
 	algs = ["ConjugatedGradient",
 			"LFBGS"             ,
 			"SteepestDescent"   ,
 			#"QuasiNewton"       ,
 			"FIRE"              ]
 	
-	if not os.path.exists( os.path.join("Tests","pDynamoWrapper","test_01","7tim.pkl") ):
+	if not os.path.exists( os.path.join(test_01_folder, "7tim_pruned_and_fix.pkl") ):
 		try: os.system("python3 Tests/pDynamoWrapper/test_01.py")
 		except: 
 			print("There is no input file for this example! Run example #01!")
@@ -32,7 +45,7 @@ def Run_Test():
 
 	_parameters = {
 		"Input_Type":"pkl",
-		"pkl_file":"Tests/pDynamoWrapper/test_01/7tim_pruned_and_fix.pkl",
+		"pkl_file":os.path.join(test_01_folder, "7tim_pruned_and_fix.pkl"),
 		"simulation_type":"Geometry_Optimization",
 		"save_format":".dcd",
 		"save_frequency":20,
@@ -50,13 +63,13 @@ def Run_Test():
 		test_01.SaveSystem("7tim_opt"+alg)
 	#-----------------------------------
 	#QC/MM optimization
-	if not os.path.exists( os.path.join("Tests","pDynamoWrapper","test_18","7tim_qcmm_rm1_pruned") ):
-		try: os.system("python3 Test/pDynamoWrapper/test_18.py")
+	if not os.path.exists( os.path.join(test_18_folder, "7tim_qcmm_rm1_pruned.pkl") ):
+		try: os.system("python3 Tests/pDynamoWrapper/test_18.py")
 		except: 
 			print("There is no input file for this example! Run example #18!")
 			return(False)
 
-	_parameters["pkl_file"] = "Tests/pDynamoWrapper/test_18/7tim_qcmm_rm1_pruned.pkl"
+	_parameters["pkl_file"] = os.path.join(test_18_folder, "7tim_qcmm_rm1_pruned.pkl")
 	_parameters["optmizer"] = "ConjugatedGradient"
 	_parameters["trajectory_name"]="7timqcmmm.ptGeo"
 	test_02 = Wrapper(folder)

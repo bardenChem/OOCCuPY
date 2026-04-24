@@ -233,7 +233,12 @@ class Analysis:
 		if  "retrieve_path" in self.parameters: 
 			if fin_point[0] < 0: fin_point[0] = self.parameters["xsize"] - 1
 			if fin_point[1] < 0: fin_point[1] = self.parameters["ysize"] - 1
-			EA.Path_From_PES(in_point,fin_point,self.parameters["retrieve_path"],self.baseFolder,self.molecule.system)
+			if "max_points" in self.parameters: max_points = self.parameters["max_points"]
+			else: max_points = 21
+			if "min_points" in self.parameters: min_points = self.parameters["min_points"]
+			else: min_points = 15
+			_p_x, _p_y = EA.Path_From_PES(in_point,fin_point,self.parameters["retrieve_path"],self.baseFolder,self.molecule.system,min_points=min_points,max_points=max_points)
+			EA.Plot2D(cnt_lines,crd1_label,crd2_label,xlim,ylim,show,pathx=_p_x,pathy=_p_y)
 
 	#=========================================================================
 	def PMFAnalysis(self):

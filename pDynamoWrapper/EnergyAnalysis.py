@@ -81,6 +81,8 @@ class EnergyAnalysis:
 		self.fig_size_x     = 0 
 		self.fig_size_y     = 0 
 		self.resumedTrajectory = None
+		self.plot1d_name   = "1d.png"
+		self.plot2d_name   = "2d.png"
 		if self.ylen > 0:
 			self.dimensions = 2
 		else:
@@ -140,6 +142,7 @@ class EnergyAnalysis:
 			self.multiple1Dplot.append(energyTmp)
 			self.identifiers.append(method)
 			self.labely = "Potential Energy (kJ/mol)"
+			self.plot1d_name = "1D_Ref.png"
 		#----------------------------------
 		elif self.Type == "2D":
 			for line in reading:
@@ -190,6 +193,7 @@ class EnergyAnalysis:
 			for i in range(len(self.energies1D)):
 				if self.energies1D[i] == 43434.0000:
 					self.energies1D[i] = MaX
+			self.plot1d_name = "WHAM1D.png"
 		#----------------------------------
 		elif self.Type == "WHAM2D":
 			m = 0
@@ -215,6 +219,7 @@ class EnergyAnalysis:
 				for i in range(self.ylen):
 					if self.energiesMatrix[i][j] == 43434.0000:
 						self.energiesMatrix[i][j] = MaX
+			self.plot2d_name = "WHAM2D.png"
 		#----------------------------------
 		elif self.Type == "FE1D":
 			energyTmp = np.zeros( (self.xlen), dtype=float )
@@ -222,7 +227,8 @@ class EnergyAnalysis:
 				lns = line.split()
 				m = int( lns[0] )
 				energyTmp[m]  = float(lns[1]) 
-			self.energies1D = energyTmp		
+			self.energies1D = energyTmp
+			self.plot1d_name = "FE1D.png"		
 		#----------------------------------
 		elif self.Type == "FE2D":
 			for line in reading:
@@ -230,6 +236,7 @@ class EnergyAnalysis:
 				m = int( lns[0])				
 				n = int( lns[1])
 				self.energiesMatrix[n][m] = float(lns[2])
+			self.plot2d_name = "FE2D.png"
 		#----------------------------------
 		self.nplots1D += 1	
 	#================================================
@@ -306,11 +313,12 @@ class EnergyAnalysis:
 		plt.xlabel(label)
 		plt.ylabel(self.labely)	
 		#--------------------------------------------
-		plt.savefig(self.baseName+"1d.png",dpi=1000)
+		plt.savefig(self.baseName+self.plot1d_name,dpi=1000)
 		#---------------------------------------------
 		if SHOW: plt.show()
 		plt.clf()
 		plt.close()
+
 
 	#===============================================
 	def MultPlot1D(self,label,SHOW=False):
@@ -331,10 +339,30 @@ class EnergyAnalysis:
 		if SHOW: plt.show()	
 		plt.clf()	
 		plt.close()
-	#===============================================
-	def Plot2D(self,contourlines,crd1label,crd2label,_xlim=None,_ylim=None,SHOW=False,_figS=[7,5],_reverserc1=False,_reverserc2=False):
+	#==================================================================
+	def Plot2D(self,contourlines,
+			crd1label,
+			crd2label,
+			_xlim=None,_ylim=None,
+			SHOW=False,
+			_figS=[7,5],
+			_reverserc1=False,
+			_reverserc2=False,
+			path_points=None):
 		'''
-		Plot contour plot for potential, free energy and potential of mean field
+		Plot contour plot for potential, free energy and potential of mean field.
+		
+		Args:
+			contourlines: Number of contour lines to plot
+			crd1label: Label for x-axis (first coordinate)
+			crd2label: Label for y-axis (second coordinate)
+			_xlim: X-axis limits [min, max]
+			_ylim: Y-axis limits [min, max]
+			SHOW: Show plot window
+			_figS: Figure size [width, height]
+			_reverserc1: Reverse x-axis
+			_reverserc2: Reverse y-axis
+			path_points: Tuple of (pathx, pathy) lists for plotting minimum energy path
 		'''			
 		#-----------------------------------------------------
 		X = []
@@ -370,7 +398,6 @@ class EnergyAnalysis:
 					Y = np.linspace(self.ylen,0,self.ylen)
 				else: 
 					Y = np.linspace(0,self.ylen,self.ylen)
-
 		#------------------------------------------------------
 		else:
 			Y = np.linspace(_ylim[0],_ylim[1],self.ylen)
@@ -391,7 +418,28 @@ class EnergyAnalysis:
 		X_grid, Y_grid = np.meshgrid(X, Y)
 		im = ax0.pcolormesh(X,Y,z, cmap=cmap, norm=norm, shading = "gouraud")		
 		am = ax0.contour(X_grid,Y_grid,z,contourlines, colors='k')		
-		ax0.clabel(am, inline=1, fontsize=8, fmt='%1.1f',colors="k")		
+		ax0.clabel(am, inline=1, fontsize=8, fmt='%1.1f',colors="k")
+		
+		# Plot minimum energy path if provided
+		if path_points is not None:
+			pathx, pathy = path_points
+			# Convert grid indices to coordinate values
+			if len(self.RC1) > 0 and len(self.RC2) > 0:
+				# Map grid indices to actual coordinate values
+				path_x_coords = [X[min(int(x), len(X)-1)] for x in pathx]
+				path_y_coords = [Y[min(int(y), len(Y)-1)] for y in pathy]
+			else:
+				path_x_coords = pathx
+				path_y_coords = pathy
+			
+			# Plot path as line with markers
+			ax0.plot(path_x_coords, path_y_coords, 'r-', linewidth=2, alpha=0.7, label='Minimum Energy Path')
+			ax0.plot(path_x_coords, path_y_coords, 'ro', markersize=6, alpha=0.8)
+			# Mark start and end points
+			ax0.plot(path_x_coords[0], path_y_coords[0], 'g^', markersize=10, label='Start')
+			ax0.plot(path_x_coords[-1], path_y_coords[-1], 'bs', markersize=10, label='End')
+			ax0.legend(loc='best', fontsize=10)
+		
 		cbar = fig.colorbar(im, ax=ax0)
 		cbar.ax.tick_params()
 		#---------------------------------------------
@@ -412,13 +460,22 @@ class EnergyAnalysis:
 			_method = "_" + self.identifiers[-1]
 
 		plotName = self.baseName + _method[:5]
+		if path_points is not None:
+			plotName += "_MEP"
 		plt.savefig(plotName+".png",dpi=1000)
 		if SHOW: plt.show()
 		plt.clf()
 		plt.close()
 		fig.clf()
 	#----------------------------------------------------------------------------------------
-	def MultPlot2D(self,contourlines,crd1label,crd2label,_xlim=None,_ylim=None,SHOW=False,_reverserc1=False,_reverserc2=False):
+	def MultPlot2D(self,contourlines,
+				crd1label,
+				crd2label,
+				_xlim=None,
+				_ylim=None,
+				SHOW=False,
+				_reverserc1=False,
+				_reverserc2=False):
 		'''
 		'''
 		for i in range(self.nplots2D):
@@ -438,7 +495,7 @@ class EnergyAnalysis:
 		plt.plot(rc0,self.energies1D,'-ok')
 		plt.xlabel("Frame Window (n)")
 		plt.ylabel(self.labely)	
-		plt.savefig(self.baseName+".png",dpi=1000)
+		plt.savefig(self.baseName+self.plot1d_name,dpi=1000)
 		#---------------------------------------------
 		if SHOW: plt.show()	
 		plt.clf()
@@ -465,8 +522,12 @@ class EnergyAnalysis:
 		return kcat
 
 	#----------------------------------------------------------------------------------------
-	def Path_From_PES(self, in_point,fin_point,_path,_folder_dst,_system):
+	def Path_From_PES(self, in_point,fin_point,_path,_folder_dst,_system,min_points=15,max_points=21):
 		'''
+		Calculate minimum energy path from starting point to final point on PES.
+		
+		Returns:
+			tuple: (pathx, pathy) - lists of x and y coordinates of the minimum energy path
 		'''
 		#setting current point as initial
 		cp = in_point
@@ -541,7 +602,9 @@ class EnergyAnalysis:
 			else:
 				kcats.append(0.0)	
 
-				
+		#---------------------------------------------------------------
+		# Export the path as a trajectory and log file for visualization in PyMOL and other tools
+		#---------------------------------------------------------------
 		trajName = os.path.join( _folder_dst, "traj1d.dcd" )
 		trajpath = os.path.join( _folder_dst, "traj1d.ptGeo" )
 		try: Duplicate( trajpath, trajName, _system ) 
@@ -565,14 +628,61 @@ class EnergyAnalysis:
 		pymol_text+= "\nload_traj {}, ".format( "traj1d.dcd" )
 		pymol_text+= "frame0, 1, start=1, stop=-1, interval=1"
 
-
 		pymols_file = open( os.path.join(_folder_dst,"traj1d.pym"), "w") 
 		pymols_file.write(pymol_text)
 		pymols_file.close()
-	
-		return(pathx, pathy, self.energies1D, kcats)
+
+		#-----------------------------------
+		#Resample the path to reduce number of frames while preserving key features
+		#-----------------------------------
+		pathIndices = list(zip(pathx, pathy))
+		Kept_indices = self.ResamplePath(pathIndices, min_points=min_points, max_points=max_points, include_curvature=True)
+
+		#write the resampled path log
+		log_text = "x Energy method Energy_kcal kcat \n"
+		new_log  = open( os.path.join(_folder_dst,"traj1D_resampled.log"), 'w' )
+		for i in Kept_indices:						
+			energy_kcal = self.energies1D[i] * 0.239006
+			log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
+		new_log.write(log_text)
+		new_log.close()
+
+		#export resampled path frames
+		self.energies1D = [self.energies1D[i] for i in Kept_indices]
+		self.Type = "1DRef"
+		self.plot1d_name = "1D_Ref_resampled.png"
+		self.Plot1D("Reaction Path frames (n)")
+		for idx in Kept_indices:
+			pkl = _path + "/frame{}_{}.pkl".format(pathx[idx],pathy[idx])			
+			finalPath = os.path.join( _folder_dst , "traj1d_resampled.ptGeo/frame{}.pkl".format(idx) )			
+			_system.coordinates3 = ImportCoordinates3(pkl,log=None)
+			pdb_file = os.path.join( _folder_dst , "frame{}.pdb".format(idx) )
+			ExportSystem( pdb_file,_system,log=None)
+			shutil.copy(pkl,finalPath)
+
+		trajName = os.path.join( _folder_dst, "traj1d_resampled.dcd" )
+		trajpath = os.path.join( _folder_dst, "traj1d_resampled.ptGeo" )
+		try: Duplicate( trajpath, trajName, _system ) 
+		except: pass
+		
+		pymol_text = "preset.publication(selection='all')\n"
+		pymol_text+= "set sticks\n"
+		pymol_text+= "set label_size, 20\n"
+		pymol_text+= "set sphere_scale, 0.2\n"
+		pymol_text+= "set bg_rgb, white\n" 
+		pymol_text+= "set stick_radius, 0.18\n"
+		pymol_text+= "load {}".format( "frame0.pdb" )
+		pymol_text+= "\nload_traj {}, ".format( "traj1d_resampled.dcd" )
+		pymol_text+= "frame0, 1, start=1, stop=-1, interval=1"
 
 
+		pymols_file = open( os.path.join(_folder_dst,"traj1d_resampled.pym"), "w") 
+		pymols_file.write(pymol_text)
+		pymols_file.close()
+
+		# Return the minimum energy path coordinates
+		return pathx, pathy
+	#----------------------------------------------------------------------------------------
 	def ResamplePath(self, path_indices,min_points=15, max_points=20, include_curvature=True):
 		"""
 		Reduce number of points in a reaction path while preserving key features.
@@ -586,7 +696,6 @@ class EnergyAnalysis:
         	list of indices into the original path to keep.
     	"""
 		n = len(self.energies1D)
-     
 		keep = set()
 		keep.add(0)                 # first point
 		keep.add(n-1)               # last point
@@ -604,15 +713,16 @@ class EnergyAnalysis:
 				v2 = np.array(path_indices[i+1]) - np.array(path_indices[i])
 				n1 = np.linalg.norm(v1)
 				n2 = np.linalg.norm(v2)
-			if n1 > 0 and n2 > 0:
-				cos_angle = np.dot(v1, v2) / (n1 * n2)
-				if cos_angle < 0.707:   # angle > 45°
-					keep.add(i)
-    
+				if n1 > 0 and n2 > 0:
+					cos_angle = np.dot(v1, v2) / (n1 * n2)
+					if cos_angle < 0.707:   # angle > 45°
+						keep.add(i)
+
 		kept = sorted(keep)
 
 
-		# 3. If still too few, add evenly spaced points from the original path
+		# 3. If mandatory set is smaller than min_points, add evenly spaced optional points
+		optional = []
 		if len(kept) < min_points:
 		# Always keep the original first and last
 			needed = min_points - len(kept)
@@ -623,35 +733,56 @@ class EnergyAnalysis:
 				candidates = sorted(candidates)
 				# Choose evenly spaced indices from the candidate list
 				step = len(candidates) / (needed + 1)
-				add_indices = [candidates[int(i*step)] for i in range(1, needed+1)]
-				keep.update(add_indices)
-				kept = sorted(keep)
+				optional = [candidates[int(i*step)] for i in range(1, needed+1)]
+
+		all_kept = sorted(keep.union(optional))
     
     	# 3. If still too many, subsample evenly
-		if len(kept) > max_points:
-			step = len(kept) / max_points
-			kept = [kept[int(i*step)] for i in range(max_points-1)] + [kept[-1]]
+		if len(all_kept) > max_points:
+			max_optional = max_points - len(keep)
+			if max_optional <=0:
+				return all_kept
+			else:
+				if len(optional) > max_optional:
+					step = len(optional) / max_optional
+					subsampled_optional = [optional[int(i*step)] for i in range(max_optional)]
+				else:
+					subsampled_optional = optional
+				all_kept = sorted(keep.union(subsampled_optional))
 
-		
-
-    
-		return kept
-
-	def Analyze_Path(self, path, in_point=None, fin_point=None):
+		return all_kept 
+	#----------------------------------------------------------------------------------------
+	def Rewrite_Log(self):
 		'''
-		Analyze the reaction path and identify potential energy barriers,
-		  intermediates, and transition states.
-		  Use the identified features to estimate reaction rates, calculate kcat values, and generate a report.
-		  calculate kcat values, and export resumed trajectory.
+		Rewrite log file with kcat values for each frame
 		'''
-		if self.Type == "2D" or self.Type == "WHAM2D" or self.Type == "FE2D" or self.Type == "2DRef":
-			if in_point == None:
-				in_point = [0,0]
-			if fin_point == None:
-				fin_point = [self.xlen-1,self.ylen-1]
-			self.Path_From_PES(in_point,fin_point,path,"path_analysis",_system=None)
-
-		pass
+		if not self.multiple1Dplot:
+			kcats = [0]
+			for i in range(1, n-1):
+				e_prev, e_curr, e_next = self.energies1D[i-1], self.energies1D[i], self.energies1D[i+1]
+				if (e_curr > e_prev and e_curr > e_next):
+					kcats.append(i)
+			kcats.append(0)
+			log_text = "x Energy method Energy_kcal kcat \n"
+			new_log  = open( os.path.join(self.baseName,"Energy_1Dkcats.log"), 'w' )
+			for i in range(len(self.energies1D)):						
+				energy_kcal = self.energies1D[i] * 0.239006
+				log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
+			new_log.write(log_text)
+		elif self.multiple1Dplot:
+			for k in range(self.nplots1D):
+				kcats = [0]
+				for i in range(1, n-1):
+					e_prev, e_curr, e_next = self.multiple1Dplot[k][i-1], self.multiple1Dplot[k][i], self.multiple1Dplot[k][i+1]
+					if (e_curr > e_prev and e_curr > e_next):
+						kcats.append(i)
+				kcats.append(0)
+				log_text = "x Energy method Energy_kcal kcat \n"
+				new_log  = open( os.path.join(self.baseName,"Energy_1Dkcats_{}.log".format(self.identifiers[k])), 'w' )
+				for i in range(len(self.multiple1Dplot[k])):						
+					energy_kcal = self.multiple1Dplot[k][i] * 0.239006
+					log_text += "{} {} pickPath {} {}\n".format(i,self.multiple1Dplot[k][i],energy_kcal,kcats[i])
+				new_log.write(log_text)
 
 #================================================================================================#
 #======================================END OF THE FILE===========================================#

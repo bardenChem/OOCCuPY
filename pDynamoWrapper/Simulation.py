@@ -362,9 +362,40 @@ class Simulation:
 			
 			if   _type == "1D": EA.Plot1D(crd1_label)
 			elif _type == "2D":
+				cnt_lines = self.parameters["contour_lines"]
 				self.parameters["xlim"] = [scan.reactionCoordinate1[0,0] , scan.reactionCoordinate1[-1,-1] ]
-				self.parameters["ylim"] = [scan.reactionCoordinate2[0,0] , scan.reactionCoordinate2[-1,-1] ]					
-				EA.Plot2D(self.parameters["contour_lines"],crd1_label,crd2_label,_xlim=self.parameters["xlim"],_ylim=self.parameters["ylim"],_figS=self.parameters["fig_size"])		
+				self.parameters["ylim"] = [scan.reactionCoordinate2[0,0] , scan.reactionCoordinate2[-1,-1] ]
+				#------------------------------------------------------					
+				EA.Plot2D(cnt_lines,
+			  				crd1_label,
+							crd2_label,
+							_xlim=self.parameters["xlim"],
+							_ylim=self.parameters["ylim"],
+							_figS=self.parameters["fig_size"])
+				#------------------------------------------------------
+				retrieve_path = self.baseFolder + "/" + scan.trajFolder
+				fin_point =  in_point = [0,0]
+				fin_point[0] = self.parameters["xsize"] - 1
+				fin_point[1] = self.parameters["ysize"] - 1
+				if "max_points" in self.parameters: max_points = self.parameters["max_points"]
+				else: max_points = 21
+				if "min_points" in self.parameters: min_points = self.parameters["min_points"]
+				else: min_points = 15
+				_p_x, _p_y = EA.Path_From_PES(in_point,
+								  fin_point,
+								  retrieve_path,
+								  self.baseFolder,
+								  self.molecule.system,
+								  min_points=min_points,
+								  max_points=max_points)
+				EA.Plot2D(cnt_lines,
+			  				crd1_label,
+							crd2_label,
+							_xlim=self.parameters["xlim"],
+							_ylim=self.parameters["ylim"],
+							_figS=self.parameters["fig_size"],
+							pathx=_p_x,
+							pathy=_p_y)
 	#==================================================================================	
 	def ScanRefinement(self):
 		'''

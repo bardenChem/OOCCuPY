@@ -4,8 +4,12 @@
 from pDynamoWrapper import Wrapper
 import os, sys
 
-folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
-folder = os.path.join("Tests","pDynamoWrapper","test_06")
+from config import get_config
+
+config = get_config()
+ooccupy_root = config.get_ooccupy_root()
+folder05 = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_05")
+folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_06")
 
 #==============================================
 def info():
@@ -17,9 +21,11 @@ def info():
 def Simple_Distance2D(_hamiltonian):
 	'''
 	'''
+	# Get OOCCuPY root from config
+	
 
-	if not os.path.exists( os.path.join(folder05,"qcmm_optm"+_hamiltonian+"_opt_PF.pkl") ):
-		os.system("python3 Tests/pDnyamoWrapper/test_05.py")
+	if not os.path.exists( os.path.join(folder05,"qcmm_opt"+_hamiltonian,"7tim_"+_hamiltonian+"_opt_PF.pkl") ):
+		os.system("python3 Tests/pDynamoWrapper/test_05.py")
 
 	system_parameters = {
 		"Input_Type":"pkl",		

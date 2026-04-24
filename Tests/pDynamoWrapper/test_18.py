@@ -2,10 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
 import os
 
-folder = os.path.join("Tests","pDynamoWrapper","test_18")
+
+from config import get_config
+config = get_config()
+ooccupy_root = config.get_ooccupy_root()
+
+data_dir = os.path.join(ooccupy_root, "data")
+folder = os.path.join(ooccupy_root,"Tests","pDynamoWrapper","test_18")
 
 #===================================
 def info():
@@ -21,7 +26,7 @@ def Run_Test():
 	SMOmodels = ["am1","am1dphot","pddgpm3","pm3","rm1","pm6"]		
 	_parameters = {
 		"Input_Type":"geometry",
-		"crd_file":os.path.join("Tests","pDynamoWrapper","data","cyclohexane_single_frame.xyz"),
+		"crd_file":os.path.join(data_dir, "cyclohexane_single_frame.xyz"),
 		"set_energy_model":"QM",
 		"Hamiltonian":"am1",
 		"method_class":"SMO"
@@ -34,7 +39,7 @@ def Run_Test():
 	
 	#test QC/MM from gromacs
 	_parameters["Input_Type"]      = "pkl"
-	_parameters["pkl_file"]        = "Tests/pDynamoWrapper/test_01/1atp_peptide.pkl"
+	_parameters["pkl_file"]        = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_01", "1atp_peptide.pkl")
 	_parameters["set_qc_region"]   = "yes"
 	_parameters["residue_patterns"]= ["*:ARG.19:*"]
 	_parameters["QCcharge"]        = 1
@@ -45,13 +50,13 @@ def Run_Test():
 
 	#test QC/MM from AMBER
 	_parameters["residue_patterns"] = ["*:LIG.248:*","*:GLU.164:*","*:HIE.94:*"]
-	_parameters["pkl_file"]         = "Tests/pDynamoWrapper/test_01/7tim.pkl"
+	_parameters["pkl_file"]         = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_01", "7tim.pkl")
 	
 	test_03 = Wrapper(folder)
 	test_03.Set_System(_parameters)
 	test_03.SaveSystem("7tim_qcmm_am1")
 
-	_parameters["pkl_file"]        = "Tests/pDynamoWrapper/test_01/7tim_pruned_and_fix.pkl"
+	_parameters["pkl_file"]        = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_01", "7tim_pruned_and_fix.pkl")
 	test_03 = Wrapper(folder)
 	_parameters["Hamiltonian"]	   = "rm1"
 	test_03.Set_System(_parameters)

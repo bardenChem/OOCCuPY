@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
 import os, sys
 
+from config import get_config
+config = get_config()
+ooccupy_root = config.get_ooccupy_root()
+folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_04")
 
-folder = os.path.join("Tests","pDynamoWrapper","test_04")
 
 #===================================
 def info():
@@ -20,11 +22,20 @@ def Run_Test():
 	Test molecular dynamics algorithms
 	'''
 	info()
+	
+	# Get OOCCuPY root from config
+	config = get_config()
+	ooccupy_root = config.get_ooccupy_root()
+	
+	# Build paths using ooccupy_root
+	folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_04")
+	test_03_pkl = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_03", "7tim_optLFBGS.pkl")
+	
 	integrators = ["Verlet", "LeapFrog", "Langevin"]	
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join("Tests","pDynamoWrapper","test_03","7tim_optLFBGS.pkl"),
+		"pkl_file":test_03_pkl,
 	}
 
 	simulation_parameters = {
@@ -38,7 +49,7 @@ def Run_Test():
 				  "sampling_heating":50,
 				}
 	
-	if not os.path.exists( os.path.join("Tests","pDynamoWrapper","test_03","7tim_optLFBGS.pkl") ):
+	if not os.path.exists(test_03_pkl):
 		try: os.system("python3 Tests/pDynamoWrapper/test_03.py")
 		except: 
 			print("There is no input file for this example! Run example #03!")

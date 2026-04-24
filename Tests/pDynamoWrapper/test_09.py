@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import config
 from pDynamoWrapper import Wrapper
-import SimulationSystem 
 import os, sys
 
+from config import get_config
+ooccupy_root = config.get_ooccupy_root()
 
-folder = os.path.join("Tests","pDynamoWrapper","test_09")
-folder05 = os.path.join("Tests","pDynamoWrapper","test_05")
+folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_09")
+folder05 = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_05")
 
 #===================================
 def info():
