@@ -135,7 +135,7 @@ def Simple_Distance(_hamiltonian):
 	scan1_parameters = {
 		"simulation_type":"Relaxed_Surface_Scan",
 		"dincre_rc1":-0.1,
-		"nsteps_rc1":12,
+		"nsteps_rc1":-1,
 		"maxIterations":2200,
 		"optmizer":"SteepestDescent",
 		"force_constants":[1200.0,1200.0]

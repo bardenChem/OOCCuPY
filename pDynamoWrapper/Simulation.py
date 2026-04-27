@@ -360,7 +360,9 @@ class Simulation:
 			#--------------------------------------------------------
 			crd1_label = self.molecule.reactionCoordinates[0].label
 			
-			if   _type == "1D": EA.Plot1D(crd1_label)
+			if   _type == "1D": 
+				EA.Plot1D(crd1_label)
+				EA.Rewrite_Log()
 			elif _type == "2D":
 				cnt_lines = self.parameters["contour_lines"]
 				self.parameters["xlim"] = [scan.reactionCoordinate1[0,0] , scan.reactionCoordinate1[-1,-1] ]
