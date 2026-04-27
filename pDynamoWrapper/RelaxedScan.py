@@ -228,10 +228,10 @@ class SCAN:
         self.text += text_line+"\n"
         
         if _nsteps == -1:
-            print("Number of steps not provided. Defining steps based on RC parameters.")
-            input()
+            print("Number of steps not provided. Defining steps based on RC parameters.")           
             self.RCs[0].DefineSteps()
             _nsteps = self.RCs[0].nsteps
+        else: self.RCs[0].nsteps = _nsteps
 
         self.energiesMatrix      = pymp.shared.array( (_nsteps), dtype=float ) 
         self.reactionCoordinate1 = pymp.shared.array( (_nsteps), dtype=float )
@@ -402,15 +402,20 @@ class SCAN:
         self.text += text_line+"\n"
         #------------------------------------------------------               
         if _nsteps_x == -1:             
-            _nsteps_x = self.RCs[0].DefineSteps()        
+            _nsteps_x = self.RCs[0].DefineSteps()    
+        else: self.RCs[0].nsteps = _nsteps_x    
         if _nsteps_y == -1: 
             _nsteps_y = self.RCs[1].DefineSteps()
+        else: self.RCs[1].nsteps = _nsteps_y
+        
+        self.RCs[0].Print()
+        self.RCs[1].Print()
 
-        print("Running 2D Scan with {} steps in RC1 and {} steps in RC2".format(X,Y))
+        print("Running 2D Scan with {} steps in RC1 and {} steps in RC2".format(_nsteps_x,_nsteps_y))
                 
-        self.energiesMatrix = pymp.shared.array( (X,Y), dtype=float ) 
-        self.reactionCoordinate1 = pymp.shared.array( (X,Y), dtype=float )   
-        self.reactionCoordinate2 = pymp.shared.array( (X,Y), dtype=float )   
+        self.energiesMatrix = pymp.shared.array( (_nsteps_x,_nsteps_y), dtype=float ) 
+        self.reactionCoordinate1 = pymp.shared.array( (_nsteps_x,_nsteps_y), dtype=float )   
+        self.reactionCoordinate2 = pymp.shared.array( (_nsteps_x,_nsteps_y), dtype=float )   
         if _nsteps_x > 0 and _nsteps_y > 0:
             if self.RCs[0].Type == "dihedral": self.Run2DScanDihedral(_nsteps_x,_nsteps_y)
             else:

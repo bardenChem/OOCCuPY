@@ -42,12 +42,13 @@ def Simple_Distance2D(_hamiltonian):
 		"dincre_rc1":-0.1,
 		"nsteps_rc1":16,
 		"dincre_rc2":-0.1,
-		"nsteps_rc2":16,
+		"nsteps_rc2":-1,
 		"maxIterations":2200,
 		"log_frequency":10,
+		"restart":"yes",
 		"optmizer":"SteepestDescent",
 		"NmaxThreads":8,
-		"force_constants":[1000.0,1000.0]
+		"force_constants":[1200.0,1200.0]
 	}
 	#test simple distance
 	test_01 = Wrapper( os.path.join(folder,"Simple_Distance2D_"+_hamiltonian) )
@@ -72,7 +73,7 @@ def Mixed_Distance2D(_hamiltonian):
 		"type_rc1":"Distance",
 		"type_rc2":"Distance",
 		"maxIterations":2200,
-		"mass_constraints":["yes","no"]
+		"mass_constraints":["no","no"]
 	}		
 	scan1_parameters = {
 		"simulation_type":"Relaxed_Surface_Scan",
@@ -81,10 +82,10 @@ def Mixed_Distance2D(_hamiltonian):
 		"optmizer":"SteepestDescent",
 		"maxIterations":2200,
 		"nsteps_rc1":16,
-		"nsteps_rc2":16,
+		"nsteps_rc2":-1,
 		"log_frequency":10,
 		"NmaxThreads":8,
-		"force_constants":[1000.0,1000.0]
+		"force_constants":[1200.0,1200.0]
 	}
 	#test simple distance
 	test_01 = Wrapper( os.path.join( folder,"Mixed_Distance_"+_hamiltonian) )
@@ -114,11 +115,11 @@ def Multiple_Distance2D(_hamiltonian):
 		"dincre_rc2":0.1,
 		"optmizer":"ConjugatedGradient",
 		"maxIterations":2200,
-		"nsteps_rc1":14,
+		"nsteps_rc1":-1,
 		"log_frequency":10,
-		"nsteps_rc2":14,
+		"nsteps_rc2":-1,
 		"NmaxThreads":8,
-		"force_constants":[1000.0,1000.0]
+		"force_constants":[1200.0,1200.0]
 
 	}
 	#test simple distance

@@ -346,7 +346,8 @@ class ReactionCoordinate:
 			else:
 				self.nsteps = int(abs(coordinate_range / self.increment)) + 1
 				pass  # For association, we can allow non-positive increment since we're scanning down to bond length
-
+		
+		return self.nsteps
 
 
 		

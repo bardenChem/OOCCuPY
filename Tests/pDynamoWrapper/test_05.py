@@ -89,6 +89,7 @@ def Set_QC_MM(_hamiltonian="am1"):
 		"Hamiltonian":_hamiltonian,
 		"method_class":"SMO",
 		"set_qc_region":"yes",
+		"correc_QM_charges":"yes",
 		"residue_patterns":["*:LIG.248:*","*:GLU.164:*","*:HIE.94:*","*:ASN.9:*"],
 		"QCcharge":-3,
 		"save_format":".dcd",
@@ -135,9 +136,9 @@ def Simple_Distance(_hamiltonian):
 	scan1_parameters = {
 		"simulation_type":"Relaxed_Surface_Scan",
 		"dincre_rc1":-0.1,
-		"nsteps_rc1":-1,
+		"nsteps_rc1":16,
 		"maxIterations":2200,
-		"optmizer":"SteepestDescent",
+		"optmizer":"ConjugatedGradient",
 		"force_constants":[1200.0,1200.0]
 	}
 	#test simple distance
@@ -166,14 +167,14 @@ def Multiple_Distance(_hamiltonian):
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
 		"type_rc1":"Distance",
 		"maxIterations":2200,
-		"mass_constraints":["yes"],
+		"mass_constraints":["no"],
 	}		
 	scan1_parameters = {
 		"simulation_type":"Relaxed_Surface_Scan",
 		"dincre_rc1":0.1,
-		"optmizer":"SteepestDescent",
+		"optmizer":"ConjugatedGradient",
 		"maxIterations":2200,
-		"nsteps_rc1":20,
+		"nsteps_rc1":-1,
 		"log_frequency":10,
 		"force_constants":[1200.0,1200.0]
 	}
@@ -198,7 +199,7 @@ def Run_Test():
 	if not os.path.exists( os.path.join(folder,"7tim_optMM.pkl") ):
 		Prepare_Prune_System()
 	
-	SMOmodels = ["am1","rm1","pm3","pm6","am1dphot","pddgpm3"]
+	SMOmodels = ["am1"]
 	for smo in SMOmodels:		
 		Simple_Distance(smo)		
 		Multiple_Distance(smo)

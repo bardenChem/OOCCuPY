@@ -117,7 +117,7 @@ class EnergyAnalysis:
 					energyTmp.append( float(lns[2] ) )
 					self.energies1D.append( float(lns[2]) )
 				i += 1
-			self.multiple1Dplot.append(energyTmp)
+			self.multiple1Dplot = None
 			self.labely = "Potential Energy (kJ/mol)"
 		#-----------------------------------
 		elif self.Type == "1DRef":
@@ -145,15 +145,29 @@ class EnergyAnalysis:
 			self.plot1d_name = "1D_Ref.png"
 		#----------------------------------
 		elif self.Type == "2D":
+			records = []
+			max_m = -1
+			max_n = -1
 			for line in reading:
 				if i > 0:
 					lns = line.split()
+					m = int(lns[0])
+					n = int(lns[1])
+					max_m = max(max_m, m)
+					max_n = max(max_n, n)
 					self.RC1.append( float(lns[2] ) )
 					self.RC2.append( float(lns[3] ) )
-					m = int(lns[0])				
-					n = int(lns[1])	
-					self.energiesMatrix[n][m] = float(lns[4]) 
-				i += 1		
+					records.append((m, n, float(lns[4])))
+				i += 1
+			if self.xlen <= 0 or self.ylen <= 0 or self.xlen <= max_m or self.ylen <= max_n:
+				self.xlen = max_m + 1
+				self.ylen = max_n + 1
+				self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+			elif self.energiesMatrix is None:
+				self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+			for m, n, value in records:
+				self.energiesMatrix[n][m] = value
+
 		#----------------------------------
 		elif self.Type == "2DRef":
 			oldMethod = "none"
@@ -532,7 +546,7 @@ class EnergyAnalysis:
 		#setting current point as initial
 		cp = in_point
 
-		z = self.energiesMatrix
+		z = self.energiesMatrix	
 
 		pathx = [in_point[0]] 
 		pathy = [in_point[1]]
@@ -570,8 +584,7 @@ class EnergyAnalysis:
 			ind = D.index(min(D))			
 			cp[0] += dirs[ind][0]
 			cp[1] += dirs[ind][1]			
-			try: self.energies1D.append( z[ cp[1], cp[0] ] )
-			except: break 
+			self.energies1D.append( z[ cp[1], cp[0] ] )
 			pathx.append(cp[0])
 			pathy.append(cp[1])
 		
@@ -752,37 +765,46 @@ class EnergyAnalysis:
 
 		return all_kept 
 	#----------------------------------------------------------------------------------------
-	def Rewrite_Log(self):
+	def Rewrite_Log(self,_fileName):
 		'''
 		Rewrite log file with kcat values for each frame
 		'''
+		min_energy = self.energies1D[0]
 		if not self.multiple1Dplot:
 			kcats = [0]
-			for i in range(1, n-1):
+			for i in range(1, len(self.energies1D)-1):
 				e_prev, e_curr, e_next = self.energies1D[i-1], self.energies1D[i], self.energies1D[i+1]
+				if (e_curr < min_energy):
+					min_energy = e_curr					
 				if (e_curr > e_prev and e_curr > e_next):
-					kcats.append(i)
-			kcats.append(0)
+					kcats.append( self.Calulate_Kcat( e_curr - min_energy) ) 
+				kcats.append(0.0)
+			kcats.append(0.0)
 			log_text = "x Energy method Energy_kcal kcat \n"
-			new_log  = open( os.path.join(self.baseName,"Energy_1Dkcats.log"), 'w' )
-			for i in range(len(self.energies1D)):						
+			new_log  = open( _fileName, 'w' )
+			for i in range(len(self.energies1D)):										
 				energy_kcal = self.energies1D[i] * 0.239006
 				log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
 			new_log.write(log_text)
+			new_log.close()
 		elif self.multiple1Dplot:
 			for k in range(self.nplots1D):
 				kcats = [0]
-				for i in range(1, n-1):
+				min_energy = self.multiple1Dplot[k][0]
+				for i in range(1, len(self.multiple1Dplot[k])-1):
 					e_prev, e_curr, e_next = self.multiple1Dplot[k][i-1], self.multiple1Dplot[k][i], self.multiple1Dplot[k][i+1]
+					if (e_curr < min_energy):
+						min_energy = e_curr	
 					if (e_curr > e_prev and e_curr > e_next):
-						kcats.append(i)
-				kcats.append(0)
+						kcats.append( self.Calulate_Kcat( e_curr - min_energy))
+					kcats.append(0.0)
+				kcats.append(0.0)
 				log_text = "x Energy method Energy_kcal kcat \n"
-				new_log  = open( os.path.join(self.baseName,"Energy_1Dkcats_{}.log".format(self.identifiers[k])), 'w' )
+				new_log  = open( _fileName, 'w' )
 				for i in range(len(self.multiple1Dplot[k])):						
 					energy_kcal = self.multiple1Dplot[k][i] * 0.239006
 					log_text += "{} {} pickPath {} {}\n".format(i,self.multiple1Dplot[k][i],energy_kcal,kcats[i])
-				new_log.write(log_text)
+			new_log.write(log_text)
 
 #================================================================================================#
 #======================================END OF THE FILE===========================================#

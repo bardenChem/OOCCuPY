@@ -352,8 +352,8 @@ class Simulation:
 				print("One dimension relaxed surface scan!")
 				scan.Run1DScan(self.parameters["nsteps_rc1"])
 			log_path = scan.Finalize()
-			X = scan.nsteps[0]
-			Y = scan.nsteps[1]			
+			X = scan.RCs[0].nsteps
+			Y = scan.RCs[1].nsteps
 			#-------------------------------------------------------
 			EA = EnergyAnalysis( X, Y, _type=_type)		
 			EA.ReadLog(log_path)
@@ -362,7 +362,8 @@ class Simulation:
 			
 			if   _type == "1D": 
 				EA.Plot1D(crd1_label)
-				EA.Rewrite_Log()
+				_filename = os.path.join(self.baseFolder,"Energy_1Dkcats.log")
+				EA.Rewrite_Log(_filename)
 			elif _type == "2D":
 				cnt_lines = self.parameters["contour_lines"]
 				self.parameters["xlim"] = [scan.reactionCoordinate1[0,0] , scan.reactionCoordinate1[-1,-1] ]
@@ -375,10 +376,11 @@ class Simulation:
 							_ylim=self.parameters["ylim"],
 							_figS=self.parameters["fig_size"])
 				#------------------------------------------------------
-				retrieve_path = self.baseFolder + "/" + scan.trajFolder
-				fin_point =  in_point = [0,0]
-				fin_point[0] = self.parameters["xsize"] - 1
-				fin_point[1] = self.parameters["ysize"] - 1
+				retrieve_path = self.baseFolder + "/" + scan.trajFolder + ".ptGeo"
+				in_point  = [0,0]
+				fin_point = [0,0]
+				fin_point[0] = X - 1
+				fin_point[1] = Y - 1
 				if "max_points" in self.parameters: max_points = self.parameters["max_points"]
 				else: max_points = 21
 				if "min_points" in self.parameters: min_points = self.parameters["min_points"]
@@ -390,6 +392,7 @@ class Simulation:
 								  self.molecule.system,
 								  min_points=min_points,
 								  max_points=max_points)
+				#--------------------------------------------------
 				EA.Plot2D(cnt_lines,
 			  				crd1_label,
 							crd2_label,
@@ -561,7 +564,7 @@ class Simulation:
 			       self.parameters["MD_method"]           ,
 			       RESTART=self.restart                   ,
 			       ADAPTATIVE=self.adaptative             ,
-			       OPTIMIZE=self.parameters["optimize_US"]                     )
+			       OPTIMIZE=self.parameters["optimize_US"])
 		#---------------------------------------
 		USrun.ChangeDefaultParameters(self.parameters)
 		USrun.SetMode(rc1)
