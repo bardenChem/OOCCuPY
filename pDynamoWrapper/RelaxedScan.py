@@ -652,12 +652,12 @@ class SCAN:
         '''
         Run two-dimensional simple distance relaxed surface scan
         '''
-        atom1 = self.RCs[0][0]
-        atom2 = self.RCs[0][1]
-        atom3 = self.RCs[0][2]
-        atom4 = self.RCs[1][0]
-        atom5 = self.RCs[1][1]
-        atom6 = self.RCs[1][2]
+        atom1 = self.RCs[0].atoms[0]
+        atom2 = self.RCs[0].atoms[1]
+        atom3 = self.RCs[0].atoms[2]
+        atom4 = self.RCs[1].atoms[0]
+        atom5 = self.RCs[1].atoms[1]
+        atom6 = self.RCs[1].atoms[2]
         weight1 = self.RCs[0].weight13
         weight2 = self.RCs[0].weight31
         weight3 = self.RCs[1].weight13
@@ -760,14 +760,14 @@ class SCAN:
         '''
         Run two-dimensional dihedral relaxed surface scan
         '''
-        atom1 = self.RCs[0][0]
-        atom2 = self.RCs[0][1]
-        atom3 = self.RCs[0][2]
-        atom4 = self.RCs[0][3]
-        atom5 = self.RCs[1][0]
-        atom6 = self.RCs[1][1]
-        atom7 = self.RCs[1][2]
-        atom8 = self.RCs[1][3]
+        atom1 = self.RCs[0].atoms[0]
+        atom2 = self.RCs[0].atoms[1]
+        atom3 = self.RCs[0].atoms[2]
+        atom4 = self.RCs[0].atoms[3]
+        atom5 = self.RCs[1].atoms[0]
+        atom6 = self.RCs[1].atoms[1]
+        atom7 = self.RCs[1].atoms[2]
+        atom8 = self.RCs[1].atoms[3]
 
         _dincrement_A = self.RCs[0].increment
         _dincrement_B = self.RCs[1].increment

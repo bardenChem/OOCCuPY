@@ -550,6 +550,7 @@ class EnergyAnalysis:
 
 		pathx = [in_point[0]] 
 		pathy = [in_point[1]]
+		self.energies1D.append( z[ pathx[0],pathy[0] ] )
 		
 		dirs = [ [1,0] ,[0,1], [1,1] ]
 
@@ -587,14 +588,14 @@ class EnergyAnalysis:
 			self.energies1D.append( z[ cp[1], cp[0] ] )
 			pathx.append(cp[0])
 			pathy.append(cp[1])
-		
 		#---------------------------------------------------------------
 		if not os.path.exists( os.path.join(_folder_dst,"traj1d.ptGeo") ): 
 			os.makedirs( os.path.join(_folder_dst,"traj1d.ptGeo") )
-		kcats = []
+
+		kcats = [0.0]
 		new_idx = 0
 		min_energy = self.energies1D[0]
-		for indx in range(len(pathx)):
+		for indx in range( 1,len(pathx) ):
 			pkl = _path + "/frame{}_{}.pkl".format(pathx[indx],pathy[indx])			
 			finalPath = os.path.join( _folder_dst , "traj1d.ptGeo/frame{}.pkl".format(new_idx) )			
 			_system.coordinates3 = ImportCoordinates3(pkl,log=None)
@@ -651,6 +652,9 @@ class EnergyAnalysis:
 		pathIndices = list(zip(pathx, pathy))
 		Kept_indices = self.ResamplePath(pathIndices, min_points=min_points, max_points=max_points, include_curvature=True)
 
+		if not os.path.exists( os.path.join(_folder_dst,"traj1d_resampled.ptGeo") ): 
+			os.makedirs( os.path.join(_folder_dst,"traj1d_resampled.ptGeo") )
+
 		#write the resampled path log
 		log_text = "x Energy method Energy_kcal kcat \n"
 		new_log  = open( os.path.join(_folder_dst,"traj1D_resampled.log"), 'w' )
@@ -669,7 +673,7 @@ class EnergyAnalysis:
 			pkl = _path + "/frame{}_{}.pkl".format(pathx[idx],pathy[idx])			
 			finalPath = os.path.join( _folder_dst , "traj1d_resampled.ptGeo/frame{}.pkl".format(idx) )			
 			_system.coordinates3 = ImportCoordinates3(pkl,log=None)
-			pdb_file = os.path.join( _folder_dst , "frame{}.pdb".format(idx) )
+			pdb_file = os.path.join( _folder_dst , "frame{}_rsd.pdb".format(idx) )
 			ExportSystem( pdb_file,_system,log=None)
 			shutil.copy(pkl,finalPath)
 

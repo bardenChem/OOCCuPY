@@ -81,8 +81,9 @@ def Mixed_Distance2D(_hamiltonian):
 		"dincre_rc2":-0.1,
 		"optmizer":"SteepestDescent",
 		"maxIterations":2200,
-		"nsteps_rc1":16,
+		"nsteps_rc1":-1,
 		"nsteps_rc2":-1,
+		"restart":"yes",
 		"log_frequency":10,
 		"NmaxThreads":8,
 		"force_constants":[1200.0,1200.0]
@@ -107,7 +108,7 @@ def Multiple_Distance2D(_hamiltonian):
 		"type_rc1":"Distance",
 		"type_rc2":"Distance",
 		"maxIterations":2200,
-		"mass_constraints":["yes","yes"]
+		"mass_constraints":["no","no"]
 	}		
 	scan1_parameters = {
 		"simulation_type":"Relaxed_Surface_Scan",
@@ -116,6 +117,7 @@ def Multiple_Distance2D(_hamiltonian):
 		"optmizer":"ConjugatedGradient",
 		"maxIterations":2200,
 		"nsteps_rc1":-1,
+		"restart":"yes",
 		"log_frequency":10,
 		"nsteps_rc2":-1,
 		"NmaxThreads":8,

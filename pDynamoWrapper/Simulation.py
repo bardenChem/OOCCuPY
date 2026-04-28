@@ -353,7 +353,7 @@ class Simulation:
 				scan.Run1DScan(self.parameters["nsteps_rc1"])
 			log_path = scan.Finalize()
 			X = scan.RCs[0].nsteps
-			Y = scan.RCs[1].nsteps
+			if self.molecule.rcs == 2: Y = scan.RCs[1].nsteps
 			#-------------------------------------------------------
 			EA = EnergyAnalysis( X, Y, _type=_type)		
 			EA.ReadLog(log_path)
@@ -385,7 +385,7 @@ class Simulation:
 				else: max_points = 21
 				if "min_points" in self.parameters: min_points = self.parameters["min_points"]
 				else: min_points = 15
-				_p_x, _p_y = EA.Path_From_PES(in_point,
+				_path_points = EA.Path_From_PES(in_point,
 								  fin_point,
 								  retrieve_path,
 								  self.baseFolder,
@@ -399,8 +399,7 @@ class Simulation:
 							_xlim=self.parameters["xlim"],
 							_ylim=self.parameters["ylim"],
 							_figS=self.parameters["fig_size"],
-							pathx=_p_x,
-							pathy=_p_y)
+							path_points=_path_points)
 	#==================================================================================	
 	def ScanRefinement(self):
 		'''
