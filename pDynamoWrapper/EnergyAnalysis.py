@@ -669,7 +669,7 @@ class EnergyAnalysis:
 		self.Type = "1DRef"
 		self.plot1d_name = "1D_Ref_resampled.png"
 		self.Plot1D("Reaction Path frames (n)")
-		for idx in Kept_indices:
+		for idx in range( len(Kept_indices) ):
 			pkl = _path + "/frame{}_{}.pkl".format(pathx[idx],pathy[idx])			
 			finalPath = os.path.join( _folder_dst , "traj1d_resampled.ptGeo/frame{}.pkl".format(idx) )			
 			_system.coordinates3 = ImportCoordinates3(pkl,log=None)
