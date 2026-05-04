@@ -588,10 +588,13 @@ class EnergyAnalysis:
 			self.energies1D.append( z[ cp[1], cp[0] ] )
 			pathx.append(cp[0])
 			pathy.append(cp[1])
+		
+		
 		#---------------------------------------------------------------
 		if not os.path.exists( os.path.join(_folder_dst,"traj1d.ptGeo") ): 
 			os.makedirs( os.path.join(_folder_dst,"traj1d.ptGeo") )
 
+		self.AnalyzePES2D( output_folder= os.path.join(_folder_dst,"path_analysis") )
 		kcats = [0.0]
 		new_idx = 0
 		min_energy = self.energies1D[0]
@@ -737,7 +740,6 @@ class EnergyAnalysis:
 
 		kept = sorted(keep)
 
-
 		# 3. If mandatory set is smaller than min_points, add evenly spaced optional points
 		optional = []
 		if len(kept) < min_points:
@@ -768,6 +770,711 @@ class EnergyAnalysis:
 				all_kept = sorted(keep.union(subsampled_optional))
 
 		return all_kept 
+	#----------------------------------------------------------------------------------------
+	def AnalyzePES2D(self, energy_threshold=0.5, output_folder=None):
+		"""
+		Analyze 2D potential energy surface to identify critical points.
+		
+		Detects and classifies critical points on the surface:
+		- Local minima: Points with lower energy than all neighbors
+		- Saddle points: Points where Hessian has both positive and negative eigenvalues
+		- Intermediates: Points between reactant/product regions with moderate energy
+		
+		Args:
+			energy_threshold (float): Energy difference threshold for intermediate detection (kcal/mol)
+			output_folder (str): Folder to save analysis results. If None, uses self.baseName
+			
+		Returns:
+			dict: Dictionary containing:
+				- 'minima': list of (x, y, energy) tuples for local minima
+				- 'saddle_points': list of (x, y, energy, eigenvalues) tuples
+				- 'intermediates': list of (x, y, energy) tuples
+				- 'analysis_report': string with formatted report
+		"""
+		if self.dimensions != 2:
+			raise ValueError("Two-dimensional energy surface required for PES analysis")
+			
+		z = self.energiesMatrix
+		results = {
+			'minima': [],
+			'saddle_points': [],
+			'intermediates': [],
+			'gradient_points': [],
+			'inflection_points': []
+		}
+		
+		# Ensure output folder exists
+		if output_folder is None:
+			output_folder = self.baseName
+		if not os.path.exists(output_folder):
+			os.makedirs(output_folder)
+		
+		# 1. Find local minima (8-neighbor connectivity)
+		print("\n" + "="*60)
+		print("ANALYZING 2D POTENTIAL ENERGY SURFACE")
+		print("="*60)
+		print("\n[1] Searching for local minima...")
+		
+		minima = []
+		for i in range(1, self.ylen - 1):
+			for j in range(1, self.xlen - 1):
+				center = z[i, j]
+				# Check 8 neighbors
+				neighbors = [
+					z[i-1, j-1], z[i-1, j], z[i-1, j+1],
+					z[i, j-1],                z[i, j+1],
+					z[i+1, j-1], z[i+1, j], z[i+1, j+1]
+				]
+				if center < min(neighbors):
+					minima.append((j, i, center))
+					results['minima'].append((j, i, center))
+		
+		print(f"  Found {len(minima)} local minima")
+		for x, y, e in minima[:10]:  # Print first 10
+			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV")
+		if len(minima) > 10:
+			print(f"    ... and {len(minima)-10} more")
+		
+		# 2. Find saddle points using Hessian approximation
+		print("\n[2] Searching for saddle points...")
+		saddle_points = []
+		
+		for i in range(1, self.ylen - 1):
+			for j in range(1, self.xlen - 1):
+				# Approximate Hessian using finite differences
+				# H_xx = (E(i,j+1) - 2*E(i,j) + E(i,j-1)) / dx^2
+				# H_yy = (E(i+1,j) - 2*E(i,j) + E(i-1,j)) / dy^2
+				# H_xy = (E(i+1,j+1) - E(i+1,j-1) - E(i-1,j+1) + E(i-1,j-1)) / 4
+				
+				center = z[i, j]
+				h_xx = z[i, j+1] - 2*center + z[i, j-1]
+				h_yy = z[i+1, j] - 2*center + z[i-1, j]
+				h_xy = (z[i+1, j+1] - z[i+1, j-1] - z[i-1, j+1] + z[i-1, j-1]) / 4.0
+				
+				# Create Hessian matrix
+				hessian = np.array([[h_xx, h_xy], [h_xy, h_yy]])
+				
+				# Compute eigenvalues
+				eigenvalues = np.linalg.eigvalsh(hessian)
+				
+				# Saddle point: one positive, one negative eigenvalue
+				if eigenvalues[0] * eigenvalues[1] < 0 and abs(eigenvalues[0]) > 0.001 and abs(eigenvalues[1]) > 0.001:
+					saddle_points.append((j, i, center, eigenvalues))
+					results['saddle_points'].append((j, i, center, eigenvalues.tolist()))
+		
+		print(f"  Found {len(saddle_points)} saddle points")
+		for x, y, e, eigs in saddle_points[:10]:
+			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV, Eigenvalues = [{eigs[0]:7.3f}, {eigs[1]:7.3f}]")
+		if len(saddle_points) > 10:
+			print(f"    ... and {len(saddle_points)-10} more")
+		
+		# 3. Find points with significant gradients (along minimum energy path)
+		print("\n[3] Searching for gradient points (transition regions)...")
+		gradient_points = []
+		
+		for i in range(1, self.ylen - 1):
+			for j in range(1, self.xlen - 1):
+				# Compute gradient magnitude
+				gx = (z[i, j+1] - z[i, j-1]) / 2.0
+				gy = (z[i+1, j] - z[i-1, j]) / 2.0
+				grad_magnitude = np.sqrt(gx**2 + gy**2)
+				
+				# High gradient indicates transition region
+				if grad_magnitude > 0.5:  # Threshold for significant gradient
+					gradient_points.append((j, i, z[i, j], grad_magnitude))
+					results['gradient_points'].append((j, i, z[i, j], grad_magnitude))
+		
+		print(f"  Found {len(gradient_points)} transition region points")
+		# Print highest gradient points
+		top_gradient = sorted(gradient_points, key=lambda x: x[3], reverse=True)[:5]
+		for x, y, e, grad in top_gradient:
+			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV, |∇E| = {grad:7.4f}")
+		
+		# 4. Identify intermediary structures (between minima with moderate energy)
+		print("\n[4] Classifying intermediary structures...")
+		if len(minima) >= 2:
+			# Get min and max energies
+			min_energy = min(m[2] for m in minima)
+			max_search_energy = max(m[2] for m in minima) + energy_threshold
+			
+			intermediates = []
+			for i in range(self.ylen):
+				for j in range(self.xlen):
+					e = z[i, j]
+					if min_energy < e < max_search_energy:
+						# Check if not already in minima or saddle list
+						is_minimum = (j, i, e) in minima
+						is_saddle = any((j, i) == (s[0], s[1]) for s in saddle_points)
+						if not is_minimum and not is_saddle:
+							intermediates.append((j, i, e))
+			
+			# Deduplicate and sort by energy
+			intermediates = list(set(intermediates))
+			intermediates.sort(key=lambda x: x[2])
+			results['intermediates'] = intermediates
+			
+			print(f"  Found {len(intermediates)} intermediate points")
+			print(f"  Energy range: {min_energy:.4f} to {max_search_energy:.4f} eV")
+			for x, y, e in intermediates[:10]:
+				print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV")
+			if len(intermediates) > 10:
+				print(f"    ... and {len(intermediates)-10} more")
+		
+		# 5. Generate analysis report
+		print("\n" + "="*60)
+		print("ANALYSIS SUMMARY")
+		print("="*60)
+		
+		report = self._GeneratePESAnalysisReport(results, energy_threshold)
+		
+		# Save report to file
+		report_file = os.path.join(output_folder, "PES_Analysis_Report.txt")
+		with open(report_file, 'w') as f:
+			f.write(report)
+		
+		print(f"\nDetailed report saved to: {report_file}")
+		
+		# 6. Generate visualization with critical points marked
+		self._VisualizeCriticalPoints(results, output_folder)
+		
+		results['analysis_report'] = report
+		return results
+	
+	#----------------------------------------------------------------------------------------
+	def _GeneratePESAnalysisReport(self, results, energy_threshold):
+		"""Generate formatted analysis report."""
+		report = ""
+		report += "POTENTIAL ENERGY SURFACE (PES) ANALYSIS REPORT\n"
+		report += "=" * 60 + "\n\n"
+		
+		report += "1. LOCAL MINIMA\n"
+		report += "-" * 60 + "\n"
+		if results['minima']:
+			report += f"Total minima found: {len(results['minima'])}\n"
+			for x, y, e in results['minima'][:20]:
+				report += f"  ({x:4d}, {y:4d}): {e:12.6f} eV ({e*0.239006:10.4f} kcal/mol)\n"
+			if len(results['minima']) > 20:
+				report += f"  ... and {len(results['minima'])-20} more\n"
+		else:
+			report += "No local minima found\n"
+		report += "\n"
+		
+		report += "2. SADDLE POINTS (TRANSITION STATES)\n"
+		report += "-" * 60 + "\n"
+		if results['saddle_points']:
+			report += f"Total saddle points found: {len(results['saddle_points'])}\n"
+			report += "Position        Energy (eV)      Eigenvalues\n"
+			for x, y, e, eigs in results['saddle_points'][:20]:
+				report += f"({x:4d}, {y:4d}): {e:12.6f}    [{eigs[0]:8.4f}, {eigs[1]:8.4f}]\n"
+			if len(results['saddle_points']) > 20:
+				report += f"... and {len(results['saddle_points'])-20} more\n"
+		else:
+			report += "No saddle points found\n"
+		report += "\n"
+		
+		report += "3. INTERMEDIATE STRUCTURES\n"
+		report += "-" * 60 + "\n"
+		if results['intermediates']:
+			report += f"Total intermediate points found: {len(results['intermediates'])}\n"
+			report += f"Energy threshold: {energy_threshold} kcal/mol\n"
+			for x, y, e in results['intermediates'][:20]:
+				report += f"  ({x:4d}, {y:4d}): {e:12.6f} eV\n"
+			if len(results['intermediates']) > 20:
+				report += f"  ... and {len(results['intermediates'])-20} more\n"
+		else:
+			report += "No intermediate structures found\n"
+		report += "\n"
+		
+		report += "4. TRANSITION REGIONS (HIGH GRADIENT ZONES)\n"
+		report += "-" * 60 + "\n"
+		if results['gradient_points']:
+			report += f"Total high-gradient points: {len(results['gradient_points'])}\n"
+			top_gradients = sorted(results['gradient_points'], key=lambda x: x[3], reverse=True)[:10]
+			for x, y, e, grad in top_gradients:
+				report += f"  ({x:4d}, {y:4d}): |∇E| = {grad:8.4f}, E = {e:10.6f} eV\n"
+		report += "\n"
+		
+		return report
+	
+	#----------------------------------------------------------------------------------------
+	def _VisualizeCriticalPoints(self, results, output_folder):
+		"""Create visualization with all critical points marked."""
+		try:
+			import matplotlib.pyplot as plt
+			from matplotlib.patches import Circle
+			
+			fig, ax = plt.subplots(figsize=(12, 10))
+			
+			# Plot energy surface
+			z = self.energiesMatrix
+			X, Y = np.meshgrid(range(self.xlen), range(self.ylen))
+			
+			# Use log scale for better visualization
+			z_plot = z - np.min(z) + 0.1
+			levels = np.logspace(np.log10(z_plot.min()), np.log10(z_plot.max()), 15)
+			
+			contour = ax.contourf(X, Y, z, levels=20, cmap='RdYlBu_r', alpha=0.7)
+			ax.contour(X, Y, z, levels=10, colors='black', linewidths=0.5, alpha=0.3)
+			
+			# Mark minima
+			for x, y, e in results['minima']:
+				ax.plot(x, y, 'g*', markersize=15, label='Minima' if x == results['minima'][0][0] and y == results['minima'][0][1] else '')
+			
+			# Mark saddle points
+			for x, y, e, eigs in results['saddle_points'][:50]:  # Limit for clarity
+				ax.plot(x, y, 'rs', markersize=8, label='Saddle' if x == results['saddle_points'][0][0] and y == results['saddle_points'][0][1] else '')
+			
+			# Mark intermediates (sample them)
+			if results['intermediates']:
+				sample_step = max(1, len(results['intermediates']) // 50)
+				for x, y, e in results['intermediates'][::sample_step]:
+					ax.plot(x, y, 'bo', markersize=3, alpha=0.5)
+			
+			ax.set_xlabel('Reaction Coordinate 1 (steps)')
+			ax.set_ylabel('Reaction Coordinate 2 (steps)')
+			ax.set_title('2D PES with Critical Points')
+			
+			# Add colorbar
+			cbar = plt.colorbar(contour, ax=ax)
+			cbar.set_label('Energy (eV)')
+			
+			# Clean legend
+			handles, labels = ax.get_legend_handles_labels()
+			by_label = dict(zip(labels, handles))
+			ax.legend(by_label.values(), by_label.keys(), loc='upper right')
+			
+			# Save figure
+			fig_path = os.path.join(output_folder, 'PES_Critical_Points.png')
+			plt.savefig(fig_path, dpi=150, bbox_inches='tight')
+			plt.close()
+			
+			print(f"Visualization saved to: {fig_path}")
+		except Exception as e:
+			print(f"Warning: Could not create visualization: {e}")
+	
+	#----------------------------------------------------------------------------------------
+	def GenerateNEBPathsFromAnalysis(self, analysis_results, in_point, fin_point, path_folder, 
+	                                   output_folder, system, max_distance=10, interpolation_points=None):
+		"""
+		Generate multiple NEB starting paths using analyzed critical points.
+		
+		Creates trajectories connecting critical points identified from PES analysis:
+		- Minima → Saddle → Minima (traditional TS pathways)
+		- Minima → Intermediates → Minima (through intermediate structures)
+		- Minima → Gradient change points → Minima (through high-gradient regions)
+		
+		Each path is exported as a ptGeo folder with renumbered .pkl files for NEB calculations.
+		This provides diverse initial guesses by exploring different reaction mechanisms.
+		
+		Args:
+			analysis_results (dict): Results from AnalyzePES2D with minima, saddle_points, intermediates, gradient_points
+			in_point (tuple): (x, y) initial point coordinates
+			fin_point (tuple): (x, y) final point coordinates
+			path_folder (str): Folder containing the frame .pkl files
+			output_folder (str): Destination folder for NEB trajectory folders
+			system: Molecular system object for coordinate operations
+			max_distance (int): Maximum distance from in/fin point to consider as "close" (pixels)
+			interpolation_points (int): Number of interpolated points between critical points. If None, uses existing frames
+		
+		Returns:
+			dict: Information about generated paths with keys:
+				- 'paths': list of generated path info dictionaries
+				- 'summary_report': formatted text report
+				- 'path_types': breakdown of path types generated
+		"""
+		print("\n" + "="*70)
+		print("GENERATING NEB PATHS FROM CRITICAL POINT ANALYSIS")
+		print("="*70)
+		
+		if 'minima' not in analysis_results or 'saddle_points' not in analysis_results:
+			print("Error: Analysis results must contain 'minima' and 'saddle_points'")
+			return None
+		
+		minima = analysis_results['minima']
+		saddles = analysis_results['saddle_points']
+		intermediates = analysis_results.get('intermediates', [])
+		gradient_points = analysis_results.get('gradient_points', [])
+		
+		if not os.path.exists(output_folder):
+			os.makedirs(output_folder)
+		
+		# 1. Find minima close to initial point
+		print("\n[1] Finding minima close to initial point...")
+		initial_minima = []
+		for x, y, e in minima:
+			dist = np.sqrt((x - in_point[0])**2 + (y - in_point[1])**2)
+			if dist <= max_distance:
+				initial_minima.append((x, y, e, dist))
+		
+		initial_minima.sort(key=lambda p: p[3])  # Sort by distance
+		print(f"    Found {len(initial_minima)} minima near initial point")
+		for x, y, e, d in initial_minima[:5]:
+			print(f"      ({x:3d}, {y:3d}): Energy = {e:10.6f} eV, Distance = {d:6.2f}")
+		
+		# 2. Find minima close to final point
+		print("\n[2] Finding minima close to final point...")
+		final_minima = []
+		for x, y, e in minima:
+			dist = np.sqrt((x - fin_point[0])**2 + (y - fin_point[1])**2)
+			if dist <= max_distance:
+				final_minima.append((x, y, e, dist))
+		
+		final_minima.sort(key=lambda p: p[3])  # Sort by distance
+		print(f"    Found {len(final_minima)} minima near final point")
+		for x, y, e, d in final_minima[:5]:
+			print(f"      ({x:3d}, {y:3d}): Energy = {e:10.6f} eV, Distance = {d:6.2f}")
+		
+		# 3. Find saddle points between regions
+		print("\n[3] Identifying transition states (saddle points)...")
+		relevant_saddles = []
+		for x, y, e, eigs in saddles:
+			relevant_saddles.append((x, y, e, eigs))
+		
+		print(f"    Found {len(relevant_saddles)} saddle points")
+		for x, y, e, eigs in relevant_saddles[:5]:
+			print(f"      ({x:3d}, {y:3d}): Energy = {e:10.6f} eV, λ = [{eigs[0]:7.3f}, {eigs[1]:7.3f}]")
+		
+		# 4. Sort and filter intermediates and gradient points
+		print("\n[4] Processing intermediary structures...")
+		relevant_intermediates = sorted(intermediates, key=lambda p: p[2])  # Sort by energy
+		print(f"    Found {len(relevant_intermediates)} intermediate points")
+		for x, y, e in relevant_intermediates[:5]:
+			print(f"      ({x:3d}, {y:3d}): Energy = {e:10.6f} eV")
+		
+		print("\n[5] Processing high-gradient transition regions...")
+		# Sort gradient points by magnitude (highest first)
+		relevant_gradients = sorted(gradient_points, key=lambda p: p[3], reverse=True)
+		print(f"    Found {len(relevant_gradients)} gradient change points")
+		for x, y, e, grad in relevant_gradients[:5]:
+			print(f"      ({x:3d}, {y:3d}): |∇E| = {grad:7.4f}, Energy = {e:10.6f} eV")
+		
+		# 5. Generate paths
+		print("\n[6] Generating paths connecting critical points...")
+		generated_paths = []
+		path_types = {'min_saddle_min': 0, 'min_intermediate_min': 0, 'min_gradient_min': 0, 
+		              'min_intermediate_saddle_min': 0, 'min_gradient_saddle_min': 0}
+		path_id = 0
+		
+		# Type 1: Traditional min → saddle → min paths
+		print("    [Type 1] Min → Saddle → Min paths...")
+		for init_x, init_y, init_e, init_d in initial_minima[:3]:  # Limit to 3 closest
+			for final_x, final_y, final_e, final_d in final_minima[:3]:  # Limit to 3 closest
+				for sad_x, sad_y, sad_e, sad_eigs in relevant_saddles[:5]:  # Check multiple saddles
+					
+					# Create path: initial minimum → saddle → final minimum
+					path_coords_x = [init_x, sad_x, final_x]
+					path_coords_y = [init_y, sad_y, final_y]
+					path_energies = [init_e, sad_e, final_e]
+					
+					barrier_height = (sad_e - min(init_e, final_e)) * 0.239006  # Convert to kcal/mol
+					
+					path_info = {
+						'id': path_id,
+						'type': 'min_saddle_min',
+						'initial': (init_x, init_y, init_e),
+						'middle': (sad_x, sad_y, sad_e),
+						'final': (final_x, final_y, final_e),
+						'barrier': barrier_height,
+						'coords_x': path_coords_x,
+						'coords_y': path_coords_y,
+						'energies': path_energies
+					}
+					
+					generated_paths.append(path_info)
+					path_types['min_saddle_min'] += 1
+					path_id += 1
+		
+		# Type 2: min → intermediate → min paths
+		if relevant_intermediates:
+			print("    [Type 2] Min → Intermediate → Min paths...")
+			for init_x, init_y, init_e, init_d in initial_minima[:3]:
+				for final_x, final_y, final_e, final_d in final_minima[:3]:
+					for int_x, int_y, int_e in relevant_intermediates[:5]:  # Use top 5 intermediates
+						
+						path_coords_x = [init_x, int_x, final_x]
+						path_coords_y = [init_y, int_y, final_y]
+						path_energies = [init_e, int_e, final_e]
+						
+						barrier_height = (int_e - min(init_e, final_e)) * 0.239006
+						
+						path_info = {
+							'id': path_id,
+							'type': 'min_intermediate_min',
+							'initial': (init_x, init_y, init_e),
+							'middle': (int_x, int_y, int_e),
+							'final': (final_x, final_y, final_e),
+							'barrier': barrier_height,
+							'coords_x': path_coords_x,
+							'coords_y': path_coords_y,
+							'energies': path_energies
+						}
+						
+						generated_paths.append(path_info)
+						path_types['min_intermediate_min'] += 1
+						path_id += 1
+		
+		# Type 3: min → gradient point → min paths
+		if relevant_gradients:
+			print("    [Type 3] Min → Gradient point → Min paths...")
+			for init_x, init_y, init_e, init_d in initial_minima[:3]:
+				for final_x, final_y, final_e, final_d in final_minima[:3]:
+					for grad_x, grad_y, grad_e, grad_mag in relevant_gradients[:5]:  # Use top 5 gradient points
+						
+						path_coords_x = [init_x, grad_x, final_x]
+						path_coords_y = [init_y, grad_y, final_y]
+						path_energies = [init_e, grad_e, final_e]
+						
+						barrier_height = (grad_e - min(init_e, final_e)) * 0.239006
+						
+						path_info = {
+							'id': path_id,
+							'type': 'min_gradient_min',
+							'initial': (init_x, init_y, init_e),
+							'middle': (grad_x, grad_y, grad_e),
+							'final': (final_x, final_y, final_e),
+							'barrier': barrier_height,
+							'gradient_magnitude': grad_mag,
+							'coords_x': path_coords_x,
+							'coords_y': path_coords_y,
+							'energies': path_energies
+						}
+						
+						generated_paths.append(path_info)
+						path_types['min_gradient_min'] += 1
+						path_id += 1
+		
+		# Type 4: min → intermediate → saddle → min (for more complex paths)
+		if relevant_intermediates and relevant_saddles:
+			print("    [Type 4] Min → Intermediate → Saddle → Min paths...")
+			for init_x, init_y, init_e, init_d in initial_minima[:2]:
+				for final_x, final_y, final_e, final_d in final_minima[:2]:
+					for int_x, int_y, int_e in relevant_intermediates[:3]:
+						for sad_x, sad_y, sad_e, sad_eigs in relevant_saddles[:3]:
+							
+							path_coords_x = [init_x, int_x, sad_x, final_x]
+							path_coords_y = [init_y, int_y, sad_y, final_y]
+							path_energies = [init_e, int_e, sad_e, final_e]
+							
+							barrier_height = (sad_e - min(init_e, final_e)) * 0.239006
+							
+							path_info = {
+								'id': path_id,
+								'type': 'min_intermediate_saddle_min',
+								'initial': (init_x, init_y, init_e),
+								'intermediate': (int_x, int_y, int_e),
+								'saddle': (sad_x, sad_y, sad_e),
+								'final': (final_x, final_y, final_e),
+								'barrier': barrier_height,
+								'coords_x': path_coords_x,
+								'coords_y': path_coords_y,
+								'energies': path_energies
+							}
+							
+							generated_paths.append(path_info)
+							path_types['min_intermediate_saddle_min'] += 1
+							path_id += 1
+		
+		# Type 5: min → gradient → saddle → min
+		if relevant_gradients and relevant_saddles:
+			print("    [Type 5] Min → Gradient → Saddle → Min paths...")
+			for init_x, init_y, init_e, init_d in initial_minima[:2]:
+				for final_x, final_y, final_e, final_d in final_minima[:2]:
+					for grad_x, grad_y, grad_e, grad_mag in relevant_gradients[:3]:
+						for sad_x, sad_y, sad_e, sad_eigs in relevant_saddles[:3]:
+							
+							path_coords_x = [init_x, grad_x, sad_x, final_x]
+							path_coords_y = [init_y, grad_y, sad_y, final_y]
+							path_energies = [init_e, grad_e, sad_e, final_e]
+							
+							barrier_height = (sad_e - min(init_e, final_e)) * 0.239006
+							
+							path_info = {
+								'id': path_id,
+								'type': 'min_gradient_saddle_min',
+								'initial': (init_x, init_y, init_e),
+								'gradient': (grad_x, grad_y, grad_e),
+								'saddle': (sad_x, sad_y, sad_e),
+								'final': (final_x, final_y, final_e),
+								'barrier': barrier_height,
+								'gradient_magnitude': grad_mag,
+								'coords_x': path_coords_x,
+								'coords_y': path_coords_y,
+								'energies': path_energies
+							}
+							
+							generated_paths.append(path_info)
+							path_types['min_gradient_saddle_min'] += 1
+							path_id += 1
+		
+		print(f"    Generated {len(generated_paths)} total candidate paths")
+		print(f"      - Type 1 (Min→Saddle→Min): {path_types['min_saddle_min']}")
+		print(f"      - Type 2 (Min→Intermediate→Min): {path_types['min_intermediate_min']}")
+		print(f"      - Type 3 (Min→Gradient→Min): {path_types['min_gradient_min']}")
+		print(f"      - Type 4 (Min→Intermediate→Saddle→Min): {path_types['min_intermediate_saddle_min']}")
+		print(f"      - Type 5 (Min→Gradient→Saddle→Min): {path_types['min_gradient_saddle_min']}")
+		
+		# 5. Extract frames along each path and export
+		print("\n[5] Exporting paths as NEB starting trajectories...")
+		exported_paths = []
+		
+		for path_info in generated_paths:
+			path_id = path_info['id']
+			output_path_folder = os.path.join(output_folder, f"NEB_Path_{path_id:03d}.ptGeo")
+			
+			if not os.path.exists(output_path_folder):
+				os.makedirs(output_path_folder)
+			
+			# Collect frames along the path
+			frames_data = []
+			frame_count = 0
+			
+			# Process initial minimum
+			init_file = os.path.join(path_folder, f"frame{path_info['coords_x'][0]}_{path_info['coords_y'][0]}.pkl")
+			if os.path.exists(init_file):
+				try:
+					system.coordinates3 = ImportCoordinates3(init_file, log=None)
+					output_file = os.path.join(output_path_folder, f"frame{frame_count:04d}.pkl")
+					Pickle(output_file, system.coordinates3)
+					frames_data.append({
+						'frame': frame_count,
+						'x': path_info['coords_x'][0],
+						'y': path_info['coords_y'][0],
+						'energy': path_info['energies'][0]
+					})
+					frame_count += 1
+				except Exception as e:
+					print(f"      Warning: Could not process initial point: {e}")
+			
+			# Process saddle point
+			sad_file = os.path.join(path_folder, f"frame{path_info['coords_x'][1]}_{path_info['coords_y'][1]}.pkl")
+			if os.path.exists(sad_file):
+				try:
+					system.coordinates3 = ImportCoordinates3(sad_file, log=None)
+					output_file = os.path.join(output_path_folder, f"frame{frame_count:04d}.pkl")
+					Pickle(output_file, system.coordinates3)
+					frames_data.append({
+						'frame': frame_count,
+						'x': path_info['coords_x'][1],
+						'y': path_info['coords_y'][1],
+						'energy': path_info['energies'][1]
+					})
+					frame_count += 1
+				except Exception as e:
+					print(f"      Warning: Could not process saddle point: {e}")
+			
+			# Process final minimum
+			fin_file = os.path.join(path_folder, f"frame{path_info['coords_x'][2]}_{path_info['coords_y'][2]}.pkl")
+			if os.path.exists(fin_file):
+				try:
+					system.coordinates3 = ImportCoordinates3(fin_file, log=None)
+					output_file = os.path.join(output_path_folder, f"frame{frame_count:04d}.pkl")
+					Pickle(output_file, system.coordinates3)
+					frames_data.append({
+						'frame': frame_count,
+						'x': path_info['coords_x'][2],
+						'y': path_info['coords_y'][2],
+						'energy': path_info['energies'][2]
+					})
+					frame_count += 1
+				except Exception as e:
+					print(f"      Warning: Could not process final point: {e}")
+			
+			# Write log file for this path
+			log_file = os.path.join(output_path_folder, "NEB_Path.log")
+			with open(log_file, 'w') as f:
+				f.write("Frame  X_Index  Y_Index  Energy(eV)  Barrier(kcal/mol)\n")
+				ref_energy = min(path_info['energies'][0], path_info['energies'][2])
+				for data in frames_data:
+					barrier = (data['energy'] - ref_energy) * 0.239006
+					f.write(f"{data['frame']:5d}  {data['x']:7d}  {data['y']:7d}  {data['energy']:10.6f}  {barrier:10.6f}\n")
+			
+			# Write path info file
+			info_file = os.path.join(output_path_folder, "Path_Info.txt")
+			with open(info_file, 'w') as f:
+				f.write("NEB PATH INFORMATION\n")
+				f.write("="*60 + "\n\n")
+				f.write(f"Path ID: {path_id}\n")
+				f.write(f"Total frames: {frame_count}\n")
+				f.write(f"Barrier height: {path_info['barrier']:.4f} kcal/mol\n\n")
+				f.write("Path segments:\n")
+				f.write(f"  Initial minimum:  ({path_info['initial'][0]}, {path_info['initial'][1]}), E = {path_info['initial'][2]:.6f} eV\n")
+				f.write(f"  Saddle point:     ({path_info['saddle'][0]}, {path_info['saddle'][1]}), E = {path_info['saddle'][2]:.6f} eV\n")
+				f.write(f"  Final minimum:    ({path_info['final'][0]}, {path_info['final'][1]}), E = {path_info['final'][2]:.6f} eV\n")
+				f.write(f"\nRenumbered frames (0 to {frame_count-1}) ready for NEB calculation\n")
+			
+			if frame_count >= 3:  # Only count as valid if we got all 3 key points
+				exported_paths.append({
+					'id': path_id,
+					'folder': output_path_folder,
+					'frames': frame_count,
+					'barrier': path_info['barrier']
+				})
+				print(f"    ✓ Path {path_id:03d}: {frame_count} frames, Barrier = {path_info['barrier']:.4f} kcal/mol")
+			else:
+				print(f"    ✗ Path {path_id:03d}: Insufficient frames ({frame_count})")
+		
+		# 6. Generate summary report
+		print("\n[6] Generating summary report...")
+		summary_report = self._GenerateNEBPathReport(exported_paths, analysis_results)
+		
+		summary_file = os.path.join(output_folder, "NEB_Paths_Summary.txt")
+		with open(summary_file, 'w') as f:
+			f.write(summary_report)
+		
+		print(f"    Summary saved to: {summary_file}")
+		
+		print("\n" + "="*70)
+		print(f"SUCCESS: Generated {len(exported_paths)} NEB starting paths")
+		print(f"Output folder: {output_folder}")
+		print("="*70 + "\n")
+		
+		return {
+			'paths': exported_paths,
+			'summary_report': summary_report,
+			'total_generated': len(exported_paths)
+		}
+	
+	#----------------------------------------------------------------------------------------
+	def _GenerateNEBPathReport(self, exported_paths, analysis_results):
+		"""Generate formatted report of generated NEB paths."""
+		report = ""
+		report += "NEB STARTING PATHS - GENERATION REPORT\n"
+		report += "="*70 + "\n\n"
+		
+		report += "SURFACE STATISTICS\n"
+		report += "-"*70 + "\n"
+		report += f"Total local minima found: {len(analysis_results['minima'])}\n"
+		report += f"Total saddle points found: {len(analysis_results['saddle_points'])}\n"
+		report += f"Total NEB paths generated: {len(exported_paths)}\n\n"
+		
+		report += "GENERATED NEB PATHS (sorted by barrier height)\n"
+		report += "-"*70 + "\n"
+		
+		sorted_paths = sorted(exported_paths, key=lambda x: x['barrier'])
+		
+		for i, path in enumerate(sorted_paths, 1):
+			report += f"\n{i}. Path ID: {path['id']:03d}\n"
+			report += f"   Frames: {path['frames']}\n"
+			report += f"   Barrier: {path['barrier']:.4f} kcal/mol\n"
+			report += f"   Folder: NEB_Path_{path['id']:03d}.ptGeo\n"
+			report += f"   Status: Ready for NEB calculation\n"
+		
+		report += "\n" + "-"*70 + "\n"
+		report += "USAGE INSTRUCTIONS\n"
+		report += "-"*70 + "\n"
+		report += "Each path folder contains:\n"
+		report += "  • frame0000.pkl, frame0001.pkl, ... - Renumbered coordinate files\n"
+		report += "  • NEB_Path.log - Energy profile along path\n"
+		report += "  • Path_Info.txt - Path details and statistics\n\n"
+		report += "To use with NEB calculations:\n"
+		report += "  1. Load the frame files as your initial guess\n"
+		report += "  2. Renumbered frames ensure correct ordering (0 to n)\n"
+		report += "  3. Use the barrier height to estimate convergence criteria\n"
+		report += "  4. Check lowest-barrier paths first for efficiency\n"
+		
+		report += "\n" + "="*70 + "\n"
+		return report
+	
 	#----------------------------------------------------------------------------------------
 	def Rewrite_Log(self,_fileName):
 		'''
