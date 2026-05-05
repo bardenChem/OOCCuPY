@@ -903,9 +903,11 @@ class EnergyAnalysis:
 			dist_to_product = np.sqrt((nearest_product[0]-fin_point[0])**2 + (nearest_product[1]-fin_point[1])**2)
 			print(f"    → Products: ({nearest_product[0]}, {nearest_product[1]}), Energy = {nearest_product[2]:.6f} eV, Distance = {dist_to_product:.2f}")
 		
-		# 2. Find saddle points using Hessian approximation
+		# 2. Find saddle points using Hessian approximation with improved filtering
 		print("\n[2] Searching for saddle points...")
-		saddle_points = []
+		
+		# First pass: identify candidates with strong saddle character
+		saddle_candidates = []
 		
 		for i in range(1, self.ylen - 1):
 			for j in range(1, self.xlen - 1):
@@ -925,20 +927,48 @@ class EnergyAnalysis:
 				# Compute eigenvalues
 				eigenvalues = np.linalg.eigvalsh(hessian)
 				
-				# Saddle point: one positive, one negative eigenvalue
-				if eigenvalues[0] * eigenvalues[1] < 0 and abs(eigenvalues[0]) > 0.001 and abs(eigenvalues[1]) > 0.001:
-					saddle_points.append((j, i, center, eigenvalues))
-					results['saddle_points'].append((j, i, center, eigenvalues.tolist()))
+				# Saddle point: one positive, one negative eigenvalue with STRONG character
+				# Require: mixed signs AND both have substantial magnitude AND product is negative
+				has_mixed_signs = eigenvalues[0] * eigenvalues[1] < 0
+				both_substantial = abs(eigenvalues[0]) > 0.1 and abs(eigenvalues[1]) > 0.1  # Stricter threshold
+				saddle_strength = abs(eigenvalues[0] * eigenvalues[1])  # Measure of saddle character
+				
+				if has_mixed_signs and both_substantial:
+					saddle_candidates.append({
+						'x': j, 'y': i, 'energy': center, 'eigs': eigenvalues, 
+						'strength': saddle_strength
+					})
 		
-		print(f"  Found {len(saddle_points)} saddle points")
-		for x, y, e, eigs in saddle_points[:10]:
-			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV, Eigenvalues = [{eigs[0]:7.3f}, {eigs[1]:7.3f}]")
+		print(f"  Found {len(saddle_candidates)} initial saddle candidates")
+		
+		# Second pass: cluster nearby saddle points and keep strongest in each cluster
+		if saddle_candidates:
+			saddle_points = self._ClusterSaddlePoints(saddle_candidates, cluster_radius=3)
+			print(f"  After clustering (radius=3): {len(saddle_points)} saddle points")
+			
+			# Third pass: energy-based filtering - keep only saddles that are significantly elevated
+			min_energy = min(m[2] for m in minima) if minima else min(z.flatten())
+			energy_threshold_for_saddle = min_energy + 1.0  # At least 1.0 eV above minimum
+			
+			filtered_saddles = [s for s in saddle_points if s['energy'] > energy_threshold_for_saddle]
+			print(f"  After energy filtering (E > {energy_threshold_for_saddle:.2f} eV): {len(filtered_saddles)} saddle points")
+			
+			# Sort by energy
+			filtered_saddles.sort(key=lambda x: x['energy'])
+			saddle_points = filtered_saddles
+			
+			# Store in results
+			for s in saddle_points:
+				results['saddle_points'].append((s['x'], s['y'], s['energy'], s['eigs'].tolist()))
+		else:
+			saddle_points = []
+			print(f"  No significant saddle points found")
+		
+		print(f"\n  Final saddle points: {len(saddle_points)}")
+		for x_info in saddle_points[:10]:
+			print(f"    - Position ({x_info['x']:3d}, {x_info['y']:3d}): Energy = {x_info['energy']:10.4f} eV, Eigenvalues = [{x_info['eigs'][0]:7.3f}, {x_info['eigs'][1]:7.3f}]")
 		if len(saddle_points) > 10:
 			print(f"    ... and {len(saddle_points)-10} more")
-		
-		# Sort saddle points by energy
-		saddle_points.sort(key=lambda x: x[2])
-		results['saddle_points'] = [(s[0], s[1], s[2], s[3].tolist()) for s in saddle_points]
 		
 		print("\n  Saddle points sorted by energy (ascending):")
 		
@@ -1015,7 +1045,57 @@ class EnergyAnalysis:
 		return results
 	
 	#----------------------------------------------------------------------------------------
-	def _GeneratePESAnalysisReport(self, results, energy_threshold):
+	def _ClusterSaddlePoints(self, candidates, cluster_radius=3):
+		"""
+		Cluster nearby saddle point candidates and keep the strongest in each cluster.
+		
+		This prevents detection of multiple nearly-identical saddle points from noise.
+		For each cluster, keeps only the point with the highest saddle strength (largest |λ₁*λ₂|).
+		
+		Args:
+			candidates (list): List of saddle point candidate dicts with 'x', 'y', 'strength', etc.
+			cluster_radius (int): Distance within which to merge saddle points
+		
+		Returns:
+			list: Clustered saddle points (strongest in each cluster)
+		"""
+		if not candidates:
+			return []
+		
+		# Sort by saddle strength (highest first)
+		sorted_candidates = sorted(candidates, key=lambda c: c['strength'], reverse=True)
+		
+		clusters = []
+		used = set()
+		
+		for candidate in sorted_candidates:
+			if (candidate['x'], candidate['y']) in used:
+				continue
+			
+			# Start new cluster with this candidate
+			cluster = [candidate]
+			used.add((candidate['x'], candidate['y']))
+			
+			# Find all nearby unassigned candidates
+			for other in sorted_candidates:
+				if (other['x'], other['y']) in used:
+					continue
+				
+				# Check distance
+				dist = np.sqrt((candidate['x'] - other['x'])**2 + (candidate['y'] - other['y'])**2)
+				if dist <= cluster_radius:
+					cluster.append(other)
+					used.add((other['x'], other['y']))
+			
+			# Add strongest from this cluster
+			strongest = max(cluster, key=lambda c: c['strength'])
+			clusters.append(strongest)
+		
+		return clusters
+	
+	#----------------------------------------------------------------------------------------
+	def _GeneratePESAnalysisReport(self,results, energy_threshold=0.5 ):
+		
 		"""Generate formatted analysis report."""
 		report = ""
 		report += "POTENTIAL ENERGY SURFACE (PES) ANALYSIS REPORT\n"
