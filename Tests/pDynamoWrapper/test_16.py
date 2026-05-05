@@ -47,7 +47,7 @@ def Run_Test():
 		"xlim_list": [-1.4,-0.4]   ,
 		"ylim_list": [-1.2,-0.2]   ,
 		"in_point" :[1,1]   ,
-		"fin_point":[10,10]    
+		"fin_point":[-1,-1]    
 	}
 
 	test_01 = Wrapper(folder)
