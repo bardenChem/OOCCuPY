@@ -39,15 +39,15 @@ def Run_Test():
 		"analysis_type":"Energy_Plots",
 		"log_name": os.path.join(folder06,"Multiple_Distance_am1","ScanTraj.log"),
 		"retrieve_path":_path,
-		"xsize":14,
-		"ysize":14,
+		"xsize":-1,
+		"ysize":-1,
 		"contour_lines":14,
 		"folder":"test_16",
 		"type":"2D",
 		"xlim_list": [-1.4,-0.4]   ,
 		"ylim_list": [-1.2,-0.2]   ,
 		"in_point" :[1,1]   ,
-		"fin_point":[-1,-1]    
+		"fin_point":[24,27]    
 	}
 
 	test_01 = Wrapper(folder)

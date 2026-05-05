@@ -237,8 +237,8 @@ class Analysis:
 			else: max_points = 21
 			if "min_points" in self.parameters: min_points = self.parameters["min_points"]
 			else: min_points = 15
-			_p_x, _p_y = EA.Path_From_PES(in_point,fin_point,self.parameters["retrieve_path"],self.baseFolder,self.molecule.system,min_points=min_points,max_points=max_points)
-			EA.Plot2D(cnt_lines,crd1_label,crd2_label,xlim,ylim,show,pathx=_p_x,pathy=_p_y)
+			_path_points = EA.Path_From_PES(in_point,fin_point,self.parameters["retrieve_path"],self.baseFolder,self.molecule.system,min_points=min_points,max_points=max_points)
+			EA.Plot2D(cnt_lines,crd1_label,crd2_label,xlim,ylim,show,path_points=_path_points)
 
 	#=========================================================================
 	def PMFAnalysis(self):

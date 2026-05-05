@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import matplotlib.colors as colors
 from matplotlib.colors import BoundaryNorm
+from scipy.interpolate import RBFInterpolator
 
 from .commonFunctions import *
 
@@ -554,6 +555,7 @@ class EnergyAnalysis:
 		if not os.path.exists( os.path.join(_folder_dst,"traj1d.ptGeo") ): 
 			os.makedirs( os.path.join(_folder_dst,"traj1d.ptGeo") )
 
+
 		Results = self.AnalyzePES2D( output_folder= os.path.join(_folder_dst,"path_analysis"), in_point=in_point, fin_point=fin_point )
 		saddle_p = Results["saddle_points"]
 		reactants = Results["reactants"]
@@ -588,13 +590,13 @@ class EnergyAnalysis:
 				if  (cp[1] + 1) <= fin_point[1] : 
 					B = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), cp[0] ] 
 					print( "Increment in Y:  {}".format(B) )
-			else: print( "No Incrementin Y: {}".format(B) )
+			else: print( "No Increment in Y: {}".format(B) )
 
 			if ( cp[0] + 1 ) < self.xlen and ( cp[1] + 1 ) < self.ylen: 
 				if  (cp[0] + 1) <=fin_point[0] and (cp[1] + 1) <= fin_point[1]:
 					C = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), (cp[0] + 1) ] 
 					print( "Increment in both directions:  {}".format(C) )
-			else: print("No Incrementin both directions: {}".format(C) )
+			else: print("No Increment in both directions: {}".format(C) )
 
 			D = [ A, B, C ]
 			ind = D.index(min(D))			
@@ -605,6 +607,8 @@ class EnergyAnalysis:
 			pathy.append(cp[1])
 
 		if not fin_point == final_fp:
+			print(final_fp)
+			print("Going from the sadle to the final point")
 			while not cp == final_fp:
 
 				print( "Current Point is: {} {} ".format(cp[0], cp[1] ) )
@@ -615,21 +619,21 @@ class EnergyAnalysis:
 				C = math.inf			
 
 				if ( cp[0] + 1 ) < self.xlen: 
-					if  (cp[0] + 1) <= fin_point[0]:
+					if  (cp[0] + 1) <= final_fp[0]:
 						A = z[ cp[1], cp[0] ] + z[ cp[1], (cp[0] + 1) ]
 						print( "Increment in X:  {}".format(A) )
 				else: print( "No Increment in X:  {}".format(A) )
 				if ( cp[1] + 1 ) < self.ylen:
-					if  (cp[1] + 1) <= fin_point[1] : 
+					if  (cp[1] + 1) <= final_fp[1] : 
 						B = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), cp[0] ] 
 						print( "Increment in Y:  {}".format(B) )
 				else: print( "No Incrementin Y: {}".format(B) )
 
 				if ( cp[0] + 1 ) < self.xlen and ( cp[1] + 1 ) < self.ylen: 
-					if  (cp[0] + 1) <=fin_point[0] and (cp[1] + 1) <= fin_point[1]:
+					if  (cp[0] + 1) <=final_fp[0] and (cp[1] + 1) <= final_fp[1]:
 						C = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), (cp[0] + 1) ] 
 						print( "Increment in both directions:  {}".format(C) )
-				else: print("No Incrementin both directions: {}".format(C) )
+				else: print("No Increment in both directions: {}".format(C) )
 
 				D = [ A, B, C ]
 				ind = D.index(min(D))			
@@ -894,52 +898,85 @@ class EnergyAnalysis:
 			nearest_reactant = min(minima, key=lambda m: (m[0]-in_point[0])**2 + (m[1]-in_point[1])**2)
 			results['reactants'] = nearest_reactant
 			dist_to_reactant = np.sqrt((nearest_reactant[0]-in_point[0])**2 + (nearest_reactant[1]-in_point[1])**2)
-			print(f"    → Reactants: ({nearest_reactant[0]}, {nearest_reactant[1]}), Energy = {nearest_reactant[2]:.6f} eV, Distance = {dist_to_reactant:.2f}")
+			if dist_to_reactant > 3.0:
+				print(f"    → Products: ({in_point[0]}, {in_point[1]}), Energy = {z[in_point[1],in_point[0]]:.6f} kJ, Distance = {dist_to_reactant:.2f}")
+				results['reactants'] = ( in_point[0], in_point[1], z[in_point[1],in_point[0]] )
+			else:
+				print(f"    → Reactants: ({nearest_reactant[0]}, {nearest_reactant[1]}), Energy = {nearest_reactant[2]:.6f} kJ, Distance = {dist_to_reactant:.2f}")
+		
+			
+			print(f"    → Reactants: ({nearest_reactant[0]}, {nearest_reactant[1]}), Energy = {nearest_reactant[2]:.6f} kJ, Distance = {dist_to_reactant:.2f}")
 		
 		if fin_point is not None and len(minima) > 0:
 			print(f"\n  Finding nearest minimum to final point {fin_point}...")
 			nearest_product = min(minima, key=lambda m: (m[0]-fin_point[0])**2 + (m[1]-fin_point[1])**2)
 			results['products'] = nearest_product
 			dist_to_product = np.sqrt((nearest_product[0]-fin_point[0])**2 + (nearest_product[1]-fin_point[1])**2)
-			print(f"    → Products: ({nearest_product[0]}, {nearest_product[1]}), Energy = {nearest_product[2]:.6f} eV, Distance = {dist_to_product:.2f}")
+			if dist_to_product > 3.0:
+				print(f"    → Products: ({fin_point[0]}, {fin_point[1]}), Energy = {z[fin_point[1],fin_point[0]]:.6f} kJ, Distance = {dist_to_product:.2f}")
+				results['products'] = ( fin_point[0], fin_point[1], z[fin_point[1],fin_point[0]] )
+			else:
+				print(f"    → Products: ({nearest_product[0]}, {nearest_product[1]}), Energy = {nearest_product[2]:.6f} kJ, Distance = {dist_to_product:.2f}")
 		
-		# 2. Find saddle points using Hessian approximation with improved filtering
-		print("\n[2] Searching for saddle points...")
+		
 		
 		# First pass: identify candidates with strong saddle character
 		saddle_candidates = []
 		
+		from scipy.interpolate import RBFInterpolator
+		# Collect all points and energies
+		points = np.column_stack((self.RC1, self.RC2))   # (N, 2)
+		values = self.energiesMatrix.flatten()           # energies
+		rbf = RBFInterpolator(points, values, kernel='thin_plate_spline', smoothing=0.001)
+		
+		# Define a uniform grid covering the range of RC1 and RC2
+		x_uniform = np.linspace(min(self.RC1), max(self.RC1), self.xlen)
+		y_uniform = np.linspace(min(self.RC2), max(self.RC2), self.ylen)
+		X, Y = np.meshgrid(x_uniform, y_uniform, indexing='xy')
+		Xg, Yg = np.meshgrid(x_uniform, y_uniform, indexing='xy')
+		grid_points = np.column_stack((Xg.ravel(), Yg.ravel()))
+		# Interpolate (use 'cubic' for smoothness, 'linear' for speed)
+		z_smooth = rbf(grid_points).reshape(self.ylen, self.xlen)
+		# Now Z_uniform is on a perfect rectangular grid with constant dx, dy
+		dx = x_uniform[1] - x_uniform[0]
+		dy = y_uniform[1] - y_uniform[0]
+
 		for i in range(1, self.ylen - 1):
 			for j in range(1, self.xlen - 1):
-				# Approximate Hessian using finite differences
-				# H_xx = (E(i,j+1) - 2*E(i,j) + E(i,j-1)) / dx^2
-				# H_yy = (E(i+1,j) - 2*E(i,j) + E(i-1,j)) / dy^2
-				# H_xy = (E(i+1,j+1) - E(i+1,j-1) - E(i-1,j+1) + E(i-1,j-1)) / 4
+				# Get local spacings (central differences use average of surrounding spacings)
+										
+				# Approximate Hessian using finite differences on SMOOTHED energy with PHYSICAL spacing
+				# H_xx = (E(i,j+1) - 2*E(i,j) + E(i,j-1)) / dx²
+				# H_yy = (E(i+1,j) - 2*E(i,j) + E(i-1,j)) / dy²
+				# H_xy = (E(i+1,j+1) - E(i+1,j-1) - E(i-1,j+1) + E(i-1,j-1)) / (4*dx*dy)
 				
-				center = z[i, j]
-				h_xx = z[i, j+1] - 2*center + z[i, j-1]
-				h_yy = z[i+1, j] - 2*center + z[i-1, j]
-				h_xy = (z[i+1, j+1] - z[i+1, j-1] - z[i-1, j+1] + z[i-1, j-1]) / 4.0
+				center = z_smooth[i, j]
+				h_xx = (z_smooth[i, j+1] - 2*center + z_smooth[i, j-1]) / (dx ** 2)
+				h_yy = (z_smooth[i+1, j] - 2*center + z_smooth[i-1, j]) / (dy ** 2)
+				h_xy = (z_smooth[i+1, j+1] - z_smooth[i+1, j-1] - z_smooth[i-1, j+1] + z_smooth[i-1, j-1]) / (4.0 * dx * dy)
 				
-				# Create Hessian matrix
+				# Create Hessian matrix (now in proper physical units: kJ/Ų)
 				hessian = np.array([[h_xx, h_xy], [h_xy, h_yy]])
 				
-				# Compute eigenvalues
+				# Compute eigenvalues (now in kJ/Ų)
 				eigenvalues = np.linalg.eigvalsh(hessian)
 				
-				# Saddle point: one positive, one negative eigenvalue with STRONG character
-				# Require: mixed signs AND both have substantial magnitude AND product is negative
+				# Saddle point detection with PHYSICAL thresholds:
+				# - Mixed signs (one positive, one negative curvature)
+				# - Both eigenvalues SIGNIFICANT in physical units
+				#   For a smooth PES, typical saddle points have |λ| > 0.01 kJ/Ų
+				#   This eliminates gentle ripples but keeps real transition states
 				has_mixed_signs = eigenvalues[0] * eigenvalues[1] < 0
-				both_substantial = abs(eigenvalues[0]) > 0.1 and abs(eigenvalues[1]) > 0.1  # Stricter threshold
-				saddle_strength = abs(eigenvalues[0] * eigenvalues[1])  # Measure of saddle character
+				both_substantial = abs(eigenvalues[0]) > 5.0 and abs(eigenvalues[0]) < 250.0 and abs(eigenvalues[1]) > 10 and abs(eigenvalues[1]) < 250.0 # Physical threshold
+				saddle_strength = abs(eigenvalues[0] * eigenvalues[1])  # Product gives saddle strength
 				
 				if has_mixed_signs and both_substantial:
 					saddle_candidates.append({
-						'x': j, 'y': i, 'energy': center, 'eigs': eigenvalues, 
+						'x': j, 'y': i, 'energy': z[i, j], 'eigs': eigenvalues,  # Use original energy, not smoothed
 						'strength': saddle_strength
 					})
 		
-		print(f"  Found {len(saddle_candidates)} initial saddle candidates")
+		print(f"  Found {len(saddle_candidates)} initial saddle candidates (after physical filtering + smoothing)")
 		
 		# Second pass: cluster nearby saddle points and keep strongest in each cluster
 		if saddle_candidates:
@@ -948,10 +985,10 @@ class EnergyAnalysis:
 			
 			# Third pass: energy-based filtering - keep only saddles that are significantly elevated
 			min_energy = min(m[2] for m in minima) if minima else min(z.flatten())
-			energy_threshold_for_saddle = min_energy + 1.0  # At least 1.0 eV above minimum
+			energy_threshold_for_saddle = min_energy + 37.0  # At least 30.0 kJ above minimum
 			
 			filtered_saddles = [s for s in saddle_points if s['energy'] > energy_threshold_for_saddle]
-			print(f"  After energy filtering (E > {energy_threshold_for_saddle:.2f} eV): {len(filtered_saddles)} saddle points")
+			print(f"  After energy filtering (E > {energy_threshold_for_saddle:.2f} kJ): {len(filtered_saddles)} saddle points")
 			
 			# Sort by energy
 			filtered_saddles.sort(key=lambda x: x['energy'])
@@ -965,8 +1002,9 @@ class EnergyAnalysis:
 			print(f"  No significant saddle points found")
 		
 		print(f"\n  Final saddle points: {len(saddle_points)}")
+		print(f"  (Physical eigenvalue threshold: 10 kJ/Ų)")
 		for x_info in saddle_points[:10]:
-			print(f"    - Position ({x_info['x']:3d}, {x_info['y']:3d}): Energy = {x_info['energy']:10.4f} eV, Eigenvalues = [{x_info['eigs'][0]:7.3f}, {x_info['eigs'][1]:7.3f}]")
+			print(f"    - Position ({x_info['x']:3d}, {x_info['y']:3d}): Energy = {x_info['energy']:10.4f} kJ, Eigenvalues = [{x_info['eigs'][0]:9.5f}, {x_info['eigs'][1]:9.5f}] kJ/Ų")
 		if len(saddle_points) > 10:
 			print(f"    ... and {len(saddle_points)-10} more")
 		
@@ -978,21 +1016,24 @@ class EnergyAnalysis:
 		
 		for i in range(1, self.ylen - 1):
 			for j in range(1, self.xlen - 1):
-				# Compute gradient magnitude
-				gx = (z[i, j+1] - z[i, j-1]) / 2.0
-				gy = (z[i+1, j] - z[i-1, j]) / 2.0
+				# Get local spacings for gradient calculation
+				
+				# Compute gradient magnitude with PHYSICAL spacing (kJ/Å) from smoothed surface
+				gx = (z_smooth[i, j+1] - z_smooth[i, j-1]) / (2.0 * dx)
+				gy = (z_smooth[i+1, j] - z_smooth[i-1, j]) / (2.0 * dy)
 				grad_magnitude = np.sqrt(gx**2 + gy**2)
 				
-				# High gradient indicates transition region
-				if grad_magnitude > 0.5:  # Threshold for significant gradient
+				# High gradient indicates transition region (threshold in physical units: kJ/Å)
+				if grad_magnitude > 1.0:  # Physical threshold: significant steepness
 					gradient_points.append((j, i, z[i, j], grad_magnitude))
 					results['gradient_points'].append((j, i, z[i, j], grad_magnitude))
 		
 		print(f"  Found {len(gradient_points)} transition region points")
+		print(f"  (Physical gradient threshold: 1.0 eV/{chr(197)})")
 		# Print highest gradient points
 		top_gradient = sorted(gradient_points, key=lambda x: x[3], reverse=True)[:5]
 		for x, y, e, grad in top_gradient:
-			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV, |∇E| = {grad:7.4f}")
+			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV, |∇E| = {grad:7.4f} eV/{chr(197)}")
 		
 		# 4. Identify intermediary structures (between minima with moderate energy)
 		print("\n[4] Classifying intermediary structures...")
@@ -1106,7 +1147,7 @@ class EnergyAnalysis:
 		if results['minima']:
 			report += f"Total minima found: {len(results['minima'])}\n"
 			for x, y, e in results['minima'][:20]:
-				report += f"  ({x:4d}, {y:4d}): {e:12.6f} eV ({e*0.239006:10.4f} kcal/mol)\n"
+				report += f"  ({x:4d}, {y:4d}): {e:12.6f} kJ ({e*0.239006:10.4f} kcal/mol)\n"
 			if len(results['minima']) > 20:
 				report += f"  ... and {len(results['minima'])-20} more\n"
 		else:
@@ -1132,7 +1173,7 @@ class EnergyAnalysis:
 			report += f"Total intermediate points found: {len(results['intermediates'])}\n"
 			report += f"Energy threshold: {energy_threshold} kcal/mol\n"
 			for x, y, e in results['intermediates'][:20]:
-				report += f"  ({x:4d}, {y:4d}): {e:12.6f} eV\n"
+				report += f"  ({x:4d}, {y:4d}): {e:12.6f} kJ\n"
 			if len(results['intermediates']) > 20:
 				report += f"  ... and {len(results['intermediates'])-20} more\n"
 		else:
@@ -1190,7 +1231,7 @@ class EnergyAnalysis:
 			
 			# Add colorbar
 			cbar = plt.colorbar(contour, ax=ax)
-			cbar.set_label('Energy (eV)')
+			cbar.set_label('Energy (kJ)')
 			
 			# Clean legend
 			handles, labels = ax.get_legend_handles_labels()

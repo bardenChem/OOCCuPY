@@ -319,17 +319,17 @@ class ReactionCoordinate:
 		if self.reaction_type == "association":
 		# For association, we're going from large to small distance
 			coordinate_range = abs(self.maximumD - self.minimumD)
+			self.nsteps = int(abs(coordinate_range / self.increment)) + 1
 		elif self.reaction_type == "dissociation":
 			coordinate_range = abs(self.minimumD - self.maximumD)
 		elif self.reaction_type == "transfer":
 			coordinate_range = abs(self.maximumD - self.minimumD)
-       
+		max_steps=40
 
 		# Calculate steps with safety check
 		if self.increment > 0:
 			nsteps = int(abs(coordinate_range / self.increment)) + 1            
 			# Safety: limit maximum steps to reasonable number
-			max_steps = 40  # Prevent runaway calculations
 			if nsteps > max_steps:
 				print(f"Warning: {nsteps} steps exceeds maximum ({max_steps})")
 				print(f"  Adjusting increment from {self.increment:.3f}")
@@ -343,11 +343,7 @@ class ReactionCoordinate:
 				print("  Setting default increment to 0.1 Å")
 				self.increment = 0.1
 				self.nsteps = int(abs(coordinate_range / self.increment)) + 1
-			else:
-				self.increment = coordinate_range / (max_steps - 1)
-				self.nsteps = max_steps
-				self.increment = abs(self.increment) *-1
-				pass  # For association, we can allow non-positive increment since we're scanning down to bond length
+			
 		
 		return self.nsteps
 
