@@ -537,7 +537,7 @@ class EnergyAnalysis:
 		return kcat
 
 	#----------------------------------------------------------------------------------------
-	def Path_From_PES(self, in_point,fin_point,_path,_folder_dst,_system,min_points=15,max_points=21):
+	def Path_From_PES(self, in_point,fin_point,_path_pkl,_folder_dst,_system,min_points=15,max_points=21,method="hessian"):
 		'''
 		Calculate minimum energy path from starting point to final point on PES.
 		
@@ -547,69 +547,42 @@ class EnergyAnalysis:
 		#setting current point as initial
 
 		z = self.energiesMatrix	
-
+		dirs = [ [1,0] ,[0,1], [1,1] ]
 		pathx = [in_point[0]] 
 		pathy = [in_point[1]]
 		self.energies1D.append( z[ pathx[0],pathy[0] ] )
+		cp = [ in_point[0],in_point[1] ]
+		final_fp = [ fin_point[0], fin_point[1] ]
 
 		if not os.path.exists( os.path.join(_folder_dst,"traj1d.ptGeo") ): 
 			os.makedirs( os.path.join(_folder_dst,"traj1d.ptGeo") )
 
-
-		Results = self.AnalyzePES2D( output_folder= os.path.join(_folder_dst,"path_analysis"), in_point=in_point, fin_point=fin_point )
-		saddle_p = Results["saddle_points"]
-		reactants = Results["reactants"]
-		products  = Results["products"]
+		if method == "Dijkstra":
+			print(cp, fin_point)
+			paths = self.FindMinEnergyPath_Dijkstra(in_point,fin_point)
+			for i in range(1,len(paths[0])): 
+				pathx.append(paths[0][i][0])
+				pathy.append(paths[0][i][1])
+		elif method =="MiniMax":
+			print(cp, fin_point)
+			paths = self.FindMinimaxPath(in_point,fin_point)
+			for i in range(1,len(paths[0])): 
+				pathx.append(paths[0][i][0])
+				pathy.append(paths[0][i][1])
+		elif method == "hessian" or method =="simpleMEP":
+			if method == "hessian":
+				Results = self.AnalyzePES2D( output_folder= os.path.join(_folder_dst,"path_analysis"), in_point=in_point, fin_point=fin_point )
+				saddle_p = Results["saddle_points"]
+				reactants = Results["reactants"]
+				products  = Results["products"]
+				cp = [ reactants[0], reactants[1] ]
+				final_fp  = [ products[0], products[1] ]			
+				if len(saddle_p) > 0:
+					fin_point = [ saddle_p[0][0], saddle_p[0][1] ]
 		
-		dirs = [ [1,0] ,[0,1], [1,1] ]
-		cp = [ reactants[0], reactants[1] ]
-		
-		final_fp  = [ products[0], products[1] ]
-		if len(saddle_p) > 0:
-			fin_point = [ saddle_p[0][0], saddle_p[0][1] ]
-		else: 
-			fin_point = final_fp
-
-		print(cp, fin_point)
-		#search path until the TS
-		while not cp == fin_point:
-
-			print( "Current Point is: {} {} ".format(cp[0], cp[1] ) )
-			print( "Energy of the Current Point: {}".format( z[ cp[1],cp[0] ] ) )
-
-			A = math.inf
-			B = math.inf
-			C = math.inf			
-
-			if ( cp[0] + 1 ) < self.xlen: 
-				if  (cp[0] + 1) <= fin_point[0]:
-					A = z[ cp[1], cp[0] ] + z[ cp[1], (cp[0] + 1) ]
-					print( "Increment in X:  {}".format(A) )
-			else: print( "No Increment in X:  {}".format(A) )
-			if ( cp[1] + 1 ) < self.ylen:
-				if  (cp[1] + 1) <= fin_point[1] : 
-					B = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), cp[0] ] 
-					print( "Increment in Y:  {}".format(B) )
-			else: print( "No Increment in Y: {}".format(B) )
-
-			if ( cp[0] + 1 ) < self.xlen and ( cp[1] + 1 ) < self.ylen: 
-				if  (cp[0] + 1) <=fin_point[0] and (cp[1] + 1) <= fin_point[1]:
-					C = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), (cp[0] + 1) ] 
-					print( "Increment in both directions:  {}".format(C) )
-			else: print("No Increment in both directions: {}".format(C) )
-
-			D = [ A, B, C ]
-			ind = D.index(min(D))			
-			cp[0] += dirs[ind][0]
-			cp[1] += dirs[ind][1]			
-			self.energies1D.append( z[ cp[1], cp[0] ] )
-			pathx.append(cp[0])
-			pathy.append(cp[1])
-
-		if not fin_point == final_fp:
-			print(final_fp)
-			print("Going from the sadle to the final point")
-			while not cp == final_fp:
+			print(cp, fin_point)
+			#search path until the TS
+			while not cp == fin_point:
 
 				print( "Current Point is: {} {} ".format(cp[0], cp[1] ) )
 				print( "Energy of the Current Point: {}".format( z[ cp[1],cp[0] ] ) )
@@ -619,18 +592,18 @@ class EnergyAnalysis:
 				C = math.inf			
 
 				if ( cp[0] + 1 ) < self.xlen: 
-					if  (cp[0] + 1) <= final_fp[0]:
+					if  (cp[0] + 1) <= fin_point[0]:
 						A = z[ cp[1], cp[0] ] + z[ cp[1], (cp[0] + 1) ]
 						print( "Increment in X:  {}".format(A) )
 				else: print( "No Increment in X:  {}".format(A) )
 				if ( cp[1] + 1 ) < self.ylen:
-					if  (cp[1] + 1) <= final_fp[1] : 
+					if  (cp[1] + 1) <= fin_point[1] : 
 						B = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), cp[0] ] 
 						print( "Increment in Y:  {}".format(B) )
-				else: print( "No Incrementin Y: {}".format(B) )
+				else: print( "No Increment in Y: {}".format(B) )
 
 				if ( cp[0] + 1 ) < self.xlen and ( cp[1] + 1 ) < self.ylen: 
-					if  (cp[0] + 1) <=final_fp[0] and (cp[1] + 1) <= final_fp[1]:
+					if  (cp[0] + 1) <=fin_point[0] and (cp[1] + 1) <= fin_point[1]:
 						C = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), (cp[0] + 1) ] 
 						print( "Increment in both directions:  {}".format(C) )
 				else: print("No Increment in both directions: {}".format(C) )
@@ -641,15 +614,53 @@ class EnergyAnalysis:
 				cp[1] += dirs[ind][1]			
 				self.energies1D.append( z[ cp[1], cp[0] ] )
 				pathx.append(cp[0])
-				pathy.append(cp[1])	
+				pathy.append(cp[1])
+
+			if not fin_point == final_fp:
+				print(final_fp)
+				print("Going from the sadle to the final point")
+				while not cp == final_fp:
+
+					print( "Current Point is: {} {} ".format(cp[0], cp[1] ) )
+					print( "Energy of the Current Point: {}".format( z[ cp[1],cp[0] ] ) )
+
+					A = math.inf
+					B = math.inf
+					C = math.inf			
+
+					if ( cp[0] + 1 ) < self.xlen: 
+						if  (cp[0] + 1) <= final_fp[0]:
+							A = z[ cp[1], cp[0] ] + z[ cp[1], (cp[0] + 1) ]
+							print( "Increment in X:  {}".format(A) )
+					else: print( "No Increment in X:  {}".format(A) )
+					if ( cp[1] + 1 ) < self.ylen:
+						if  (cp[1] + 1) <= final_fp[1] : 
+							B = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), cp[0] ] 
+							print( "Increment in Y:  {}".format(B) )
+					else: print( "No Incrementin Y: {}".format(B) )
+
+					if ( cp[0] + 1 ) < self.xlen and ( cp[1] + 1 ) < self.ylen: 
+						if  (cp[0] + 1) <=final_fp[0] and (cp[1] + 1) <= final_fp[1]:
+							C = z[ cp[1], cp[0] ] + z[ (cp[1] + 1), (cp[0] + 1) ] 
+							print( "Increment in both directions:  {}".format(C) )
+					else: print("No Increment in both directions: {}".format(C) )
+
+					D = [ A, B, C ]
+					ind = D.index(min(D))			
+					cp[0] += dirs[ind][0]
+					cp[1] += dirs[ind][1]			
+					self.energies1D.append( z[ cp[1], cp[0] ] )
+					pathx.append(cp[0])
+					pathy.append(cp[1])
 		
 		#---------------------------------------------------------------
 		
 		kcats = [0.0]
 		new_idx = 0
 		min_energy = self.energies1D[0]
-		for indx in range( 1,len(pathx) ):
-			pkl = _path + "/frame{}_{}.pkl".format(pathx[indx],pathy[indx])			
+
+		for indx in range( 1,len(pathx) ):			
+			pkl = _path_pkl + "/frame{}_{}.pkl".format(pathx[indx],pathy[indx])			
 			finalPath = os.path.join( _folder_dst , "traj1d.ptGeo/frame{}.pkl".format(new_idx) )			
 			_system.coordinates3 = ImportCoordinates3(pkl,log=None)
 			pdb_file = os.path.join( _folder_dst , "frame{}.pdb".format(new_idx) )
@@ -679,7 +690,7 @@ class EnergyAnalysis:
 		log_text = "x Energy method Energy_kcal kcat \n"
 		new_log  = open( os.path.join(_folder_dst,"traj1D.log"), 'w' )
 		for i in range(len(self.energies1D)):						
-			energy_kcal = self.energies1D[i] * 0.239006
+			energy_kcal = self.energies1D[i] / 4.184
 			log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
 		new_log.write(log_text)
 		self.Type = "1DRef"
@@ -712,7 +723,7 @@ class EnergyAnalysis:
 		log_text = "x Energy method Energy_kcal kcat \n"
 		new_log  = open( os.path.join(_folder_dst,"traj1D_resampled.log"), 'w' )
 		for i in Kept_indices:						
-			energy_kcal = self.energies1D[i] * 0.239006
+			energy_kcal = self.energies1D[i] / 4.184
 			log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
 		new_log.write(log_text)
 		new_log.close()
@@ -723,7 +734,7 @@ class EnergyAnalysis:
 		self.plot1d_name = "1D_Ref_resampled.png"
 		self.Plot1D("Reaction Path frames (n)")
 		for idx in range( len(Kept_indices) ):
-			pkl = _path + "/frame{}_{}.pkl".format(pathx[idx],pathy[idx])			
+			pkl = _path_pkl + "/frame{}_{}.pkl".format(pathx[idx],pathy[idx])			
 			finalPath = os.path.join( _folder_dst , "traj1d_resampled.ptGeo/frame{}.pkl".format(idx) )			
 			_system.coordinates3 = ImportCoordinates3(pkl,log=None)
 			pdb_file = os.path.join( _folder_dst , "frame{}_rsd.pdb".format(idx) )
@@ -888,7 +899,7 @@ class EnergyAnalysis:
 		
 		print(f"  Found {len(minima)} local minima")
 		for x, y, e in minima[:10]:  # Print first 10
-			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV")
+			print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} kJ/mol")
 		if len(minima) > 10:
 			print(f"    ... and {len(minima)-10} more")
 		
@@ -1059,9 +1070,9 @@ class EnergyAnalysis:
 			results['intermediates'] = intermediates
 			
 			print(f"  Found {len(intermediates)} intermediate points")
-			print(f"  Energy range: {min_energy:.4f} to {max_search_energy:.4f} eV")
+			print(f"  Energy range: {min_energy:.4f} to {max_search_energy:.4f} kJ/mol")
 			for x, y, e in intermediates[:10]:
-				print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} eV")
+				print(f"    - Position ({x:3d}, {y:3d}): Energy = {e:10.4f} kJ/mol")
 			if len(intermediates) > 10:
 				print(f"    ... and {len(intermediates)-10} more")
 		
@@ -1147,7 +1158,7 @@ class EnergyAnalysis:
 		if results['minima']:
 			report += f"Total minima found: {len(results['minima'])}\n"
 			for x, y, e in results['minima'][:20]:
-				report += f"  ({x:4d}, {y:4d}): {e:12.6f} kJ ({e*0.239006:10.4f} kcal/mol)\n"
+				report += f"  ({x:4d}, {y:4d}): {e:12.6f} kJ ({e/4.184:10.4f} kcal/mol)\n"
 			if len(results['minima']) > 20:
 				report += f"  ... and {len(results['minima'])-20} more\n"
 		else:
@@ -1248,6 +1259,257 @@ class EnergyAnalysis:
 			print(f"Warning: Could not create visualization: {e}")
 	
 	#----------------------------------------------------------------------------------------
+	def FindMinEnergyPath_Dijkstra(self, start_xy, goal_xy, cost_mode='neighbor_energy'):
+		"""
+		Find minimum cumulative-energy path using Dijkstra's algorithm on the grid.
+		
+		Args:
+			start_xy: (x, y) grid indices of starting point.
+			goal_xy:  (x, y) grid indices of goal point.
+			cost_mode: 'neighbor_energy' -> cost = energy of destination cell.
+					   'edge_average'     -> cost = average of current and destination.
+		
+		Returns:
+			path: list of (x, y) indices from start to goal.
+			energies: list of energy values along the path.
+			barrier: maximum energy along path minus start energy (kJ/mol).
+		"""
+		import heapq
+		
+		print("\n" + "="*70)
+		print("FINDING MINIMUM ENERGY PATH (Dijkstra Algorithm)")
+		print("="*70)
+		print(f"Start: {start_xy}, Goal: {goal_xy}")
+		print(f"Start energy: {self.energiesMatrix[start_xy[1]][start_xy[0]]:.4f} kJ/mol")
+		print(f"Goal energy:  {self.energiesMatrix[goal_xy[1]][goal_xy[0]]:.4f} kJ/mol")
+		print(f"Cost mode: {cost_mode}\n")
+		
+		# Get grid dimensions and the energy matrix (rows = y, cols = x)
+		rows, cols = self.ylen, self.xlen
+		z = self.energiesMatrix
+		
+		# CRITICAL FIX: Offset energies to make all costs positive (Dijkstra requirement)
+		# Negative energies cause cumulative costs to become unbounded negative, breaking algorithm
+		z_min = np.min(z)
+		z_offset = z - z_min + 0.001  # Add small epsilon to ensure strict positivity
+		
+		print(f"Grid dimensions: {cols} x {rows}")
+		print(f"Energy range: {z_min:.6f} to {np.max(z):.6f} kJ/mol")
+		print(f"Offset applied: +{(-z_min + 0.001):.6f} kJ/mol (ensures positive step costs)\n")
+		
+		# dist[y][x] = best cumulative cost found so far to reach (x, y)
+		dist = np.full((rows, cols), np.inf)
+		prev = np.full((rows, cols), None, dtype=object)
+		
+		# Start point coordinates
+		sx, sy = start_xy
+		dist[sy][sx] = 0.0
+		heap = [(0.0, sx, sy)]
+		
+		print(f"Starting Dijkstra search...")
+		nodes_explored = 0
+		nodes_added = 0
+		
+		# Main loop: pop smallest cost node, explore neighbours
+		while heap:
+			current_cost, x, y = heapq.heappop(heap)
+			nodes_explored += 1
+			
+			# Stop if we reached the goal
+			if (x, y) == goal_xy:
+				print(f"\n✓ Goal reached at ({x}, {y})")
+				print(f"  Cumulative cost: {current_cost:.4f}")
+				print(f"  Nodes explored: {nodes_explored}")
+				break
+			
+			# If this entry is outdated, skip it
+			if current_cost > dist[y][x]:
+				continue
+			
+			# Periodic status output
+			if nodes_explored % 100 == 0:
+				print(f"  Progress: {nodes_explored} nodes explored, heap size: {len(heap)}, current position: ({x}, {y}), cost: {current_cost:.4f}")
+			
+			# Explore the 8 neighbours (includes diagonals)
+			for dx in (-1, 0, 1):
+				for dy in (-1, 0, 1):
+					if dx == 0 and dy == 0:
+						continue
+					nx, ny = x + dx, y + dy
+					
+					# Check grid boundaries
+					if 0 <= nx < cols and 0 <= ny < rows:
+						# Compute step cost using OFFSET energies (always positive!)
+						if cost_mode == 'neighbor_energy':
+							step_cost = z_offset[ny][nx]
+						elif cost_mode == 'edge_average':
+							step_cost = 0.5 * (z_offset[y][x] + z_offset[ny][nx])
+						else:
+							step_cost = z_offset[ny][nx]
+						
+						new_cost = current_cost + step_cost
+						
+						# If we found a cheaper way to reach (nx, ny), update and push to heap
+						if new_cost < dist[ny][nx]:
+							dist[ny][nx] = new_cost
+							prev[ny][nx] = (x, y)
+							heapq.heappush(heap, (new_cost, nx, ny))
+							nodes_added += 1
+		
+		print(f"  Total nodes added to heap: {nodes_added}\n")
+		
+		# Reconstruct the path from start to goal by walking backwards
+		if prev[goal_xy[1]][goal_xy[0]] is None:
+			print("✗ Error: Goal not reachable from start.")
+			return [], [], np.inf
+		
+		print(f"Reconstructing path...")
+		path = []
+		cur = goal_xy
+		while cur is not None:
+			path.append(cur)
+			cur = prev[cur[1]][cur[0]]
+		
+		path.reverse()
+		print(f"✓ Path reconstructed: {len(path)} waypoints\n")
+		
+		# Extract energies along the path
+		energies = [z[y][x] for (x, y) in path]
+		self.energies1D = energies
+		
+		# Calculate barrier height (kJ/mol, convert to kcal/mol for display)
+		barrier = max(energies) - energies[0]
+		barrier_kcal = barrier / 4.184  # Convert kJ/mol to kcal/mol
+		
+		print(f"Path Statistics:")
+		print(f"  Path length: {len(path)} steps")
+		print(f"  Total cumulative cost: {dist[goal_xy[1]][goal_xy[0]]:.4f} kJ/mol")
+		print(f"  Start energy: {energies[0]:.6f} kJ/mol")
+		print(f"  End energy: {energies[-1]:.6f} kJ/mol")
+		print(f"  Max energy on path: {max(energies):.6f} kJ/mol")
+		print(f"  Min energy on path: {min(energies):.6f} kJ/mol")
+		print(f"  Barrier height: {barrier:.6f} kJ/mol = {barrier_kcal:.4f} kcal/mol")
+		print("="*70 + "\n")
+		
+		return path, energies, barrier_kcal
+	
+	#----------------------------------------------------------------------------------------
+	def FindMinimaxPath(self, start_xy, goal_xy):
+		"""
+		Path that minimises the maximum energy (lowest barrier).
+		Uses a variant of Dijkstra where the cost = max(max_so_far, energy_of_cell).
+		This finds the true minimum-energy barrier path (MEP).
+		
+		Args:
+			start_xy: (x, y) grid indices of starting point.
+			goal_xy:  (x, y) grid indices of goal point.
+		
+		Returns:
+			path: list of (x, y) indices from start to goal.
+			energies: list of energy values along the path.
+			barrier: maximum energy along path minus start energy (kcal/mol).
+		"""
+		import heapq
+		
+		print("\n" + "="*70)
+		print("FINDING MINIMUM BARRIER PATH (Minimax Algorithm)")
+		print("="*70)
+		print(f"Start: {start_xy}, Goal: {goal_xy}")
+		print(f"Start energy: {self.energiesMatrix[start_xy[1]][start_xy[0]]:.4f} kJ/mol")
+		print(f"Goal energy:  {self.energiesMatrix[goal_xy[1]][goal_xy[0]]:.4f} kJ/mol")
+		print(f"Algorithm: Minimize maximum energy along path (true MEP)\n")
+		
+		rows, cols = self.ylen, self.xlen
+		z = self.energiesMatrix
+		
+		print(f"Grid dimensions: {cols} x {rows}")
+		
+		# best_max[y][x] = lowest possible maximum energy to reach (x,y)
+		best_max = np.full((rows, cols), np.inf)
+		prev = np.full((rows, cols), None, dtype=object)
+		
+		sx, sy = start_xy
+		best_max[sy][sx] = z[sy][sx]        # initial max = start energy
+		heap = [(z[sy][sx], sx, sy)]        # (current_max, x, y)
+		
+		print(f"Starting Minimax search...")
+		nodes_explored = 0
+		nodes_added = 0
+		
+		while heap:
+			current_max, x, y = heapq.heappop(heap)
+			nodes_explored += 1
+			
+			# Stop if we reached the goal
+			if (x, y) == goal_xy:
+				print(f"\n✓ Goal reached at ({x}, {y})")
+				print(f"  Minimum barrier: {current_max:.4f} kJ/mol")
+				print(f"  Nodes explored: {nodes_explored}")
+				break
+			
+			# If this entry is outdated, skip it
+			if current_max > best_max[y][x]:
+				continue
+			
+			# Periodic status output
+			if nodes_explored % 100 == 0:
+				print(f"  Progress: {nodes_explored} nodes explored, heap size: {len(heap)}, current position: ({x}, {y}), max barrier: {current_max:.4f}")
+			
+			# Explore the 8 neighbours (includes diagonals)
+			for dx in (-1, 0, 1):
+				for dy in (-1, 0, 1):
+					if dx == 0 and dy == 0:
+						continue
+					nx, ny = x + dx, y + dy
+					
+					# Check grid boundaries
+					if 0 <= nx < cols and 0 <= ny < rows:
+						# Minimax: new barrier = max of current barrier and this cell's energy
+						new_max = max(current_max, z[ny][nx])
+						
+						# If we found a path with lower barrier to (nx, ny), update and push to heap
+						if new_max < best_max[ny][nx]:
+							best_max[ny][nx] = new_max
+							prev[ny][nx] = (x, y)
+							heapq.heappush(heap, (new_max, nx, ny))
+							nodes_added += 1
+		
+		print(f"  Total nodes added to heap: {nodes_added}\n")
+		
+		# Reconstruct path from start to goal by walking backwards
+		if prev[goal_xy[1]][goal_xy[0]] is None:
+			print("✗ Error: Goal not reachable from start.")
+			return [], [], np.inf
+		
+		print(f"Reconstructing path...")
+		path = []
+		cur = goal_xy
+		while cur is not None:
+			path.append(cur)
+			cur = prev[cur[1]][cur[0]]
+		
+		path.reverse()
+		print(f"✓ Path reconstructed: {len(path)} waypoints\n")
+		
+		# Extract energies along the path
+		energies = [z[y][x] for (x, y) in path]
+		self.energies1D = energies
+		
+		# Calculate barrier height (kJ/mol, convert to kcal/mol for display)
+		barrier = best_max[goal_xy[1]][goal_xy[0]] - z[sy][sx]
+		barrier_kcal = barrier / 4.184  # Convert kJ/mol to kcal/mol
+		
+		print(f"Path Statistics:")
+		print(f"  Path length: {len(path)} steps")
+		print(f"  Start energy: {energies[0]:.6f} kJ/mol")
+		print(f"  End energy: {energies[-1]:.6f} kJ/mol")
+		print(f"  Max energy on path: {max(energies):.6f} kJ/mol")
+		print(f"  Min energy on path: {min(energies):.6f} kJ/mol")
+		print(f"  Barrier height: {barrier:.6f} kJ/mol = {barrier_kcal:.4f} kcal/mol")
+		print("="*70 + "\n")
+		
+		return path, energies, barrier_kcal
+	#----------------------------------------------------------------------------------------
 	def Rewrite_Log(self,_fileName):
 		'''
 		Rewrite log file with kcat values for each frame
@@ -1266,7 +1528,7 @@ class EnergyAnalysis:
 			log_text = "x Energy method Energy_kcal kcat \n"
 			new_log  = open( _fileName, 'w' )
 			for i in range(len(self.energies1D)):										
-				energy_kcal = self.energies1D[i] * 0.239006
+				energy_kcal = self.energies1D[i] / 4.184
 				log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
 			new_log.write(log_text)
 			new_log.close()
@@ -1285,7 +1547,7 @@ class EnergyAnalysis:
 				log_text = "x Energy method Energy_kcal kcat \n"
 				new_log  = open( _fileName, 'w' )
 				for i in range(len(self.multiple1Dplot[k])):						
-					energy_kcal = self.multiple1Dplot[k][i] * 0.239006
+					energy_kcal = self.multiple1Dplot[k][i] / 4.184
 					log_text += "{} {} pickPath {} {}\n".format(i,self.multiple1Dplot[k][i],energy_kcal,kcats[i])
 			new_log.write(log_text)
 

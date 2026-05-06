@@ -209,6 +209,7 @@ class Analysis:
 		in_point  = [0,0]
 		fin_point = [0,0]
 		FindPath  = False
+		MEP_method= "MiniMax" # Dijkstra,  SimpleMEP, hessian, MiniMax
 		#--------------------------------------------------------
 		if "contour_lines" 	in self.parameters: cnt_lines  = self.parameters["contour_lines"]		
 		if "xlim" 		in self.parameters: xlim  	   = self.parameters["xlim"		    ]
@@ -216,7 +217,8 @@ class Analysis:
 		if "show" 			in self.parameters: show       = self.parameters["show"         ]
 		if "in_point"       in self.parameters: in_point   = self.parameters["in_point"     ]
 		if "fin_point"      in self.parameters: fin_point  = self.parameters["fin_point"    ]
-		if "multiple_plot" 	in self.parameters: multiPlot  = True 		
+		if "multiple_plot" 	in self.parameters: multiPlot  = True 	
+		if "MEP_method"     in self.parameters: MEP_method = self.parameters["MEP_method"   ]
 		if ysize > 0: ndim = 2
 		#--------------------------------------------------------
 		EA = EnergyAnalysis(self.parameters["xsize"],ysize,_type=self.parameters["type"] )
@@ -237,8 +239,21 @@ class Analysis:
 			else: max_points = 21
 			if "min_points" in self.parameters: min_points = self.parameters["min_points"]
 			else: min_points = 15
-			_path_points = EA.Path_From_PES(in_point,fin_point,self.parameters["retrieve_path"],self.baseFolder,self.molecule.system,min_points=min_points,max_points=max_points)
-			EA.Plot2D(cnt_lines,crd1_label,crd2_label,xlim,ylim,show,path_points=_path_points)
+			_path_points = EA.Path_From_PES(in_point,
+								   fin_point,
+								   self.parameters["retrieve_path"],
+								   self.baseFolder,
+								   self.molecule.system,
+								   min_points=min_points,
+								   max_points=max_points,
+								   method=MEP_method)
+			EA.Plot2D(cnt_lines,
+				crd1_label,
+				crd2_label,
+			 	xlim,
+			 	ylim,
+			 	show,
+			 	path_points=_path_points)
 
 	#=========================================================================
 	def PMFAnalysis(self):
