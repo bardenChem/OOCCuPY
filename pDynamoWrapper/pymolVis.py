@@ -7,16 +7,16 @@
 
 #==========================================
 class pymolVis:
-	'''
-	'''
+    '''
+    '''
 
-	def __init__(self,_path,_type):
-		'''
-		'''
-		self.text = ""
+    def __init__(self,_path,_type):
+        '''
+        '''
+        self.text = ""
 
 
 
-	def WrteScript(self):
-		pass
+    def WrteScript(self):
+        pass
 
