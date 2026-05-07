@@ -569,7 +569,8 @@ class EnergyAnalysis:
 			for i in range(1,len(paths[0])): 
 				pathx.append(paths[0][i][0])
 				pathy.append(paths[0][i][1])
-		elif method == "hessian" or method =="simpleMEP":
+		elif method == "hessian" or method =="SimpleMEP":
+			saddle_p = None
 			if method == "hessian":
 				Results = self.AnalyzePES2D( output_folder= os.path.join(_folder_dst,"path_analysis"), in_point=in_point, fin_point=fin_point )
 				saddle_p = Results["saddle_points"]
@@ -579,7 +580,13 @@ class EnergyAnalysis:
 				final_fp  = [ products[0], products[1] ]			
 				if len(saddle_p) > 0:
 					fin_point = [ saddle_p[0][0], saddle_p[0][1] ]
-		
+			else:
+				print("Trying to find the saddle point using a simple MEP approach")
+				paths, saddle_p = self.FindMinimaxPath(in_point,fin_point )
+				fin_point = [saddle_p[0], saddle_p[1] ]
+				self.energies1D = []
+				self.energies1D.append( z[ pathx[0],pathy[0] ] )
+
 			print(cp, fin_point)
 			#search path until the TS
 			while not cp == fin_point:
@@ -689,6 +696,7 @@ class EnergyAnalysis:
 		except: pass
 		log_text = "x Energy method Energy_kcal kcat \n"
 		new_log  = open( os.path.join(_folder_dst,"traj1D.log"), 'w' )
+		
 		for i in range(len(self.energies1D)):						
 			energy_kcal = self.energies1D[i] / 4.184
 			log_text += "{} {} pickPath {} {}\n".format(i,self.energies1D[i],energy_kcal,kcats[i])
@@ -1499,6 +1507,12 @@ class EnergyAnalysis:
 		barrier = best_max[goal_xy[1]][goal_xy[0]] - z[sy][sx]
 		barrier_kcal = barrier / 4.184  # Convert kJ/mol to kcal/mol
 		
+		# Find the barrier point (maximum energy along the path)
+		barrier_idx = max(range(len(energies)), key=lambda i: energies[i])
+		barrier_xy = path[barrier_idx]
+		barrier_x, barrier_y = barrier_xy[0], barrier_xy[1]
+		barrier_energy_max = energies[barrier_idx]
+		
 		print(f"Path Statistics:")
 		print(f"  Path length: {len(path)} steps")
 		print(f"  Start energy: {energies[0]:.6f} kJ/mol")
@@ -1506,9 +1520,11 @@ class EnergyAnalysis:
 		print(f"  Max energy on path: {max(energies):.6f} kJ/mol")
 		print(f"  Min energy on path: {min(energies):.6f} kJ/mol")
 		print(f"  Barrier height: {barrier:.6f} kJ/mol = {barrier_kcal:.4f} kcal/mol")
+		print(f"  Barrier point: ({barrier_x}, {barrier_y}) at index {barrier_idx}")
+		print(f"  Barrier energy: {barrier_energy_max:.6f} kJ/mol")
 		print("="*70 + "\n")
 		
-		return path, energies, barrier_kcal
+		return path, (barrier_x, barrier_y)
 	#----------------------------------------------------------------------------------------
 	def Rewrite_Log(self,_fileName):
 		'''
