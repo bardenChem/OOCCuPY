@@ -539,7 +539,7 @@ class EnergyAnalysis:
         return kcat
 
     #----------------------------------------------------------------------------------------
-    def Path_From_PES(self, in_point,fin_point,_path_pkl,_folder_dst,_system,min_points=15,max_points=21):
+    def Path_From_PES(self, in_point,fin_point,_path_pkl,_folder_dst,_system,min_points=17,max_points=21):
         '''
         Calculate minimum energy path from starting point to final point on PES.
         
@@ -642,6 +642,8 @@ class EnergyAnalysis:
         self.Type = "1DRef"
         self.plot1d_name = "1D_Ref_resampled.png"
         self.Plot1D("Reaction Path frames (n)")
+        kpathx = [pathx[i] for i in Kept_indices]
+        kpathy = [pathy[i] for i in Kept_indices]
         for idx in range( len(Kept_indices) ):
             pkl = _path_pkl + "/frame{}_{}.pkl".format(pathx[idx],pathy[idx])            
             finalPath = os.path.join( _folder_dst , "traj1d_resampled.ptGeo/frame{}.pkl".format(idx) )            
@@ -671,9 +673,9 @@ class EnergyAnalysis:
         pymols_file.close()
 
         # Return the minimum energy path coordinates
-        return pathx, pathy
+        return kpathx, kpathy
     #----------------------------------------------------------------------------------------
-    def ResamplePath(self, path_indices,min_points=15, max_points=20, include_curvature=True):
+    def ResamplePath(self, path_indices,min_points=17, max_points=21, include_curvature=True):
         """
         Reduce number of points in a reaction path while preserving key features.
     
@@ -689,20 +691,19 @@ class EnergyAnalysis:
         keep = set()
         keep.add(0)                 # first point
         keep.add(n-1)               # last point
-        last_minima = None 
+        last_minima = n-1 
     
         # 1. Local extrema (minima and maxima)
+        progress = 0 
         for i in range(1, n-1):
+            progress = i/n 
             e_prev, e_curr, e_next = self.energies1D[i-1], self.energies1D[i], self.energies1D[i+1]
             if (e_curr > e_prev and e_curr > e_next) or (e_curr < e_prev and e_curr < e_next):
                 keep.add(i)
                 if last_minima is None or e_curr < self.energies1D[last_minima]:
-                	last_minima = i
-        #after last minimum, i dont want any maximum            
-        for i in range(last_minima+1, n-1):
-            keep.remove(i)
-
-                    
+                    if progress > 0.7: last_minima = i
+        
+	                   
         # 2. Direction changes (curvature)
         if include_curvature and n > 3:
             for i in range(1, last_minima):
@@ -715,6 +716,7 @@ class EnergyAnalysis:
                     if cos_angle < 0.707:   # angle > 45°
                         keep.add(i)
 
+        keep = {i for i in keep if i <= last_minima}
         kept = sorted(keep)
 
         # 3. If mandatory set is smaller than min_points, add evenly spaced optional points

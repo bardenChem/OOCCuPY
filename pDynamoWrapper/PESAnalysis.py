@@ -7,6 +7,7 @@ from importlib.resources import path
 import math
 from multiprocessing import heap
 import numpy as np
+import gc
 
 #-------------------------------------------------------------------------------
 class PESAnalysis:
@@ -114,6 +115,7 @@ class PESAnalysis:
         
         if start_xy[0] >= self.xlen or start_xy[1] >= self.ylen or goal_xy[0] >= self.xlen or goal_xy[1] >= self.ylen:
             print("Error: Start or goal coordinates are out of bounds.")
+            gc.collect()
             return -1
 
         print("\n" + "="*70)
@@ -184,6 +186,8 @@ class PESAnalysis:
         # Reconstruct path from start to goal by walking backwards
         if prev[goal_xy[1]][goal_xy[0]] is None:
             print("✗ Error: Goal not reachable from start.")
+            del heap, best_max, prev
+            gc.collect()
             return [], [], np.inf
         
         print(f"Reconstructing path...")
@@ -227,10 +231,16 @@ class PESAnalysis:
                 self.structures['saddle_points'].append( (barrier_x, barrier_y, barrier_energy_max) )
             else:
                 print(f"  Found barrier at ({barrier_x}, {barrier_y}) with energy {barrier_energy_max:.6f} kJ/mol, but it's not significantly higher than last saddle point ({first_e:.6f} kJ/mol). Not adding to saddle points list.")
+                del heap, best_max, prev
+                gc.collect()
                 return -1
         else:
             self.structures['saddle_points'].append( (barrier_x, barrier_y, barrier_energy_max) )
 
+        # Cleanup large arrays and force garbage collection
+        del heap, best_max, prev
+        gc.collect()
+        
         return path
     
     #-----------------------------------------------------------------------------------------
@@ -327,7 +337,6 @@ class PESAnalysis:
                 self.pathx.append(cp[0])
                 self.pathy.append(cp[1])
 
-                print(cp, fin_point)
                 if cp[0] == fin_point[0] and cp[1] == fin_point[1]:
                     print( "Reached the final point: {} {}".format(cp[0], cp[1] ) )
                     print( "Energy of the final point: {}".format( self.z[ cp[1],cp[0] ] ) )
