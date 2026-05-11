@@ -672,13 +672,13 @@ class Simulation:
         if "trajectory_name" in self.parameters: _traj_name = self.parameters["trajectory_name"]
         RSrun = GeometrySearcher(self.molecule.system,self.baseFolder,_trajName=_traj_name)        
         RSrun.ChangeDefaultParameters(self.parameters)        
-
+        traj_bins = 0 
         if   self.parameters["simulation_type"] == "NEB"                :
             print("Running Nudged Elastic Band Simulation") 
             RSrun.saveFormat = ".dcd"
             RSrun.saveFrequency = 1
             RSrun.savePdb = True
-            RSrun.NudgedElasticBand(self.parameters)
+            traj_bins= RSrun.NudgedElasticBand(self.parameters)
             RSrun.Finalize()
             pymol_text = "preset.publication(selection='all')\n"
             pymol_text+= "set sticks\n"
@@ -706,6 +706,10 @@ class Simulation:
         self.molecule.system.coordinates3 = molCRD
         '''
 
+        if "traj_bins" not in self.parameters: self.parameters["traj_bins"] = 0
+        if self.parameters["traj_bins"] == 0: 
+            self.parameters["traj_bins"] = traj_bins
+
         nmaxthreads = 1
         if "NmaxThreads" in self.parameters: nmaxthreads = self.parameters["NmaxThreads"]
 
@@ -720,6 +724,11 @@ class Simulation:
                                   self.molecule.system.electronicState.multiplicity)
             ER.RunInternalSMO(refMethod,nmaxthreads)
             ER.WriteLog()
+            if self.parameters["traj_bins"] == 0: 
+                self.parameters["traj_bins"] = len(RSrun.trajectory)
+                if self.parameters["traj_bins"] == 0: 
+                    self.parameters["traj_bins"] = traj_bins
+
             crd1_label     = "Reaction Coordinate #1"
             xlim         = [ 0, self.parameters["traj_bins"] ]
             show          = False

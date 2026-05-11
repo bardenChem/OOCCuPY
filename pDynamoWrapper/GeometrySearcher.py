@@ -176,6 +176,7 @@ class GeometrySearcher:
         fixedTerminal   = False
         useSpline       = False
         spline_tol      = 1.5
+        traj_bins       = 0
         if "spring_constant_force"      in _parameters: springCF      = _parameters["spring_constant_force"]
         if "fixed_terminal_images"      in _parameters: fixedTerminal = _parameters["fixed_terminal_images"]
         if "RMS_growing_intial_string"  in _parameters: rmsGIS        = _parameters["RMS_growing_intial_string"]
@@ -197,6 +198,7 @@ class GeometrySearcher:
         else:
             self.trajectoryName = _parameters["traj_source"]
             trajectory = ExportTrajectory( _parameters["traj_source"], self.molecule, append=True ) 
+            traj_bins = trajectory.numberOfFrames
         #------------------------------------------------------------------------------------------
         ChainOfStatesOptimizePath_SystemGeometry (  self.molecule                                       ,   
                                                     trajectory                                          ,
@@ -207,7 +209,7 @@ class GeometrySearcher:
                                                     splineRedistributionTolerance=spline_tol            ,
                                                     forceSplineRedistributionCheckPerIteration=useSpline,
                                                     rmsGradientTolerance = self.rmsGrad   )
-        
+        return traj_bins
         
     #========================================================================================
     def SelfAvoidWalking(self,_parameters):
