@@ -196,8 +196,14 @@ class GeometrySearcher:
                                     rmsGradientTolerance=rmsGIS )
             trajectory = ExportTrajectory( self.trajectoryName, self.molecule, append=True )
         else:
-            self.trajectoryName = _parameters["traj_source"]
-            trajectory = ExportTrajectory( _parameters["traj_source"], self.molecule, append=True ) 
+            import shutil
+            from pathlib import Path
+
+            src = Path(_parameters["traj_source"])
+            self.trajectoryName  = os.path.join(self.baseName,"NEB.ptGeo")
+            if not os.path.exists(self.trajectoryName): os.makedirs(self.trajectoryName)
+            shutil.copytree(src, self.trajectoryName, ignore=shutil.ignore_patterns('*.png'), dirs_exist_ok=True )
+            trajectory = ExportTrajectory( self.trajectoryName , self.molecule, append=True ) 
             traj_bins = trajectory.numberOfFrames
         #------------------------------------------------------------------------------------------
         ChainOfStatesOptimizePath_SystemGeometry (  self.molecule                                       ,   

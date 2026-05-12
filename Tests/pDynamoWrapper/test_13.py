@@ -25,20 +25,14 @@ def Run_Test():
 	'''
 	info()
 
-	_path   = os.path.join( folder05, "Multiple_Distance_rm1","ScanTraj.ptGeo" )
+	_path   = os.path.join( folder05, "Multiple_Distance_am1","ScanTraj.ptGeo" )
 	init_path    = os.path.join( _path, "frame0.pkl")
 	final_path   = os.path.join( _path, "frame19.pkl")
 	saddle_coord = os.path.join( _path, "frame12.pkl") 
 
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join(folder05,"qcmm_optam1","7tim_am1_opt_PF.pkl"),		
-		"set_reaction_crd":2,	
-		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
-		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
-		"type_rc1":"Distance",
-		"type_rc2":"Distance",
-		"mass_constraint":["yes","yes"]
+		"pkl_file":os.path.join(folder05,"qcmm_optam1","7tim_am1_opt_PF.pkl"),				
 	}
 
 	parameters_NEB = {  "init_coord":init_path           					,
@@ -53,16 +47,15 @@ def Run_Test():
 
 	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
-	test_01.Run_Simulation(parameters_NEB)
-	test_01.SaveSystem()
+	#test_01.Run_Simulation(parameters_NEB)
+	#test_01.SaveSystem()
 
 	parameters_NEBT = { "traj_source":_path,
-						"traj_bins":20                   					,
-						"refine_methods":["rm1","am1","pm3","pddgpm3","pm6"],
+						"refine_methods":["rm1"],
 						"RMS_growing_intial_string":1.0  					,
 						"simulation_type":"NEB"          					,
 						"spring_force_constant":800.0    					,
-						"rmsGradient":0.3               					,
+						"rmsGradient":0.1               					,
 						"fixed_terminal_images":"no"                       }
 	
 	test_02 = Wrapper(folderTRJ)
