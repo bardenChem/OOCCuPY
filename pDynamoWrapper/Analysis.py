@@ -236,7 +236,7 @@ class Analysis:
             if "max_points" in self.parameters: max_points = self.parameters["max_points"]
             else: max_points = 21
             if "min_points" in self.parameters: min_points = self.parameters["min_points"]
-            else: min_points = 15
+            else: min_points = 17
             _path_points = EA.Path_From_PES(in_point,
                                    fin_point,
                                    self.parameters["retrieve_path"],
