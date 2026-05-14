@@ -304,7 +304,18 @@ class Simulation:
         _traj_name = None
         if "optmizer"          in self.parameters: _Optimizer = self.parameters["optmizer"]
         if "trajectory_name" in self.parameters: _traj_name = self.parameters["trajectory_name"]
-        Gopt = GeometrySearcher(self.molecule.system,self.baseFolder,_trajName=_traj_name)        
+        
+        # Extract logging parameters if provided
+        enable_debug_file = self.parameters.get("enable_debug_file", False)
+        verbosity = self.parameters.get("debug_verbosity", "INFO")
+        
+        Gopt = GeometrySearcher(
+            self.molecule.system,
+            self.baseFolder,
+            _trajName=_traj_name,
+            _enable_debug_file=enable_debug_file,
+            _verbosity=verbosity
+        )        
         Gopt.ChangeDefaultParameters(self.parameters)
         Gopt.Minimization(self.parameters["optmizer"])
         Gopt.Finalize()
@@ -670,7 +681,18 @@ class Simulation:
 
         _traj_name = "ReactionPath"
         if "trajectory_name" in self.parameters: _traj_name = self.parameters["trajectory_name"]
-        RSrun = GeometrySearcher(self.molecule.system,self.baseFolder,_trajName=_traj_name)        
+        
+        # Extract logging parameters if provided
+        enable_debug_file = self.parameters.get("enable_debug_file", False)
+        verbosity = self.parameters.get("debug_verbosity", "INFO")
+        
+        RSrun = GeometrySearcher(
+            self.molecule.system,
+            self.baseFolder,
+            _trajName=_traj_name,
+            _enable_debug_file=enable_debug_file,
+            _verbosity=verbosity
+        )
         RSrun.ChangeDefaultParameters(self.parameters)        
         traj_bins = 0 
         if   self.parameters["simulation_type"] == "NEB"                :
