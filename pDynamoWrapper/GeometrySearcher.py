@@ -177,10 +177,15 @@ class GeometrySearcher:
         useSpline       = False
         spline_tol      = 1.5
         traj_bins       = 0
+        overwrite       = False 
         if "spring_constant_force"      in _parameters: springCF      = _parameters["spring_constant_force"]
         if "fixed_terminal_images"      in _parameters: fixedTerminal = _parameters["fixed_terminal_images"]
         if "RMS_growing_intial_string"  in _parameters: rmsGIS        = _parameters["RMS_growing_intial_string"]
         if "spline_redistribution"      in _parameters: useSpline     = _parameters["spline_redistribution"]
+        if "overwrite_traj"              in _parameters: 
+            if _parameters["overwrite_traj"] == "yes":
+                overwrite     = True
+        if "traj_bins"                   in _parameters: traj_bins     = _parameters["traj_bins"]
 
         self.trajectoryName = os.path.join(self.baseName,"NEB.ptGeo")        
         trajectory = None
@@ -201,8 +206,12 @@ class GeometrySearcher:
 
             src = Path(_parameters["traj_source"])
             self.trajectoryName  = os.path.join(self.baseName,"NEB.ptGeo")
-            if not os.path.exists(self.trajectoryName): os.makedirs(self.trajectoryName)
-            shutil.copytree(src, self.trajectoryName, ignore=shutil.ignore_patterns('*.png'), dirs_exist_ok=True )
+            if not os.path.exists(self.trajectoryName): 
+                os.makedirs(self.trajectoryName)                
+            else:
+                if overwrite:
+                    shutil.copytree(src, self.trajectoryName, ignore=shutil.ignore_patterns('*.png'), dirs_exist_ok=True )
+                
             trajectory = ExportTrajectory( self.trajectoryName , self.molecule, append=True ) 
             traj_bins = trajectory.numberOfFrames
         #------------------------------------------------------------------------------------------
