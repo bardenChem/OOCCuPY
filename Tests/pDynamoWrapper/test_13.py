@@ -47,8 +47,8 @@ def Run_Test():
 
 	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
-	#test_01.Run_Simulation(parameters_NEB)
-	#test_01.SaveSystem()
+	test_01.Run_Simulation(parameters_NEB)
+	test_01.SaveSystem()
 
 	parameters_NEBT = { "traj_source":_path,
 						"refine_methods":["rm1"],
