@@ -452,18 +452,45 @@ class GeometrySearcher:
     def CalculateRMS(self):
         '''
         Calculate the root mean square of deviation of the final coordinate found with the first set given.
+        Safe version that handles cases where coordinates might be invalid or from different sources.
         '''
         try:
+            # Check if we have valid coordinates to compare
+            if self.InitCrd3D is None or self.finalCrd3D is None:
+                self.logger.warning("Cannot calculate RMS: InitCrd3D or finalCrd3D is None")
+                return
+            
             self.logger.debug("Calculating RMS with mass weighting...")
-            masses = Array.FromIterable ( [ atom.mass for atom in self.molecule.atoms ] )
-            self.InitCrd3D.Superimpose ( self.finalCrd3D, weights = masses )
-            rms = self.InitCrd3D.RootMeanSquareDeviation ( self.finalCrd3D, weights = masses )
-            msg = f"Root Mean Square of Deviation of the optimized structure from the initial: {rms:.6f}"
-            print(msg)
-            self.logger.info(msg)
+            try:
+                masses = Array.FromIterable ( [ atom.mass for atom in self.molecule.atoms ] )
+                self.logger.debug(f"Masses calculated: {len(masses)} atoms")
+            except Exception as e:
+                self.logger.warning(f"Failed to calculate masses: {str(e)}")
+                return
+            
+            try:
+                self.logger.debug("Performing superimpose...")
+                self.InitCrd3D.Superimpose ( self.finalCrd3D, weights = masses )
+                self.logger.debug("Superimpose completed")
+            except Exception as e:
+                self.logger.warning(f"Superimpose failed (may be due to incompatible coordinates from trajectory source): {str(e)}")
+                return
+            
+            try:
+                self.logger.debug("Calculating RMSD...")
+                rms = self.InitCrd3D.RootMeanSquareDeviation ( self.finalCrd3D, weights = masses )
+                msg = f"Root Mean Square Deviation of the optimized structure from the initial: {rms:.6f}"
+                print(msg)
+                self.logger.info(msg)
+            except Exception as e:
+                self.logger.warning(f"RMSD calculation failed: {str(e)}")
+                return
+                
         except Exception as e:
-            self.logger.error(f"RMS calculation failed: {str(e)}")
-            raise
+            self.logger.error(f"RMS calculation failed with unexpected error: {str(e)}")
+            import traceback
+            self.logger.debug(f"Traceback: {traceback.format_exc()}")
+            # Don't re-raise - allow finalize to continue
     #===========================================================================================
     def Finalize(self):
         '''
