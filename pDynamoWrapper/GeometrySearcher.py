@@ -182,7 +182,7 @@ class GeometrySearcher:
                 LBFGSMinimize_SystemGeometry(self.molecule                          ,                
                                         logFrequency         = self.logFreq         ,
                                         trajectories         = [(trajectory, self.saveFrequency)],
-                                        maximumIterations    = self.maxIt           ,
+                                        maximumIterations    = self.maxIt           , 
                                         rmsGradientTolerance = self.rmsGrad         )
             self.logger.debug("LFBGS minimization completed")
         except Exception as e:
