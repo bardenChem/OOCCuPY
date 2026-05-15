@@ -42,6 +42,8 @@ def Run_Test():
 						"RMS_growing_intial_string":1.0  					,
 						"simulation_type":"NEB"          					,
 						"spring_force_constant":800.0    					,
+						"enable_debug_file":True							,
+						"debug_verbosity":"DEBUG"							,
 						"rmsGradient":0.10               					,
 						"fixed_terminal_images":"no"    	                }
 

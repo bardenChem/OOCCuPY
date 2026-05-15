@@ -329,18 +329,30 @@ class GeometrySearcher:
                 self.logger.debug(f"Target trajectory path: {self.trajectoryName}")
                 
                 if not os.path.exists(self.trajectoryName): 
-                    self.logger.info(f"Creating trajectory directory: {self.trajectoryName}")
+                    self.logger.info(f"Creating trajectory directory and copying source: {self.trajectoryName}")
                     os.makedirs(self.trajectoryName)
-                    log_checkpoint(self.logger, "Trajectory directory created", status="OK")
+                    # CRITICAL: Copy the trajectory source files into the new directory
+                    self.logger.debug(f"Copying trajectory frames from {src} to {self.trajectoryName}")
+                    shutil.copytree(src, self.trajectoryName, 
+                                  ignore=shutil.ignore_patterns('*.png'), dirs_exist_ok=True)
+                    log_checkpoint(self.logger, "Trajectory directory created and source copied", status="OK")
                 else:
                     self.logger.debug("Trajectory directory already exists")
-                    if overwrite:
-                        self.logger.info("Overwrite flag set - copying source to target...")
+                    # Check if directory has frames
+                    import glob
+                    existing_frames = glob.glob(os.path.join(self.trajectoryName, "*.pkl"))
+                    self.logger.debug(f"Found {len(existing_frames)} existing frames in trajectory directory")
+                    
+                    if len(existing_frames) == 0 or overwrite:
+                        # No frames or overwrite flag set - copy source
+                        self.logger.info("Copying trajectory source (either empty directory or overwrite flag set)...")
                         shutil.copytree(src, self.trajectoryName, 
                                       ignore=shutil.ignore_patterns('*.png'), dirs_exist_ok=True)
-                        log_checkpoint(self.logger, "Trajectory directory overwritten", status="OK")
+                        log_checkpoint(self.logger, "Trajectory populated from source", status="OK")
                     else:
-                        self.logger.debug("Overwrite flag not set - reusing existing trajectory directory")
+                        self.logger.debug("Reusing existing trajectory directory with frames")
+                        log_checkpoint(self.logger, "Using existing trajectory frames", status="OK", 
+                                      message=f"Found {len(existing_frames)} frames")
                 
                 self.logger.debug("Exporting trajectory from source...")
                 trajectory = ExportTrajectory(self.trajectoryName, self.molecule, append=True)
