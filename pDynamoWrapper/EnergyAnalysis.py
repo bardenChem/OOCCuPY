@@ -701,7 +701,7 @@ class EnergyAnalysis:
             if (e_curr > e_prev and e_curr > e_next) or (e_curr < e_prev and e_curr < e_next):
                 keep.add(i)
                 if last_minima is None or e_curr < self.energies1D[last_minima]:
-                    if progress > 0.8: last_minima = i
+                    if progress > 0.7: last_minima = i
         
 	                   
         # 2. Direction changes (curvature)
