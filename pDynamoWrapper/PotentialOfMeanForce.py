@@ -67,6 +67,7 @@ class PMF:
             histogram.ToTextFileWithData ( os.path.join(self.baseName,"PotentialOfMeanForce.dat") , [ pmf ], format = "{:20.3f} {:20.3f} \n" )
         #-----------------------------------------------------------------------------------------------
         text = ""
+        print(FE)
         for i in range(len(FE)):
             lsFrames = GetFrameIndex( self.fileNames[i] )
             if len(lsFrames) > 1:                
