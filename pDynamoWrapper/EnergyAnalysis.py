@@ -644,8 +644,8 @@ class EnergyAnalysis:
         self.Plot1D("Reaction Path frames (n)")
         kpathx = [pathx[i] for i in Kept_indices]
         kpathy = [pathy[i] for i in Kept_indices]
-        for idx in range( len(Kept_indices) ):
-            pkl = _path_pkl + "/frame{}_{}.pkl".format(pathx[idx],pathy[idx])            
+        for idx in range(len(kpathx)):
+            pkl = _path_pkl + "/frame{}_{}.pkl".format(kpathx[idx],kpathy[idx])            
             finalPath = os.path.join( _folder_dst , "traj1d_resampled.ptGeo/frame{}.pkl".format(idx) )            
             _system.coordinates3 = ImportCoordinates3(pkl,log=None)
             pdb_file = os.path.join( _folder_dst , "frame{}_rsd.pdb".format(idx) )
@@ -701,7 +701,7 @@ class EnergyAnalysis:
             if (e_curr > e_prev and e_curr > e_next) or (e_curr < e_prev and e_curr < e_next):
                 keep.add(i)
                 if last_minima is None or e_curr < self.energies1D[last_minima]:
-                    if progress > 0.8: last_minima = i
+                    if progress > 0.7: last_minima = i
         
 	                   
         # 2. Direction changes (curvature)
