@@ -73,7 +73,7 @@ class PMF:
             if len(lsFrames) > 1:                
                 text += "{} {} {}\n".format( lsFrames[0], lsFrames[1] , FE[i] )
             elif len(lsFrames) == 1:
-                text += "{} {}\n".format( lsFrames[0] , FE[i] )
+                text += "{} {}\n".format( i , FE[i] )
         #-----------------------------------------------------------------------------------------------
         self.LOG.write(text)
         self.LOG.close()
