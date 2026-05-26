@@ -394,7 +394,7 @@ class US:
         #---------------------------------------
         self.molecule.DefineRestraintModel(None)
     #==============================================================================
-    def Run2DSampling(self,_trajFolder,_crdFormat,_sample):
+    def Run2DSampling(self,_trajFolder,_crdFormat,_sample,_mergeRcs=False):
         '''
         Class method to set the two-dimesninal sampling
         ''' 
@@ -419,7 +419,9 @@ class US:
         self.EnergyRef = self.molecule.Energy()
         self.forceCRef = self.forceC
         #-----------------------------------------------
-        if self.angle: 
+        if _mergeRcs:
+            self.RunThetherSampling()
+        elif self.angle: 
             self.Run2DSamplingDihedral()
         else:
             if self.multipleDistance[0] and self.multipleDistance[1]:            self.Run2DMultipleDistance()            
@@ -630,6 +632,50 @@ class US:
                 self.MarkWindownEnd(self.mdPaths[i])
         #---------------------------------------
         self.molecule.DefineRestraintModel(None)
+
+    #===========================================================================================
+    def RunThetherSampling(self):
+        '''
+        '''
+
+
+        atoms_list = []
+        for rc in self.RCs:
+            atoms_list.extend(rc.atoms)
+        cv_atoms = Selection.FromIterable( atoms_list )
+
+        restraints = RestraintModel()
+        self.molecule.DefineRestraintModel( restraints )
+        #-------------------------------------
+        with pymp.Parallel(self.nprocs) as p:
+            for i in p.range ( self.bins) :  
+                #--------------------------------------------------------
+                #First confirm if the folder already exists in cases of restart
+                reference = ImportCoordinates3( self.file_lists[i], log=None )
+
+                #--------------------------------------------------------
+                rmodel            =  RestraintEnergyModel.Harmonic( cv_dist, self.forceC[0] )
+                restraint         =  RestraintMultipleTether.WithOptions(energyModel = rmodel, 
+                                                                         reference   = reference, 
+                                                                         selection   = cv_atoms )
+                restraints["CV"] = restraint              
+                #------------------------------------------------------------
+                #if required goemetry optimization
+                if self.optimize:
+                    relaxRun = GeometrySearcher( self.molecule, self.baseName  )
+                    relaxRun.ChangeDefaultParameters(self.GeoOptPars)
+                    relaxRun.Minimization( self.GeoOptPars["optmizer"] )
+                #------------------------------------------------------------  
+                if self.adaptative: self.ChangeConvergenceParameters()
+                #------------------------------------------------------------
+                self.mdParameters["trajectory_name"] = self.mdPaths[i] 
+                mdRun = MD(self.molecule,self.mdPaths[i],self.mdParameters)
+                mdRun.RunProduction(self.equiNsteps,0,_Restricted=True,_equi=True)
+                mdRun.RunProduction(self.prodNsteps,self.samplingFactor,_Restricted=True)  
+                self.MarkWindownEnd(self.mdPaths[i])
+        #.....................................................................
+        self.molecule.DefineRestraintModel(None) 
+        
 
     #===========================================================================================
     def Finalize(self):
