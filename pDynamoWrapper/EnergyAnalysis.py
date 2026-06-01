@@ -57,7 +57,7 @@ class EnergyAnalysis:
         dimensions (int): Number of coordinates (1 or 2).
     """
     #------------------------------------------------
-    def __init__(self, x, y, _type="1D"):
+    def __init__(self, _type="1D"):
         """Initialize EnergyAnalysis object.
         
         Args:
@@ -74,12 +74,12 @@ class EnergyAnalysis:
         self.RC2            = []                              # Array with the second reaction coordinate values
         self.dimensions     = 0                                  # Number of coordinates used in the analysis
         self.nplots1D       = 0                                  # Number of one-dimension energy plots to do 
-        self.nplots2D         = 0                                  # Number of two-dimension energy plots to do
-        self.xlen             = x                               # Number of steps in the first coordinate
-        self.ylen              = y                               # Number of steps in the seconf coordinate
-        self.Type             = _type                           # Type of the plot, could be of: Free Energy, PMF, Potential Energy 
+        self.nplots2D       = 0                                  # Number of two-dimension energy plots to do
+        self.xlen           = x                               # Number of steps in the first coordinate
+        self.ylen           = y                               # Number of steps in the seconf coordinate
+        self.Type           = _type                           # Type of the plot, could be of: Free Energy, PMF, Potential Energy 
         self.labely         = ""                              # String holding the name of Y axis  
-        self.baseName         = ""                              # string holding the path of the folder
+        self.baseName       = ""                              # string holding the path of the folder
         self.identifiers    = []                              # List of string identifiers 
         self.fig_size_x     = 0 
         self.fig_size_y     = 0 
@@ -175,23 +175,50 @@ class EnergyAnalysis:
         elif self.Type == "2DRef":
             oldMethod = "none"
             method    = "none"
-            i = 0 
+            i = 0
+            records = []
+            max_m = -1
+            max_n = -1
             for line in reading:
                 if i > 0:
                     lns = line.split()
                     if oldMethod == "none":
                         oldMethod = lns[4]
                     method = lns[4]
+                    m = int(lns[0])        
+                    n = int(lns[1])
+                    max_m = max(max_m, m)
+                    max_n = max(max_n, n)
                     if not method == oldMethod:
+                        # Save current matrix with current method
+                        if self.xlen <= 0 or self.ylen <= 0 or self.xlen <= max_m or self.ylen <= max_n:
+                            self.xlen = max_m + 1
+                            self.ylen = max_n + 1
+                            self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+                        elif self.energiesMatrix is None:
+                            self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+                        # Fill matrix with records from previous method
+                        for rec_m, rec_n, value in records:
+                            self.energiesMatrix[rec_n][rec_m] = value
                         self.multiple2Dplot.append(self.energiesMatrix)
                         self.identifiers.append(oldMethod)
                         oldMethod = method
                         self.nplots2D += 1
                         self.energiesMatrix = np.zeros( (self.ylen, self.xlen), dtype=float )
-                    m = int(lns[0])        
-                    n = int(lns[1])                
-                    self.energiesMatrix[n][m] = float(lns[2])
+                        records = []
+                        max_m = -1
+                        max_n = -1
+                    records.append((m, n, float(lns[2])))
                 i += 1
+            # Handle last set of records
+            if self.xlen <= 0 or self.ylen <= 0 or self.xlen <= max_m or self.ylen <= max_n:
+                self.xlen = max_m + 1
+                self.ylen = max_n + 1
+                self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+            elif self.energiesMatrix is None:
+                self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+            for m, n, value in records:
+                self.energiesMatrix[n][m] = value
             
             self.multiple2Dplot.append(self.energiesMatrix)
             self.identifiers.append(method)
@@ -213,25 +240,34 @@ class EnergyAnalysis:
             self.plot1d_name = "WHAM1D.png"
         #----------------------------------
         elif self.Type == "WHAM2D":
-            m = 0
-            n = 0
+            records = []
+            max_m = -1
+            max_n = -1
             MaX = 0.0
             for line in reading:
-                lns = line.split()                
+                lns = line.split()
+                m = int(lns[0]) if len(lns) > 0 else 0
+                n = int(lns[1]) if len(lns) > 1 else 0
+                max_m = max(max_m, m)
+                max_n = max(max_n, n)
                 self.RC1.append( float(lns[0]) )
                 self.RC2.append( float(lns[1]) )
-                if lns[2] == "inf":
-                    self.energiesMatrix[m][n] = 43434.0000
-                else:
-                    self.energiesMatrix[m][n] = float(lns[2])    
-                    pmf = float(lns[2])
-                    if pmf > MaX:
-                        MaX = pmf            
-                i +=1
-                n +=1                 
-                if i % self.xlen == 0:
-                    m += 1
-                    n = 0    
+                pmf_val = 43434.0000 if lns[2] == "inf" else float(lns[2])
+                if lns[2] != "inf":
+                    if float(lns[2]) > MaX:
+                        MaX = float(lns[2])
+                records.append((m, n, pmf_val))
+            # Dynamically size the matrix based on detected dimensions
+            if self.xlen <= 0 or self.ylen <= 0 or self.xlen <= max_m or self.ylen <= max_n:
+                self.xlen = max_m + 1
+                self.ylen = max_n + 1
+                self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+            elif self.energiesMatrix is None:
+                self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+            # Fill matrix with records
+            for m, n, value in records:
+                self.energiesMatrix[n][m] = value
+            # Replace inf values with max
             for j in range(self.xlen):
                 for i in range(self.ylen):
                     if self.energiesMatrix[i][j] == 43434.0000:
@@ -239,20 +275,49 @@ class EnergyAnalysis:
             self.plot2d_name = "WHAM2D.png"
         #----------------------------------
         elif self.Type == "FE1D":
-            energyTmp = np.zeros( (self.xlen), dtype=float )
+            records = []
+            max_m = -1
+            i = 0
             for line in reading:
-                lns = line.split()
-                m = int( lns[0] )
-                energyTmp[m]  = float(lns[1]) 
+                if i > 0:
+                    lns = line.split()
+                    m = int( lns[0] )
+                    max_m = max(max_m, m)
+                    records.append((m, float(lns[1])))
+                i += 1
+            # Dynamically size based on detected data
+            if self.xlen <= 0 or self.xlen <= max_m:
+                self.xlen = max_m + 1
+            energyTmp = np.zeros( (self.xlen), dtype=float )
+            for m, value in records:
+                energyTmp[m] = value
             self.energies1D = energyTmp
             self.plot1d_name = "FE1D.png"        
         #----------------------------------
         elif self.Type == "FE2D":
+            records = []
+            max_m = -1
+            max_n = -1
+            i = 0
             for line in reading:
-                lns = line.split()
-                m = int( lns[0])                
-                n = int( lns[1])
-                self.energiesMatrix[n][m] = float(lns[2])
+                if i > 0:
+                    lns = line.split()
+                    m = int( lns[0])
+                    n = int( lns[1])
+                    max_m = max(max_m, m)
+                    max_n = max(max_n, n)
+                    records.append((m, n, float(lns[2])))
+                i += 1
+            # Dynamically size the matrix based on detected dimensions
+            if self.xlen <= 0 or self.ylen <= 0 or self.xlen <= max_m or self.ylen <= max_n:
+                self.xlen = max_m + 1
+                self.ylen = max_n + 1
+                self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+            elif self.energiesMatrix is None:
+                self.energiesMatrix = np.zeros((self.ylen, self.xlen), dtype=float)
+            # Fill matrix with records
+            for m, n, value in records:
+                self.energiesMatrix[n][m] = value
             self.plot2d_name = "FE2D.png"
         #----------------------------------
         self.nplots1D += 1    

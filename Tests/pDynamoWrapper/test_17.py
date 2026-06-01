@@ -25,7 +25,7 @@ def Run_Test():
 	'''
 	'''
 	info()
-	_path = "test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
+	_path = "test_05/Multiple_Distance_am1/ScanTraj.ptGeo"
 
 	system_parameters = {
 		"Input_Type":"pkl",		
@@ -35,7 +35,7 @@ def Run_Test():
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
 		"type_rc1":"Distance",
 		"type_rc2":"Distance",
-		"mass_constraints":["yes","yes"],
+		"mass_constraints":["no","no"],
 		"analysis_type":"Split_Traj",
 		"break_point":5,
 		"trajectory_name":_path

@@ -892,7 +892,7 @@ class SCAN:
                 Duplicate( trajpath, trajName, self.molecule )           
                 
 
-        textLog = open( os.path.join(self.baseName,self.trajFolder+".log"), "w" ) 
+        textLog = open( os.path.join(self.baseName,self.baseName+"energy.log"), "w" ) 
         textLog.write(self.text)
         textLog.close() 
 
