@@ -892,7 +892,7 @@ class SCAN:
                 Duplicate( trajpath, trajName, self.molecule )           
                 
 
-        textLog = open( os.path.join(self.baseName,self.baseName+"energy.log"), "w" ) 
+        textLog = open( os.path.join(self.baseName,self.baseName+"_pes.log"), "w" ) 
         textLog.write(self.text)
         textLog.close() 
 
@@ -906,11 +906,11 @@ class SCAN:
         pymol_text+= "\nload_traj {}, ".format( os.path.join( self.baseName, self.trajFolder+self.saveFormat ) )
         pymol_text+= "frame0, 1, start=1, stop=-1, interval=1"
         
-        pymols_file = open( os.path.join(self.baseName,"traj1d.pym"), "w") 
+        pymols_file = open( os.path.join(self.baseName,self.baseName+"_traj1d.pym"), "w") 
         pymols_file.write(pymol_text)
         pymols_file.close()
 
-        return( os.path.join(self.baseName,self.trajFolder+".log") )
+        return( os.path.join(self.baseName,self.baseName+"_pes.log") )
         
 
     #========================================================================================
