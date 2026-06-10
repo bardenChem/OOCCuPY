@@ -159,7 +159,7 @@ class Simulation:
             #free energy parameters
             "relax":"False",
             "crd_format":"pkl",
-            "optimize_US":False,
+            "optimize_US":"no",
             "analysis_only":"False",
             #thermo parameters
             "cycles":10,
@@ -558,7 +558,8 @@ class Simulation:
         rc1.SetInformation(self.molecule.system,0.0)        
         sampling   = self.parameters["sampling_production"]
         _crdFormat = self.parameters["crd_format"] 
-        
+        if self.parameters["optmize_US"] == "yes":
+            self.parameters["optimize_US"] = True
 
         nDims = self.parameters['ndim']
         rc2   = None
