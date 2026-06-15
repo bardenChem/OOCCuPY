@@ -517,7 +517,10 @@ class Simulation:
             rcs.append(rc2)    
         #----------------------------------------------------------------
         traj_name = "trajectory"
-        if "trajectory_name" in self.parameters: traj_name = self.parameters["trajectory_name"]
+        if "trajectory_name" in self.parameters: 
+            traj_name = self.parameters["trajectory_name"]
+        else:
+            self.parameters["trajectory_name"] = traj_name
         
         MDrun = MD(self.molecule.system,self.baseFolder,self.parameters)
         if self.parameters["heating_nsteps"]        > 0: 
@@ -526,12 +529,14 @@ class Simulation:
                 _trajAN = TrajectoryAnalysis(MDrun.trajectoryNameCurr,MDrun.molecule,MDrun.timeStep*MDrun.nsteps)
                 _trajAN.CalculateRG_RMSD()
                 _trajAN.PlotRG_RMS()
+            MDrun.Finalize()
         if self.parameters["equilibration_nsteps"] > 0: 
             MDrun.RunProduction(self.parameters["equilibration_nsteps"],self.parameters["sampling_equilibration"],_equi=True)
             if self.parameters["sampling_equilibration"] > 0:
                 _trajAN = TrajectoryAnalysis(MDrun.trajectoryNameCurr,MDrun.molecule,MDrun.timeStep*MDrun.nsteps)
                 _trajAN.CalculateRG_RMSD()
                 _trajAN.PlotRG_RMS()
+            MDrun.Finalize()
         if self.parameters["production_nsteps"]    > 0: 
             MDrun.RunProduction(self.parameters["production_nsteps"],self.parameters["sampling_production"])
             if self.parameters["sampling_production"] > 0:
@@ -540,6 +545,8 @@ class Simulation:
                 _trajAN.PlotRG_RMS()    
                 _trajAN.DistancePlots(rcs)
                 _trajAN.ExtractFrames()
+            MDrun.saveFormat = ".dcd"
+            MDrun.Finalize()
 
     #=======================================================================
     def UmbrellaSampling(self):

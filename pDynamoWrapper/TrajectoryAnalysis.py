@@ -348,8 +348,12 @@ class TrajectoryAnalysis:
                 fn = i        
         a  = Unpickle( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
         b  = Unpickle( os.path.join(self.trajFolder,"frame{}.pkl".format( len(distances2)-1 ) ) )
-
-        self.molecule.coordinates3 = a[0]
+        
+        try:
+            self.molecule.coordinates3 = a
+        except:
+            self.molecule.coordinates3 = a[0]
+        
         ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC1RC2.pdb"), self.molecule,log=None  )
         ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC1RC2.pkl"), self.molecule,log=None )
 
@@ -358,7 +362,7 @@ class TrajectoryAnalysis:
             g=sns.jointplot(x=distances1,y=distances2,kind="kde",cmap="plasma",shade=True,height=6,widht=8)
             g.set_axis_labels(rc_1[0].label,rc_2[0].label)
             plt.savefig( os.path.join( self.trajFolder,label_text+"_Biplot.png"),dpi=1000 )
-            if SHOW: plt.show()
+            #if SHOW: plt.show()
             plt.close()
         except:
             print("Error in importing seaborn package!\nSkipping biplot distribution plot!")
@@ -476,8 +480,9 @@ class TrajectoryAnalysis:
     def Save_DCD(self):
         '''
         '''
-        traj_save = os.path.join(self.trajFolder[:-4] + ".dcd")
-        Duplicate(self.trajFolder,traj_save,self.molecule)
+        if not os.path.exists(self.trajFolder[:-4] + ".dcd"):
+            traj_save = os.path.join(self.trajFolder[:-4] + ".dcd")
+            Duplicate(self.trajFolder,traj_save,self.molecule)
     #=========================================================================
     def Print(self):
         '''

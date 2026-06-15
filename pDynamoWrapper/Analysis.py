@@ -28,6 +28,7 @@ import numpy as np
 from .EnergyAnalysis         import EnergyAnalysis
 from .TrajectoryAnalysis     import TrajectoryAnalysis
 from .PotentialOfMeanForce   import PMF
+from .ReactionCoordinate     import ReactionCoordinate
 from pBabel                        import *                                     
 from pCore                         import *                                     
 from pMolecule                     import *            
@@ -88,7 +89,7 @@ class Analysis:
         if   Type == "Trajectory_Analysis": self.TrajectoryPlots()         
         elif Type == "Energy_Plots":        self.EnergyPlots()
         elif Type == "PMF":                 self.PMFAnalysis()
-        elif Type == "Split_Traj":             self.SplitTraj()
+        elif Type == "Split_Traj":          self.SplitTraj()
 
     #=========================================================================    
     def TrajectoryPlots(self) :
@@ -108,22 +109,25 @@ class Analysis:
             ATOMS_RC2 (list): Atom indices for second reaction coordinate.
         """
         RCs  = None
+        show = False
         if "show" in self.parameters: show = self.parameters["show"]
         t_time = self.parameters["nsteps"]*0.001
-        DA = TrajectoryAnalysis(MDrun.trajectoryNameCurr,self.molecule,t_time)
+        DA = TrajectoryAnalysis(self.parameters["source_folder"],self.molecule.system,t_time)
         DA.CalculateRG_RMSD()
         DA.PlotRG_RMS(show)                        
         if "calculate_distances" in self.parameters:
-            if self.parameters["calculate_distances"] == True:
-                rc1 = ReactionCoordinate(self.parameters["ATOMS_RC1"],False,0)
-                rc1.GetRCLabel(self.molecule)
+            if self.parameters["calculate_distances"] == "yes":
+                rc1 = self.molecule.reactionCoordinates[0]
                 RCs = [rc1]
                 rc2 = None
-                if "ATOMS_RC2" in self.parameters:
-                    rc2 = ReactionCoordinate(self.parameters["ATOMS_RC2"],False,0)                        
-                    rc2.GetRCLabel(self.molecule)
+                if "atoms_rc2" in self.parameters:
+                    rc2 = self.molecule.reactionCoordinates[1]                   
                     RCs.append(rc2)
                 DA.DistancePlots(RCs,show)
+                DA.ExtractFrames_biplot(rc1,rc2)
+                DA.Save_DCD()
+                DA.Print()
+
     #=========================================================================
     def EnergyPlots(self):
         """Generate 1D and 2D energy landscape plots from simulation logs.
