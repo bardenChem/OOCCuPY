@@ -285,30 +285,31 @@ class TrajectoryAnalysis:
         self.RMS.reshape(-1,1)
         self.RG.reshape(-1,1)
         
-        try:
-            kde.fit(self.RMS[:,None])
-            density_rms = np.exp(kde.score_samples(self.RMS[:,None]))
-            self.rms_MF = max(density_rms[:,None])
-            kde.fit(self.RG[:,None])
-            density_rg  = np.exp(kde.score_samples(self.RG[:,None]))
-            self.rg_MF  = max(density_rg[:,None])
+        
+        
+        kde.fit(self.RMS[:,None])
+        density_rms = np.exp(kde.score_samples(self.RMS[:,None]))
+        self.rms_MF = max(density_rms[:,None])
+        kde.fit(self.RG[:,None])
+        density_rg  = np.exp(kde.score_samples(self.RG[:,None]))
+        self.rg_MF  = max(density_rg[:,None])
         
         #------------------------------------------------------------------------------
-            distold = abs(density_rms[0] - self.rms_MF)
-            distnew = 0.0
-            fn      = 0 
-            for i in range( len(density_rms) ):
-                distnew = abs(density_rms[i] - self.rms_MF)
-                if distnew < distold:
-                    distold = distnew
-                    fn = i
+        distold = abs(density_rms[0] - self.rms_MF)
+        distnew = 0.0
+        fn      = 0 
+        for i in range( len(density_rms) ):
+            distnew = abs(density_rms[i] - self.rms_MF)
+            if distnew < distold:
+                distold = distnew
+                fn = i
         #------------------------------------------------
-            print( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
-            self.molecule.coordinates3 = ImportSystem( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
-            ExportSystem( os.path.join( self.trajFolder, "mostFrequentRMS.pdb" ),self.molecule,log=None )
-            ExportSystem( os.path.join( self.trajFolder, "mostFrequentRMS.pkl" ),self.molecule,log=None )
+        print( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
+        self.molecule.coordinates3 = ImportSystem( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
+        ExportSystem( os.path.join( self.trajFolder, "mostFrequentRMS.pdb" ),self.molecule,log=None )
+        ExportSystem( os.path.join( self.trajFolder, "mostFrequentRMS.pkl" ),self.molecule,log=None )
         #------------------------------------------------------------------------------
-        except:    pass    
+           
         self.molecule.coordinates3 = AveragePositions(self.trajFolder,self.molecule)
         ExportSystem( os.path.join( self.trajFolder,"Average.pdb"), self.molecule,log=None  )
         ExportSystem( os.path.join( self.trajFolder,"Average.pkl"), self.molecule,log=None )

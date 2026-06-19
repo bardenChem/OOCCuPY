@@ -114,7 +114,8 @@ class Analysis:
         t_time = self.parameters["nsteps"]*0.001
         DA = TrajectoryAnalysis(self.parameters["source_folder"],self.molecule.system,t_time)
         DA.CalculateRG_RMSD()
-        DA.PlotRG_RMS(show)                        
+        DA.PlotRG_RMS(show) 
+        DA.ExtractFrames()                       
         if "calculate_distances" in self.parameters:
             if self.parameters["calculate_distances"] == "yes":
                 rc1 = self.molecule.reactionCoordinates[0]
@@ -124,7 +125,7 @@ class Analysis:
                     rc2 = self.molecule.reactionCoordinates[1]                   
                     RCs.append(rc2)
                 DA.DistancePlots(RCs,show)
-                DA.ExtractFrames_biplot(rc1,rc2)
+                #DA.ExtractFrames_biplot()
                 DA.Save_DCD()
                 DA.Print()
 

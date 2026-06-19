@@ -6,6 +6,7 @@ from pDynamoWrapper import Wrapper
 import os, sys
 
 from config import get_config
+config = get_config()
 ooccupy_root = config.get_ooccupy_root()
 folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_08")
 folder05 = os.path.join(ooccupy_root,"Tests","pDynamoWrapper","test_05")
@@ -36,9 +37,9 @@ def Run_Test():
 	simulation_parameters = {
 				  "temperature": 315.15,
 				  "simulation_type":"Restricted_Molecular_Dynamics",
-				  "equilibration_nsteps":5000,
-				  "production_nsteps":10000,
-				  "heating_nsteps":2000,
+				  "equilibration_nsteps":500,
+				  "production_nsteps":1000,
+				  "heating_nsteps":200,
 				  "sampling_equilibration":100,
 				  "sampling_production":50,
 				  "sampling_heating":50,
