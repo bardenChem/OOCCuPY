@@ -31,19 +31,20 @@ def Run_Test():
 		"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
 		"type_rc1":"Distance",
 		"type_rc2":"Distance",
-		"mass_constraints":["yes","yes"],
+		"mass_constraints":["no","no"],
 	}
 
 	simulation_parameters = {
-				  "temperature": 315.15,
+				  "temperature": 293.15,
+				  "ndim":2,
 				  "simulation_type":"Restricted_Molecular_Dynamics",
-				  "equilibration_nsteps":500,
-				  "production_nsteps":1000,
-				  "heating_nsteps":200,
+				  "equilibration_nsteps":1000,
+				  "production_nsteps":2000,
+				  "heating_nsteps":1000,
 				  "sampling_equilibration":100,
 				  "sampling_production":50,
 				  "sampling_heating":50,
-				  "force_constants":[300.0,300.0],
+				  "force_constants":[100.0,100.0],
 				  "log_frequency":10
 				}
 	
