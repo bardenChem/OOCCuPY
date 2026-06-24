@@ -305,7 +305,8 @@ class TrajectoryAnalysis:
                 fn = i
         #------------------------------------------------
         print( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
-        self.molecule.coordinates3 = ImportSystem( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
+        
+        self.molecule.coordinates3 = ImportCoordinates3( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
         ExportSystem( os.path.join( self.trajFolder, "mostFrequentRMS.pdb" ),self.molecule,log=None )
         ExportSystem( os.path.join( self.trajFolder, "mostFrequentRMS.pkl" ),self.molecule,log=None )
         #------------------------------------------------------------------------------
@@ -465,6 +466,8 @@ class TrajectoryAnalysis:
         #-------------------------------------------------------------------------        
         fig2, (ax2) = plt.subplots(nrows=1)        
         for key in self.RCs: 
+            print(key)
+            input()
             plt.plot( n, self.RCs[key][1], label=self.RCs[key][0].label[:-6] )
         #---------------------------------------------
         plt.xlabel("Time (ps)")
@@ -482,7 +485,7 @@ class TrajectoryAnalysis:
         '''
         '''
         if not os.path.exists(self.trajFolder[:-4] + ".dcd"):
-            traj_save = os.path.join(self.trajFolder[:-4] + ".dcd")
+            traj_save = os.path.join(self.trajFolder[:-5] + ".dcd")
             Duplicate(self.trajFolder,traj_save,self.molecule)
     #=========================================================================
     def Print(self):
