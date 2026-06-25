@@ -329,46 +329,56 @@ class TrajectoryAnalysis:
         distances1 = np.array(rc_1[1], dtype=np.float32)
         distances2 = np.array(rc_2[1], dtype=np.float32)
 
+        idx_min_rc1 = int(np.argmin(distances1))
+        idx_min_rc2 = int(np.argmin(distances2))
+
         kde.fit(distances1[:, None])
         density_rc1 = kde.score_samples(distances1[:,None])
         density_rc1 = np.exp(density_rc1)
-        rc1_MF = max(density_rc1)
+        self.rc1_MF = max(density_rc1)
         distances2.reshape(-1,1)
         kde.fit(distances2[:,None])
         density_rc2 = np.exp(kde.score_samples(distances2[:,None]))
-        rc2_MF = max(density_rc2)
+        self.rc2_MF = max(density_rc2)
 
-        distoldRC1 = abs(density_rc1[0] - rc1_MF)
-        distoldRC2 = abs(density_rc2[0] - rc2_MF)
+
+        distoldRC1 = abs(density_rc1[0] - self.rc1_MF)
+        distoldRC2 = abs(density_rc2[0] - self.rc2_MF)
         distold    = abs(distoldRC1-distoldRC2)
         distnew    = 0.0
-        fn         = 0 
+        fn         = 0         
         for i in range( len(distances1) ):
-            distnew = abs( abs(density_rc1[i] - rc1_MF) -  abs(density_rc2[i] - rc2_MF) )
+            
+            distnew = abs( abs(density_rc1[i] - self.rc1_MF) -  abs(density_rc2[i] - self.rc2_MF) )
             if distnew < distold:
                 distold = distnew
                 fn = i        
         a  = Unpickle( os.path.join(self.trajFolder,"frame{}.pkl".format(fn) ) )
-        b  = Unpickle( os.path.join(self.trajFolder,"frame{}.pkl".format( len(distances2)-1 ) ) )
-        
-        try:
-            self.molecule.coordinates3 = a
-        except:
-            self.molecule.coordinates3 = a[0]
+        b  = Unpickle( os.path.join(self.trajFolder,"frame{}.pkl".format(idx_min_rc1 ) ) )
+        c  = Unpickle( os.path.join(self.trajFolder,"frame{}.pkl".format(idx_min_rc2 ) ) )
+
+        try:    self.molecule.coordinates3 = a
+        except: self.molecule.coordinates3 = a[0]
         
         ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC1RC2.pdb"), self.molecule,log=None  )
         ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC1RC2.pkl"), self.molecule,log=None )
 
-        try:
-            import seaborn as sns
-            g=sns.jointplot(x=distances1,y=distances2,kind="kde",cmap="plasma",shade=True,height=6,widht=8)
-            g.set_axis_labels(rc_1[0].label,rc_2[0].label)
-            plt.savefig( os.path.join( self.trajFolder,label_text+"_Biplot.png"),dpi=1000 )
-            #if SHOW: plt.show()
-            plt.close()
-        except:
-            print("Error in importing seaborn package!\nSkipping biplot distribution plot!")
-            pass
+        try:    self.molecule.coordinates3 = b
+        except: self.molecule.coordinates3 = b[0]
+        
+        ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC1_least.pdb"), self.molecule,log=None  )
+
+        try:    self.molecule.coordinates3 = c
+        except: self.molecule.coordinates3 = c[0]
+
+        ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC2_least.pdb"), self.molecule,log=None  )
+
+        import seaborn as sns
+        g=sns.jointplot(x=distances1,y=distances2,kind="kde",cmap="plasma",shade=True,height=6,width=8)
+        g.set_axis_labels(rc_1[0].label,rc_2[0].label)
+        plt.savefig( os.path.join( self.trajFolder,"rcs_Biplot.png"),dpi=1000 )
+        plt.close()
+        
         
     #=================================================
     def PlotRG_RMS(self,SHOW=False):
@@ -466,8 +476,6 @@ class TrajectoryAnalysis:
         #-------------------------------------------------------------------------        
         fig2, (ax2) = plt.subplots(nrows=1)        
         for key in self.RCs: 
-            print(key)
-            input()
             plt.plot( n, self.RCs[key][1], label=self.RCs[key][0].label[:-6] )
         #---------------------------------------------
         plt.xlabel("Time (ps)")
