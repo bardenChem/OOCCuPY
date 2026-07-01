@@ -374,7 +374,7 @@ class TrajectoryAnalysis:
         ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC2_least.pdb"), self.molecule,log=None  )
 
         import seaborn as sns
-        g=sns.jointplot(x=distances1,y=distances2,kind="kde",cmap="plasma",shade=True,height=6,width=8)
+        g=sns.jointplot(x=distances1,y=distances2,kind="kde",cmap="plasma",fill=True,height=6)
         g.set_axis_labels(rc_1[0].label,rc_2[0].label)
         plt.savefig( os.path.join( self.trajFolder,"rcs_Biplot.png"),dpi=1000 )
         plt.close()
@@ -415,7 +415,7 @@ class TrajectoryAnalysis:
             self.RG  = self.RG/std_rg
             self.RMS = self.RMS/std_rms
 
-            g = sns.jointplot(x=self.RG,y=self.RMS,kind="kde",cmap="plasma",shade=True)
+            g = sns.jointplot(x=self.RG,y=self.RMS,kind="kde",cmap="plasma",fill=True)
             g.set_axis_labels("Radius of Gyration $\AA$","RMSD $\AA$")
             plt.savefig( os.path.join( self.trajFolder,"rg_rmsd_biplot.png") )
             if SHOW: plt.show()
@@ -509,4 +509,3 @@ class TrajectoryAnalysis:
         print( "RMS most frequent:{}".format( self.rg_MF) ) 
         
 #=================================================================================
-
