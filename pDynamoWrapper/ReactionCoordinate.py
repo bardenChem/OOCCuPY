@@ -146,7 +146,7 @@ class ReactionCoordinate:
         if not _dminimum == None:  
             self.minimumD = _dminimum
             set_pars      = False
-        if not _sigma_pk1_pk3 == None:     self.weight13 = _sigma_pk1_pk3
+        if not _sigma_pk1_pk3 == None:    self.weight13 = _sigma_pk1_pk3
         if not _sigma_pk3_pk1 == None:    self.weight31 = _sigma_pk3_pk1        
         if set_pars:            
             # ============================================================
@@ -184,7 +184,8 @@ class ReactionCoordinate:
                     self.weight31 = mass_a3/(mass_a1+mass_a3)
 
                     self.AB = _molecule.coordinates3.Distance(self.atoms[0], self.atoms[1])
-                    self.BC = _molecule.coordinates3.Distance(self.atoms[1], self.atoms[2])                    
+                    self.BC = _molecule.coordinates3.Distance(self.atoms[1], self.atoms[2])
+
                     # Transfer coordinate: weighted difference
                     self.minimumD = (self.weight13 * self.AB) - (self.weight31 * self.BC )
                     print(f"DEBUG: d(A-B) = {self.AB:.3f}, d(B-C) = {self.BC:.3f}")
@@ -207,6 +208,11 @@ class ReactionCoordinate:
                     # Transfer limits
                     self.reaction_type = "transfer"
                     self.SetTransferLimits()
+                    x0, y0, z0 = system.coordinates3[self.atoms[0]]
+                    x1, y1, z1 = system.coordinates3[self.atoms[1]]
+                    x2, y2, z2 = system.coordinates3[self.atoms[2]]                    
+                    print(f"Coordinates atom 1 = ({x0:.3f}, {y0:.3f}, {z0:.3f}), atom 2 = ({x1:.3f}, {y1:.3f}, {z1:.3f}), atom 3 = ({x2:.3f}, {y2:.3f}, {z2:.3f})")
+
             
             elif self.Type == "Dihedral": 
                 self.minimumD = _molecule.coordinates3.Dihedral(self.atoms[0],self.atoms[1],self.atoms[2],self.atoms[3])
@@ -375,6 +381,11 @@ class ReactionCoordinate:
             print( "\tScanning from {:.2f} to {:.2f} ({} steps)".format(self.maximumD, self.minimumD, self.nsteps) )    
         elif self.reaction_type == "dissociation":
             print( "\tScanning from {:.2f} to {:.2f} ({} steps)".format(self.minimumD, self.maximumD, self.nsteps) )
+        x0, y0, z0 = system.coordinates3[self.atoms[0]]
+        x1, y1, z1 = system.coordinates3[self.atoms[1]]
+        x2, y2, z2 = system.coordinates3[self.atoms[2]]                    
+        print(f"Coordinates atom 1 = ({x0:.3f}, {y0:.3f}, {z0:.3f}), atom 2 = ({x1:.3f}, {y1:.3f}, {z1:.3f}), atom 3 = ({x2:.3f}, {y2:.3f}, {z2:.3f})")
+
 
 
 #==================================================================================
