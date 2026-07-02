@@ -452,9 +452,15 @@ class TrajectoryAnalysis:
         frames = 0 
         while self.trajectory.RestoreOwnerData():
             for key in self.RCs:
-                atom1 = self.RCs[key][0].atoms[0]            
-                atom2 = self.RCs[key][0].atoms[1]            
-                self.RCs[key][1].append( self.molecule.coordinates3.Distance(atom1, atom2) )
+                if len(self.RCs[key][0].atoms) == 2:
+                    atom1 = self.RCs[key][0].atoms[0]            
+                    atom2 = self.RCs[key][0].atoms[1]            
+                    self.RCs[key][1].append( self.molecule.coordinates3.Distance(atom1, atom2) )
+                elif len(self.RCs[key][0].atoms) == 3:
+                    atom1 = self.RCs[key][0].atoms[0]            
+                    atom2 = self.RCs[key][0].atoms[1]            
+                    atom3 = self.RCs[key][0].atoms[2]            
+                    self.RCs[key][1].append( self.molecule.coordinates3.Distance(atom2, atom3) )
             frames +=1
                                 
         #------------------------------------------------------------------------
