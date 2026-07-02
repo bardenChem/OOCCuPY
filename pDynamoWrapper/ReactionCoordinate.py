@@ -375,11 +375,7 @@ class ReactionCoordinate:
         elif self.reaction_type == "association":
             print( "\tScanning from {:.2f} to {:.2f} ({} steps)".format(self.maximumD, self.minimumD, self.nsteps) )    
         elif self.reaction_type == "dissociation":
-            print( "\tScanning from {:.2f} to {:.2f} ({} steps)".format(self.minimumD, self.maximumD, self.nsteps) )
-        x0, y0, z0 = system.coordinates3[self.atoms[0]]
-        x1, y1, z1 = system.coordinates3[self.atoms[1]]
-        x2, y2, z2 = system.coordinates3[self.atoms[2]]                    
-        print(f"Coordinates atom 1 = ({x0:.3f}, {y0:.3f}, {z0:.3f}), atom 2 = ({x1:.3f}, {y1:.3f}, {z1:.3f}), atom 3 = ({x2:.3f}, {y2:.3f}, {z2:.3f})")
+            print( "\tScanning from {:.2f} to {:.2f} ({} steps)".format(self.minimumD, self.maximumD, self.nsteps) )                      
 
 
 
