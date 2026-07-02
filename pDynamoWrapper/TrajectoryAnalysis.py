@@ -367,11 +367,13 @@ class TrajectoryAnalysis:
         except: self.molecule.coordinates3 = b[0]
         
         ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC1_least.pdb"), self.molecule,log=None  )
+        ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC1_least.pkl"), self.molecule,log=None  )
 
         try:    self.molecule.coordinates3 = c
         except: self.molecule.coordinates3 = c[0]
 
         ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC2_least.pdb"), self.molecule,log=None  )
+        ExportSystem( os.path.join( self.trajFolder,"mostFrequentRC2_least.pkl"), self.molecule,log=None  )
 
         import seaborn as sns
         g=sns.jointplot(x=distances1,y=distances2,kind="kde",cmap="plasma",fill=True,height=6)
