@@ -208,9 +208,9 @@ class ReactionCoordinate:
                     # Transfer limits
                     self.reaction_type = "transfer"
                     self.SetTransferLimits()
-                    x0, y0, z0 = system.coordinates3[self.atoms[0]]
-                    x1, y1, z1 = system.coordinates3[self.atoms[1]]
-                    x2, y2, z2 = system.coordinates3[self.atoms[2]]                    
+                    x0, y0, z0 = _molecule.coordinates3[self.atoms[0]]
+                    x1, y1, z1 = _molecule.coordinates3[self.atoms[1]]
+                    x2, y2, z2 = _molecule.coordinates3[self.atoms[2]]                    
                     print(f"Coordinates atom 1 = ({x0:.3f}, {y0:.3f}, {z0:.3f}), atom 2 = ({x1:.3f}, {y1:.3f}, {z1:.3f}), atom 3 = ({x2:.3f}, {y2:.3f}, {z2:.3f})")
 
             
