@@ -89,7 +89,12 @@ class ReactionCoordinate:
         if self.Type == "multipleDistance":
             A1 = _molecule.atoms.items[ self.atoms[0] ]
             A2 = _molecule.atoms.items[ self.atoms[1] ]
-            A3 = _molecule.atoms.items[ self.atoms[2] ]            
+            A3 = _molecule.atoms.items[ self.atoms[2] ]   
+            x0, y0, z0 = _molecule.coordinates3[self.atoms[0]]
+            x1, y1, z1 = _molecule.coordinates3[self.atoms[1]]
+            x2, y2, z2 = _molecule.coordinates3[self.atoms[2]]                    
+            print(f"Coordinates atom 1 = ({x0:.3f}, {y0:.3f}, {z0:.3f}), atom 2 = ({x1:.3f}, {y1:.3f}, {z1:.3f}), atom 3 = ({x2:.3f}, {y2:.3f}, {z2:.3f})")
+
             if not sequence == None:
                 A1res = A1.parent.label.split(".")
                 A2res = A2.parent.label.split(".")
