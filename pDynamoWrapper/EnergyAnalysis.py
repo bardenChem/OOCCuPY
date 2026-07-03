@@ -57,7 +57,7 @@ class EnergyAnalysis:
         dimensions (int): Number of coordinates (1 or 2).
     """
     #------------------------------------------------
-    def __init__(self, _type="1D"):
+    def __init__(self, x=0, y=0, _type="1D"):
         """Initialize EnergyAnalysis object.
         
         Args:
@@ -66,6 +66,11 @@ class EnergyAnalysis:
             _type (str, optional): Plot type. Options: '1D', '2D', 'WHAM1D', 'WHAM2D',
                 'FE1D', 'FE2D', 'PMF', etc. Defaults to '1D'.
         """
+        if isinstance(x, str) and y == 0 and _type == "1D":
+            _type = x
+            x = 0
+        x = int(x)
+        y = int(y)
         self.energies1D     = []                          # array for energy values from one-dimension coordinate simulation 
         self.energiesMatrix = np.zeros( (y, x), dtype=float ) # array for energy values from two-dimension coordinate simulation
         self.multiple1Dplot = []                              # List of one-dimension energy arrays, each one for a different energy method
