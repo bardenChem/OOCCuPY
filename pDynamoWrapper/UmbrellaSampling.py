@@ -67,7 +67,7 @@ class US:
                  mdMethod         ,
                  RESTART=False    ,
                  ADAPTATIVE=False ,
-                 OPTIMIZE=False  ):
+                 OPTIMIZE=False  ) -> None:
         """Initialize umbrella sampling object.
         
         Args:
@@ -450,7 +450,7 @@ class US:
         self.molecule.DefineRestraintModel( restraints )
         #-------------------------------------
         with pymp.Parallel(self.nprocs) as p:
-            for i in p.range ( self.bins) :  
+            for i in p.range ( self.bins):  
                 #--------------------------------------------------------
                 #First confirm if the folder already exists in cases of restart
                 self.molecule.coordinates3 = ImportCoordinates3( self.file_lists[i], log=None )
@@ -551,7 +551,7 @@ class US:
         self.molecule.DefineRestraintModel( restraints )
         
         with pymp.Parallel(self.nprocs) as p:
-            for i in p.range ( self.bins) :                
+            for i in p.range ( self.bins):                
                 #------------------------------------------------------------------------           
                 self.molecule.coordinates3 = ImportCoordinates3( self.file_lists[i],log=None )
                 #------------------------------------------------------------------------
@@ -648,7 +648,7 @@ class US:
         self.molecule.DefineRestraintModel( restraints )
         #-------------------------------------
         with pymp.Parallel(self.nprocs) as p:
-            for i in p.range ( self.bins) :  
+            for i in p.range ( self.bins):  
                 #--------------------------------------------------------
                 #First confirm if the folder already exists in cases of restart
                 reference = ImportCoordinates3( self.file_lists[i], log=None )

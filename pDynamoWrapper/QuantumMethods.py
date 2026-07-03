@@ -49,7 +49,7 @@ class QuantumMethods:
         converger (SCFConverger): SCF convergence settings.
         pars (dict): Method parameters.
     """    
-    def __init__(self,_parameters):
+    def __init__(self,_parameters) -> None:
         """Initialize QuantumMethods with configuration parameters.
         
         Args:

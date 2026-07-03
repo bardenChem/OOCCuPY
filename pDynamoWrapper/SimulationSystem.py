@@ -62,7 +62,7 @@ class SimulationSystem:
         rcs (int): Number of reaction coordinates defined.
     """  
     #.-------------------------------------------------------------------------
-    def __init__(self,_label="No specified"):
+    def __init__(self,_label="No specified") -> None:
         """Initialize SimulationSystem instance.
         
         Args:

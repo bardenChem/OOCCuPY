@@ -64,7 +64,7 @@ class Simulation:
         restart (bool): Whether to restart from checkpoint.
         adaptative (bool): Whether to use adaptive parameters.
     """
-    def __init__(self,_parameters):
+    def __init__(self,_parameters) -> None:
         """Initialize Simulation instance with configuration parameters.
         
         Args:
@@ -366,7 +366,7 @@ class Simulation:
             X = scan.RCs[0].nsteps
             if self.molecule.rcs == 2: Y = scan.RCs[1].nsteps
             #-------------------------------------------------------
-            EA = EnergyAnalysis( X, Y, _type=_type)        
+            EA = EnergyAnalysis(_type=_type)        
             EA.ReadLog(log_path)
             #--------------------------------------------------------
             crd1_label = self.molecule.reactionCoordinates[0].label
@@ -422,7 +422,7 @@ class Simulation:
         scan.RunRelaxedRefinement(self.parameters["functional"], self.parameters["basis"], self.parameters["pySCF_method"])
 
         log_path = scan.WriteLog()        
-        EA       = EnergyAnalysais(scan.xsize,0,_type="1DRef")        
+        EA       = EnergyAnalysais(_type="1DRef")        
         EA.ReadLog(log_path)
         #--------------------------------------------------------
         crd1_label = "Reaction Path frames (n)"        

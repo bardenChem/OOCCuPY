@@ -38,7 +38,7 @@ class Tee:
 		file (file): File object for log file.
 		stdout (file): Reference to original sys.stdout.
 	"""
-	def __init__(self, filename, mode='a'):
+	def __init__(self, filename, mode='a') -> None:
 		"""Initialize Tee with output filename.
 		
 		Args:
@@ -80,7 +80,7 @@ class Interface:
 		tee (Tee): Dual output handler for logging.
 	"""
 
-	def __init__(self,args):
+	def __init__(self,args) -> None:
 		"""Initialize Interface and set up output logging.
 		
 		Args:
@@ -90,7 +90,7 @@ class Interface:
 		self.tee   = Tee(self.args.output, 'w')
 		sys.stdout = self.tee
 
-	def __del__(self):
+	def __del__(self) -> None:
 		"""Clean up when object is destroyed."""
 		if hasattr(self, 'tee'):
 			sys.stdout = self.tee.stdout  # Restore original stdout

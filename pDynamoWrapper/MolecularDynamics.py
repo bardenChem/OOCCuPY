@@ -59,7 +59,7 @@ class MD:
         samplingFactor (int): Save frequency.
     """
     #.---------------------------------------
-    def __init__(self,_system,_baseFolder,_parameters):
+    def __init__(self,_system,_baseFolder,_parameters) -> None:
         """Initialize MD simulation manager.
         
         Args:

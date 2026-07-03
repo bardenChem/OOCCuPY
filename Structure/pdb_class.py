@@ -59,7 +59,7 @@ class pdb_atom:
 		occ (float): Occupancy from PDB file.
 		bfactor (float): B-factor/temperature factor.
 	"""
-	def __init__(self):
+	def __init__(self) -> None:
 		self.name      = ''
 		self.Type      = ''
 		self.element   = ''
@@ -99,7 +99,7 @@ class residue:
 		side_chain (list): Side chain atoms.
 	"""
 
-	def __init__(self):
+	def __init__(self) -> None:
 
 		obj = pdb_atom
 
@@ -153,7 +153,7 @@ class protein:
 		protein_center (list): Geometric center of protein [x, y, z].
 	"""
 
-	def __init__(self,name,reorg=False):
+	def __init__(self,name,reorg=False) -> None:
 		"""Initialize protein object and parse PDB file.
 		
 		Reads a PDB file and populates atomic and residue data structures.

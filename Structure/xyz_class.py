@@ -22,7 +22,7 @@ class xyz_parser:
 	'''
 	Class to read/write and storage xyz molecula coordinates file information
 	'''
-	def __init__(self,name):
+	def __init__(self,name) -> None:
 		self.name = name 
 		self.AtomLabels = []
 		self.AtomicN = []

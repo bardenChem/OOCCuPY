@@ -17,7 +17,7 @@ class Wrapper:
     Set Wrapper and control the library of the presetted simulations
     '''
 
-    def __init__(self, _projectFolder=None):
+    def __init__(self, _projectFolder=None) -> None:
         '''
         Initialize project folder and paths.
         '''

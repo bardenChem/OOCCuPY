@@ -10,7 +10,7 @@ class pymolVis:
     '''
     '''
 
-    def __init__(self,_path,_type):
+    def __init__(self,_path,_type) -> None:
         '''
         '''
         self.text = ""

@@ -13,7 +13,7 @@ import gc
 class PESAnalysis:
     '''
     '''
-    def __init__(self, z, in_point, fin_point, _xlength, _ylength):
+    def __init__(self, z, in_point, fin_point, _xlength, _ylength) -> None:
         self.z = z 
         self.xlen = _xlength
         self.ylen = _ylength

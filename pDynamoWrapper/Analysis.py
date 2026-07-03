@@ -49,7 +49,7 @@ class Analysis:
         molecule: Molecular system object from pDynamo.
         baseFolder (str): Base directory for output files.
     """
-    def __init__(self,_parameters):
+    def __init__(self,_parameters) -> None:
         """Initialize Analysis object with required parameters.
         
         Args:
@@ -92,7 +92,7 @@ class Analysis:
         elif Type == "Split_Traj":          self.SplitTraj()
 
     #=========================================================================    
-    def TrajectoryPlots(self) :
+    def TrajectoryPlots(self)  :
         """Analyze and plot trajectory statistics (RG, RMSD, distances).
         
         Generates radius of gyration and root mean square deviation plots from

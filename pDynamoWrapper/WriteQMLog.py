@@ -11,7 +11,7 @@ from .commonFunctions import *
 class WriteQMLog:
     '''
     '''
-    def __init__(self,_system,_outFile):
+    def __init__(self,_system,_outFile) -> None:
         '''
         '''
         _system.qcModel.GetOrthogonalizer(_system)

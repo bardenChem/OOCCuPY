@@ -47,7 +47,7 @@ class EnergyRefinement:
         energiesArray (ndarray): Shared array for parallel energy storage.
         SMOenergies (dict): Dictionary storing energies by method name.
     """
-    def __init__(self,_refSystem,_trajFolder,_outFolder,_dims,_chg,_mult):
+    def __init__(self,_refSystem,_trajFolder,_outFolder,_dims,_chg,_mult) -> None:
         """Initialize EnergyRefinement object.
         
         Args:

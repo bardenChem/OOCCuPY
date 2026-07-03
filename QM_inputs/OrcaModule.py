@@ -42,7 +42,7 @@ class out_file:
 		LRD (list): Local reaction descriptors.
 		charges (list): Partial atomic charges (CHELPG).
 	"""
-	def __init__(self, filename):
+	def __init__(self, filename) -> None:
 		"""Initialize ORCA output file parser.
 		
 		Args:
@@ -438,7 +438,7 @@ class Elec_Cube:
 		scalar3d (array): 3D numpy array of density/orbital values.
 	"""
           
-	def __init__(self, Typ="MO", Prog="Gaussian", grid=40):
+	def __init__(self, Typ="MO", Prog="Gaussian", grid=40) -> None:
 		"""Initialize Elec_Cube handler.
 		
 		Args:
@@ -775,7 +775,7 @@ class OR_Plot:
 	density like from QM orca out file 	
 	'''
 	
-	def __init__(self,out_name):
+	def __init__(self,out_name) -> None:
 		
 		'''
 		initialization method for the OR_plot class 
@@ -863,7 +863,7 @@ class LRDmaps:
 	informarion 
 	'''
 	
-	def __init__(self,filename,SPname):
+	def __init__(self,filename,SPname) -> None:
 		
 		'''
 		Initialization method for the LRDmaps class

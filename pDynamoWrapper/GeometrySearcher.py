@@ -25,7 +25,7 @@ class GeometrySearcher:
     as saddle points and reaction path trajectories. 
     '''
     #.-------------------------------------------------------------------------   
-    def __init__(self,_system,_baseFolder,_trajName=None, _enable_debug_file=False, _verbosity="INFO"):
+    def __init__(self,_system,_baseFolder,_trajName=None, _enable_debug_file=False, _verbosity="INFO") -> None:
         '''
         Class constructor.
         Parameters:

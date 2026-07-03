@@ -204,7 +204,7 @@ path_to_dftb = "/home/barden/Dropbox/Mestrado_Igor/Revisão/dftb/mio-1-1"
 
 class fragment: 
 	
-	def __init__(self):
+	def __init__(self) -> None:
 		self.name      = '' 
 		self.charge    = 0
 		self.scf_typ   = "rhf"
@@ -246,7 +246,7 @@ class FMO_input:
 			pcm=True,
 			nbody=2,
 			sulfur=False
-			):
+			) -> None:
 
 		self.name         = pdbfile[:-4] + '.inp'
 		self.pdb_name     = pdbfile

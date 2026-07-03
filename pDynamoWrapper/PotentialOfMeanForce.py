@@ -24,7 +24,7 @@ class PMF:
     the free energies from umbrella sampling simulations.
     '''
     #-----------------------------------------------------------------------------------
-    def __init__(self,_system,_sourceFolder,_name):
+    def __init__(self,_system,_sourceFolder,_name) -> None:
         '''
         Class constructor
         '''

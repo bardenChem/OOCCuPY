@@ -15,7 +15,7 @@ class MopacQCMMinput:
     Class to set methods to creat inputs for run QC/MM in mopac
     '''
     #---------------------------------------------------------
-    def __init__(self,_parameters):
+    def __init__(self,_parameters) -> None:
         '''
         '''
         self.system         = _parameters["active_system"]

@@ -40,7 +40,7 @@ class ReactionCoordinate:
         label2 (str): Alternative coordinate label.
         weight13, weight31 (float): Weights for multiple distance coordinate.
     """
-    def __init__(self,_atoms,_massConstraint,_type="Distance"):
+    def __init__(self,_atoms,_massConstraint,_type="Distance") -> None:
         """Initialize ReactionCoordinate object.
         
         Args:

@@ -57,7 +57,7 @@ class TrajectoryAnalysis:
         rg_MF, rms_MF: Mean field structural parameters.
     """
     #-----------------------------------------
-    def __init__(self,_trajFolder,_system,t_time):
+    def __init__(self,_trajFolder,_system,t_time) -> None:
         """Initialize TrajectoryAnalysis object.
         
         Args:

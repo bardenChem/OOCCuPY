@@ -50,7 +50,7 @@ class mopac_inp:
 				inpnam ,
 				mozyme , 
 				mgf    , 
-				method):
+				method) -> None:
 		"""Initialize MOPAC input generator from XYZ structure file.
 		
 		Args:

@@ -8,12 +8,12 @@ import sys
 import json
 import yaml
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 
 class OOCCuPYConfig:
     """Configuration manager for OOCCuPY - Flat Structure"""
     
-    def __init__(self, config_dir: Optional[Path] = None):
+    def __init__(self, config_dir: Optional[Path] = None) -> None:
         if config_dir is None:
             self.config_dir = Path.home() / ".ooccupy"
         else:
@@ -193,7 +193,7 @@ class OOCCuPYConfig:
         # Return user path even if it doesn't exist yet
         return user_path
     
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default = None):
         """Get configuration value"""
         keys = key.split('.')
         value = self.config
@@ -206,7 +206,7 @@ class OOCCuPYConfig:
         
         return value
     
-    def set(self, key: str, value: Any):
+    def set(self, key: str, value):
         """Set configuration value"""
         keys = key.split('.')
         config = self.config

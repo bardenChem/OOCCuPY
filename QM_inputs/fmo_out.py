@@ -20,7 +20,7 @@ numberatom = ['H','He','Li','Be','B','C','N','O','F','Ar','Na','Mg','Al','a','P'
 class Fragment:
 	
 	
-	def __init__(self):
+	def __init__(self) -> None:
 		self.name = ''
 		self.index = 0
 		self.charge = 0
@@ -45,7 +45,7 @@ class fmo_parser:
 	
 	def __init__(self      ,
 				logfile    ,
-				totCharge=0):
+				totCharge=0) -> None:
 
 		self.name      = logfile
 		self.datfile   = logfile[:-4] + '.dat'		
@@ -259,7 +259,7 @@ class global_rd:
 	def __init__(self  ,
 				 neutro,
 				 cation,
-				 anion):
+				 anion) -> None:
 
 		self.neutro = neutro
 		self.cation = cation
@@ -345,7 +345,7 @@ class local_rd:
 	def __init__(self,
 				neutro,
 				cation, 
-				anion):
+				anion) -> None:
 
 		self.neutro = neutro
 		self.cation = cation

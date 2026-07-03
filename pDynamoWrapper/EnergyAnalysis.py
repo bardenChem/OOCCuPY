@@ -57,7 +57,7 @@ class EnergyAnalysis:
         dimensions (int): Number of coordinates (1 or 2).
     """
     #------------------------------------------------
-    def __init__(self, _type="1D"):
+    def __init__(self, x=0, y=0, _type="1D") -> None:
         """Initialize EnergyAnalysis object.
         
         Args:
@@ -432,7 +432,7 @@ class EnergyAnalysis:
             crd2label,
             _xlim=None,_ylim=None,
             SHOW=False,
-            _figS=[7,5],
+            _figS=None,
             _reverserc1=False,
             _reverserc2=False,
             path_points=None):
@@ -451,6 +451,8 @@ class EnergyAnalysis:
             _reverserc2: Reverse y-axis
             path_points: Tuple of (pathx, pathy) lists for plotting minimum energy path
         '''            
+        if _figS is None:
+            _figS = [7, 5]
         #-----------------------------------------------------
         X = []
         Y = []

@@ -44,7 +44,7 @@ class amber_mod:
 			     pdbfile                                 ,
 			     H_opt=True                              ,
 			     lig  ="none"                            ,
-			     path="/home/igorchem/programs/amber18/bin"):
+			     path="/home/igorchem/programs/amber18/bin") -> None:
 		"""Initialize AMBER preparation object and run initial hydrogen addition.
 		
 		Automatically runs the AMBER reduce tool to add hydrogens to the structure.

@@ -47,7 +47,7 @@ class SCAN:
         adaptative (bool): Enable adaptive convergence adjustment.
     """
     #---------------------------------------------------------------
-    def __init__(self,_system,_baseFolder,_optimizer,ADAPTATIVE=False,RESTART=False):
+    def __init__(self,_system,_baseFolder,_optimizer,ADAPTATIVE=False,RESTART=False) -> None:
         """Initialize SCAN object.
         
         Args:

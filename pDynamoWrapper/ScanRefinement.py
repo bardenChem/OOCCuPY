@@ -27,7 +27,7 @@ class ScanRefinement:
     * Por hora, funciona só para caminhos unidimensionais com duas restrições de distância
     '''
 
-    def __init__(self, _parameters):
+    def __init__(self, _parameters) -> None:
         self.system        = _parameters["active_system"].system
         self.traj          = _parameters["source_folder"]
         self.outFolder       = _parameters["folder"]
