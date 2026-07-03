@@ -57,7 +57,7 @@ class EnergyAnalysis:
         dimensions (int): Number of coordinates (1 or 2).
     """
     #------------------------------------------------
-    def __init__(self, x=0, y=0, _type="1D"):
+    def __init__(self, _type="1D"):
         """Initialize EnergyAnalysis object.
         
         Args:
