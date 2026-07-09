@@ -283,11 +283,16 @@ class SimulationSystem:
         self.system = qs.system
         
     #=========================================================================
-    def Set_QCMM_Region(self,_pat_list,_centerAtom=None,_radius=None,_DEBUG=False):
+    def Set_QCMM_Region(self,_pat_list,
+                        _select_waters=0,
+                        _centerAtom=None,
+                        _radius=None,
+                        _DEBUG=False):
         """Define QM region for QM/MM simulations.
         
         Args:
             _pat_list (list): List of atom patterns to include in QM region.
+            _select_waters (float): radius of waters to include in QM region. Default: 0 (no waters).
             _centerAtom (str): Alternative: center atom for spherical selection.
             _radius (float): Radius for spherical selection around center atom.
             _DEBUG (bool): Print debug information. Default: False
@@ -296,6 +301,11 @@ class SimulationSystem:
             for pat in _pat_list:
                 _sel =  AtomSelection.FromAtomPattern(self.system,pat)
                 self.quantumRegion += _sel
+            if _select_waters > 0:
+                waters = AtomSelection.FromAtomPattern(self.system,"HOH")
+                for water in waters:
+                    _sel = AtomSelection.Within(self.system,water,_select_waters)
+                    self.quantumRegion += _sel
 
         if _centerAtom:
             atomRef = AtomSelection.FromAtomPattern(self.system,_centerAtom)
