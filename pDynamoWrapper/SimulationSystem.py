@@ -39,6 +39,7 @@ from pBabel            import ExportSystem                    , \
                               ImportCoordinates3              , \
                               ImportSystem
 from .ReactionCoordinate import ReactionCoordinate
+from pMolecule import AtomSelection, SQLAtomSelector
 #==========================================================================
 
 #**************************************************************************
@@ -274,6 +275,7 @@ class SimulationSystem:
         _parameters["molden_name"]   = self.baseName + "_qcRegion.molden"
         qs = QuantumMethods(_parameters)
         qs.Set_QC_System()
+        qs.Export_QC_System()
         if not "method_class" in _parameters: _parameters["method_class"] = "SMO"
         if len(self.quantumRegion) > 0: qs.Export_QC_System()
         newLabel = self.system.label + "QC_system_"
@@ -284,7 +286,7 @@ class SimulationSystem:
         
     #=========================================================================
     def Set_QCMM_Region(self,_pat_list,
-                        _select_waters=0,
+                        _select_waters,
                         _centerAtom=None,
                         _radius=None,
                         _DEBUG=False):
@@ -300,17 +302,20 @@ class SimulationSystem:
         if len(_pat_list) > 0:
             for pat in _pat_list:
                 _sel =  AtomSelection.FromAtomPattern(self.system,pat)
-                self.quantumRegion += _sel
+                self.quantumRegion.append(_sel)
             if _select_waters > 0:
-                waters = AtomSelection.FromAtomPattern(self.system,"HOH")
-                for water in waters:
-                    _sel = AtomSelection.Within(self.system,water,_select_waters)
-                    self.quantumRegion += _sel
-
-        if _centerAtom:
+                selector = SQLAtomSelector.WithSystem(self.system)
+                atomref = self.quantumRegion[0]
+                near = AtomSelection.Within(self.system,atomref,_select_waters)
+                waters = selector.Where("ResNam IN ('HOH','H2O','TIP','TIP3','TP3M','WAT','SOL')") 
+                nearWaters = AtomSelection.ByComponent(self.system, near & waters)                
+                self.quantumRegion.append(nearWaters)
+                
+        elif _centerAtom:
             atomRef = AtomSelection.FromAtomPattern(self.system,_centerAtom)
             core    = AtomSelection.Within(self.system,atomRef,_radius)
             self.quantumRegion = AtomSelection.ByComponent(self.system,core) 
+           
 
         self.quantumRegion = list(self.quantumRegion)
        
