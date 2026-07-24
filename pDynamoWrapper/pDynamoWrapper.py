@@ -212,6 +212,7 @@ class Wrapper:
                 elif lines[0] == "#RETRIEVE_PATH": _parameters["retrieve_path"] = lines[1]
                 elif lines[0] == "#CONVERGER": _parameters["converger"] = lines[1]
                 elif lines[0] == "#OPT_US": _parameters["optimize_US"] = lines[1] 
+                elif lines[0] == "#SELECT_WATERS": _parameters["select_waters"] = int(lines[1])
 
         
         _parameters["set_reaction_crd"] = SET_CRD_NMB            
@@ -298,11 +299,13 @@ class Wrapper:
             _residue_list = []
             _centerAtom = None
             _radius = None
+            _select_hoh = 0.0
             if "residue_patterns" in _parameters: _residue_list = _parameters["residue_patterns"]
             if "center_atom"      in _parameters: _centerAtom   = _parameters["center_atom"]
             if "radius"           in _parameters: _radius       = _parameters["radius"]
+            if "select_waters"    in _parameters: _select_hoh   = _parameters["select_waters"]
             if _parameters["set_qc_region"] == "yes":
-                self.activeSystem.Set_QCMM_Region(_residue_list,_centerAtom,_radius)
+                self.activeSystem.Set_QCMM_Region(_residue_list,_select_hoh,_centerAtom,_radius)
         if "set_energy_model" in _parameters:
             if _parameters["set_energy_model"] == "QM":
                 self.activeSystem.Set_QC_Method(_parameters,_DEBUG=_debug_ok)

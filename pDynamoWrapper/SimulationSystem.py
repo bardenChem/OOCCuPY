@@ -39,6 +39,7 @@ from pBabel            import ExportSystem                    , \
                               ImportCoordinates3              , \
                               ImportSystem
 from .ReactionCoordinate import ReactionCoordinate
+from pMolecule import AtomSelection, SQLAtomSelector
 #==========================================================================
 
 #**************************************************************************
@@ -259,6 +260,40 @@ class SimulationSystem:
         #------------------------------------------------------        
         self.system.freeAtoms = mobile       
         self.system.label     = newLabel  
+
+    #=========================================================================
+    def Get_Water_Residue_Labels(self,_selection):
+        """Return water residue labels represented by oxygen atoms in a selection."""
+        water_residue_names = ("HOH","H2O","TIP","TIP3","TP3M","WAT","SOL")
+        water_labels = []
+        seen_labels = set()
+
+        for i in range(len(_selection)):
+            atom = self.system.atoms.items[_selection[i]]
+            parent = getattr(atom,"parent",None)
+            residue_label = getattr(parent,"label",None)
+            if residue_label is None:
+                continue
+
+            residue_name = residue_label.split(".")[0].upper()
+            if residue_name not in water_residue_names:
+                continue
+
+            atom_label = getattr(atom,"label","").strip().upper()
+            is_oxygen = (getattr(atom,"atomicNumber",None) == 8) or atom_label.startswith("O")
+            if is_oxygen and residue_label not in seen_labels:
+                water_labels.append(residue_label)
+                seen_labels.add(residue_label)
+
+        return water_labels
+
+    #=========================================================================
+    def Print_QM_Water_Residues(self,_selection):
+        """Print water residues selected for the QM region."""
+        water_labels = self.Get_Water_Residue_Labels(_selection)
+        print("Selected water molecules in QM region: {}".format(len(water_labels)))
+        for label in water_labels:
+            print("  {}".format(label))
         
     #=========================================================================
     def Set_QC_Method(self,_parameters,_DEBUG=False):
@@ -271,20 +306,25 @@ class SimulationSystem:
         """
         if len(self.quantumRegion) > 0: _parameters["region"] = self.quantumRegion
         _parameters["active_system"] = self.system 
-        _parameters["molden_name"]   = self.baseName + "_qcRegion.molden"
+        _parameters["molden_name"]   = self.baseName + "_qcRegion"
         qs = QuantumMethods(_parameters)
         qs.Set_QC_System()
         if not "method_class" in _parameters: _parameters["method_class"] = "SMO"
-        if len(self.quantumRegion) > 0: qs.Export_QC_System()
         newLabel = self.system.label + "QC_system_"
-        if "Hamiltonian" in _parameters: newLabel += _parameters["Hamiltonian"] 
-        if "functional"  in _parameters: newLabel += _parameters["functional"] 
+        if "Hamiltonian" in _parameters: 
+            newLabel += _parameters["Hamiltonian"] 
+            _parameters["molden_name"]   = self.baseName + "_qcRegion_"+_parameters["Hamiltonian"]
+        if "functional"  in _parameters: 
+            newLabel += _parameters["functional"] 
+            _parameters["molden_name"]   = self.baseName + "_qcRegion_"+_parameters["functional"]
         self.system.label += newLabel
         self.system = qs.system
+        if len(self.quantumRegion) > 0: qs.Export_QC_System()
+
         
     #=========================================================================
     def Set_QCMM_Region(self,_pat_list,
-                        _select_waters=0,
+                        _select_waters,
                         _centerAtom=None,
                         _radius=None,
                         _DEBUG=False):
@@ -300,17 +340,21 @@ class SimulationSystem:
         if len(_pat_list) > 0:
             for pat in _pat_list:
                 _sel =  AtomSelection.FromAtomPattern(self.system,pat)
-                self.quantumRegion += _sel
+                self.quantumRegion.append(_sel)
             if _select_waters > 0:
-                waters = AtomSelection.FromAtomPattern(self.system,"HOH")
-                for water in waters:
-                    _sel = AtomSelection.Within(self.system,water,_select_waters)
-                    self.quantumRegion += _sel
-
-        if _centerAtom:
+                selector = SQLAtomSelector.WithSystem(self.system)
+                atomref = self.quantumRegion[0]
+                near = AtomSelection.Within(self.system,atomref,_select_waters)
+                waters = selector.Where("ResNam IN ('HOH','H2O','TIP','TIP3','TP3M','WAT','SOL')") 
+                nearWaters = AtomSelection.ByComponent(self.system, near & waters)                
+                self.quantumRegion.append(nearWaters)
+                self.Print_QM_Water_Residues(nearWaters)
+                
+        elif _centerAtom:
             atomRef = AtomSelection.FromAtomPattern(self.system,_centerAtom)
             core    = AtomSelection.Within(self.system,atomRef,_radius)
             self.quantumRegion = AtomSelection.ByComponent(self.system,core) 
+           
 
         self.quantumRegion = list(self.quantumRegion)
        
