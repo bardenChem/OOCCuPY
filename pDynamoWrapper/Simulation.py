@@ -262,7 +262,7 @@ class Simulation:
         elif self.parameters["Software"] == "ORCA"        : ER.RunORCA(self.parameters["orca_method"],self.parameters["basis"],nmaxthreads,_restart=self.restart)
         elif self.parameters["Software"] == "mopac" or self.parameters["Software"]=="MOPAC":
             _mopacKeyWords = ["AUX","LARGE"]
-            path_mopac = "/opt/mopac/bin/mopac": 
+            path_mopac = "/opt/mopac/bin/mopac"
             if "mopac_keywords" in self.parameters:
                 for key in self.parameters["mopac_keywords"]: _mopacKeyWords.append(key)
             if "software_path" in self.parameters: 
