@@ -49,7 +49,7 @@ def Run_Test():
 	#------------------------------------
 	test_01 = Wrapper(folder)
 	test_01.Set_System(system_parameters)
-	test_01.Run_Simulation(simulation_parameters)
+	#test_01.Run_Simulation(simulation_parameters)
 	test_01.SaveSystem()
 	#-----------------------------------
 	methods.append("pm7")
@@ -57,6 +57,7 @@ def Run_Test():
 	simulation_parameters["Software"] = "mopac"
 	simulation_parameters["mopac_keywords"] = [] 
 	simulation_parameters["folder"] = folder
+	simulation_parameters["sampling_factor"] = 5
 
 	test_02 = Wrapper("test_09_mopac")
 	test_02.Set_System(system_parameters)
@@ -79,7 +80,7 @@ def Run_Test():
 	simulation_parameters["basis"]       = "6-31G*" 
 	test_04 = Wrapper(folder)
 	test_04.Set_System(system_parameters)
-	test_04.Run_Simulation(simulation_parameters)
+	#test_04.Run_Simulation(simulation_parameters)
 	test_04.SaveSystem()
 	
 #===================================
