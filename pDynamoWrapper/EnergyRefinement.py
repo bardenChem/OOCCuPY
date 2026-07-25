@@ -100,12 +100,12 @@ class EnergyRefinement:
         #----------------------------------------------------------------------
         if self.ylen  == 0:
             self.energiesArray         = pymp.shared.array( (self.xlen) , dtype='float')
-            self.indexArrayX           = pymp.shared.array( (self.xlen) , dtype='uint8')
-            self.indexArrayY           = pymp.shared.array( (self.xlen) , dtype='uint8')
+            self.indexArrayX           = pymp.shared.array( (self.xlen) , dtype='int64')
+            self.indexArrayY           = pymp.shared.array( (self.xlen) , dtype='int64')
         else:
             self.energiesArray         = pymp.shared.array( (self.xlen,self.ylen) , dtype='float')
-            self.indexArrayX           = pymp.shared.array( (self.xlen,self.ylen) , dtype='uint8')
-            self.indexArrayY           = pymp.shared.array( (self.xlen,self.ylen) , dtype='uint8')
+            self.indexArrayX           = pymp.shared.array( (self.xlen,self.ylen) , dtype='int64')
+            self.indexArrayY           = pymp.shared.array( (self.xlen,self.ylen) , dtype='int64')
         self.SMOenergies   = None
     
     
