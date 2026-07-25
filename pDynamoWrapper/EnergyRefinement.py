@@ -87,7 +87,6 @@ class EnergyRefinement:
             self.fileLists = glob.glob(_path + "frame*.pkl")  
             print("Number of files on folder {}".format( len(self.fileLists) ) )
             print("Sample Factor: {}".format(_sample))
-            print(self.fileLists)
             if _sample > 0:
                 sampled = []
                 for i in range(0, len(self.fileLists)):
@@ -287,6 +286,7 @@ class EnergyRefinement:
                     division = 1
                     if self.sample >0: division = self.sample
                     self.energiesArray[ int(lsFrames[0]/division) ] = mop.GetEnergy()
+                    print( int(lsFrames[0]/division) )
                     self.indexArrayX[ int(lsFrames[0]/division) ] = lsFrames[0]                    
             #----------------            
             if self.ylen > 0:
