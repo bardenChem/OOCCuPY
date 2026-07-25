@@ -73,6 +73,7 @@ class EnergyRefinement:
         self.text          = ""
         self.methods       = []
         self.fileLists     = []
+        self.sample        = _sample
         
         if hasattr(self.molecule,"qcState"): 
             self.pureQCAtoms = list(self.molecule.qcState.pureQCAtoms)
@@ -283,8 +284,10 @@ class EnergyRefinement:
                     self.indexArrayX[ lsFrames[0], lsFrames[1] ] = lsFrames[0]
                     self.indexArrayY[ lsFrames[0], lsFrames[1] ] = lsFrames[1]
                 else:
-                    self.energiesArray[ lsFrames[0] ] = mop.GetEnergy()
-                    self.indexArrayX[ lsFrames[0] ] = lsFrames[0]                    
+                    division = 1
+                    if self.sample >0: division = self.sample
+                    self.energiesArray[ int(lsFrames[0]/division) ] = mop.GetEnergy()
+                    self.indexArrayX[ int(lsFrames[0]/division) ] = lsFrames[0]                    
             #----------------            
             if self.ylen > 0:
                 self.SMOenergies[smo] = self.energiesArray
