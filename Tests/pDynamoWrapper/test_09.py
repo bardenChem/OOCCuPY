@@ -6,6 +6,7 @@ from pDynamoWrapper import Wrapper
 import os, sys
 
 from config import get_config
+config = get_config()
 ooccupy_root = config.get_ooccupy_root()
 
 folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_09")
@@ -25,16 +26,14 @@ def Run_Test():
 	info()
 	system_parameters = {
 		"Input_Type":"pkl",		
-		"pkl_file":os.path.join(folder,"qcmm_optam1","7tim_am1_opt_PF.pkl"),
+		"pkl_file":os.path.join(folder05,"qcmm_optam1","7tim_am1_opt_PF.pkl"),
 		"set_reaction_crd":1,	
 		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
-		#"atoms_rc2":["*:LIG.*:O06","*:HIE.94:HE2","*:HIE.94:NE2"],
 		"type_rc1":"Distance",
-		#"type_rc2":"Distance",
 		"mass_constraints":["yes","yes"],
 	}
 
-	_path   = "test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
+	_path   = os.path.join(folder05, "Simple_Distance_am1","ScanTraj.ptGeo")
 	methods = ["am1","pm3","rm1","pm6"]
 	
 	simulation_parameters = { "xnbins":20			    ,

@@ -47,7 +47,7 @@ class EnergyRefinement:
         energiesArray (ndarray): Shared array for parallel energy storage.
         SMOenergies (dict): Dictionary storing energies by method name.
     """
-    def __init__(self,_refSystem,_trajFolder,_outFolder,_dims,_chg,_mult) -> None:
+    def __init__(self,_refSystem,_trajFolder,_outFolder,_dims,_chg,_mult,_sample=0) -> None:
         """Initialize EnergyRefinement object.
         
         Args:
@@ -59,36 +59,46 @@ class EnergyRefinement:
             _mult (int): Multiplicity of QC region.
         """
         self.molecule      = _refSystem
-        self.trajFolder  = _trajFolder  
-        self.pureQCAtoms = []
+        self.trajFolder    = _trajFolder  
+        self.pureQCAtoms   = []
         self.RC1           = []
-        self.RC2          = []
-        self.rc1CoordName= []
-        self.rc2CoordName= []
-        self.restart     = False
-        self.xlen        = _dims[0]
-        self.ylen        = _dims[1]
-        self.charge      = _chg
-        self.multiplicity= _mult
+        self.RC2           = []
+        self.rc1CoordName  = []
+        self.rc2CoordName  = []
+        self.restart       = False
+        self.xlen          = _dims[0]
+        self.ylen          = _dims[1]
+        self.charge        = _chg
+        self.multiplicity  = _mult
         self.text          = ""
-        self.methods      = []
-        self.fileLists   = []
+        self.methods       = []
+        self.fileLists     = []
         
-
         if hasattr(self.molecule,"qcState"): 
             self.pureQCAtoms = list(self.molecule.qcState.pureQCAtoms)
-        i = 0
+
         self.baseName = _outFolder    
         if not os.path.exists(self.baseName): os.makedirs(self.baseName)
         if self.xlen > 1:
             _path = os.path.join( _trajFolder,"")
-            self.fileLists = glob.glob(_path + "frame*.pkl")            
+            if not os.path.exists(_path):
+                print("WARNING! Folder not found: "+_path)
+            self.fileLists = glob.glob(_path + "frame*.pkl")  
+            print("Number of files on folder {}".format( len(self.fileLists) ) )
+            print("Sample Factor: {}".format(_sample))
+            if _sample > 0:
+                sampled = []
+                for i in range(0, len(self.fileLists)):
+                    if i % _sample == 0:
+                        sampled.append(self.fileLists[i])
+                self.fileLists = sampled
+                print("Sampled Files: {}".format(len(self.fileLists)))
         elif self.xlen == 1:
             self.fileLists.append(_trajFolder+".pkl")        
         #----------------------------------------------------------------------
         if self.ylen  == 0:
             self.energiesArray         = pymp.shared.array( (self.xlen) , dtype='float')
-            self.indexArrayX          = pymp.shared.array( (self.xlen) , dtype='uint8')
+            self.indexArrayX           = pymp.shared.array( (self.xlen) , dtype='uint8')
             self.indexArrayY           = pymp.shared.array( (self.xlen) , dtype='uint8')
         else:
             self.energiesArray         = pymp.shared.array( (self.xlen,self.ylen) , dtype='float')
@@ -216,7 +226,7 @@ class EnergyRefinement:
                 self.energiesArray = pymp.shared.array( (self.xlen), dtype='float')
 
     #====================================================
-    def RunMopacSMO(self,_methods,_keyWords):
+    def RunMopacSMO(self,_methods,_keyWords,_soft_path="/opt/mopac/bin/mopac"):
         """Calculate energies using external MOPAC quantum chemistry software.
         
         Generates MOPAC input files for each structure and performs QC/MM calculations
@@ -248,14 +258,21 @@ class EnergyRefinement:
         }
 
         for smo in _methods:
-            for i in range( len(self.fileLists) ):                
-                self.molecule.coordinates3 = ImportCoordinates3(self.fileLists[i],log=None)
+            for i in range( len(self.fileLists) ):
+                if self.fileLists[i][-4:] == ".pkl":
+                    try:                
+                        self.molecule.coordinates3 = Unpickle(self.fileLists[i])[0]
+                    except:
+                        self.molecule.coordinates3 = Unpickle(self.fileLists[i])
+                else:                
+                    self.molecule.coordinates3 = ImportCoordinates3(self.fileLists[i],log=None)
+
                 mop_pars["Hamiltonian"]    = smo 
                 mop_pars["cood_name"]      = self.fileLists[i]
                 mop = MopacQCMMinput(mop_pars)
                 mop.CalculateGradVectors()
                 mop.write_input(os.path.basename(mop_pars["cood_name"]))
-                mop.Execute()                
+                mop.Execute(mopac_path=_soft_path)                
                 lsFrames = []
                 if self.fileLists[i] == "single.pkl": lsFrames.append(0)
                 else: lsFrames = GetFrameIndex(self.fileLists[i][:-4])        

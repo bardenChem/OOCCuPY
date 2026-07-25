@@ -234,22 +234,25 @@ class Simulation:
         _trajfolder   = "single"
         _type         = "1DRef"
         if self.parameters["ynbins"] > 0: _type = "2DRef"
-        if "ynbins"        in self.parameters: dimensions[1] = self.parameters["ynbins"]
-        if "source_folder" in self.parameters: _trajfolder   = self.parameters["source_folder"] 
+        if "ynbins"          in self.parameters: dimensions[1] = self.parameters["ynbins"]
+        if "source_folder"   in self.parameters: _trajfolder   = self.parameters["source_folder"] 
+        if "sampling_factor" in self.parameters: _Sample = self.parameters["sampling_factor"]
         #-----------------------------------------------------------------
         print("="*40)
         print("Initializinf Energy Refine Routine")
         print("Xlen: {}".format(dimensions[0]))
-        print("Ylen: {}".format(dimensions[0]))
+        print("Ylen: {}".format(dimensions[1]))
         print("Software: {}".format(self.parameters["Software"]))
         print("="*40)
+
         #------------------------------------------------------------------
         ER = EnergyRefinement(self.molecule.system          ,
                               _trajfolder                      ,
                               self.parameters["folder"]     ,
                               dimensions                    ,
                               self.parameters["QCcharge"]   ,
-                              self.parameters["multiplicity"])
+                              self.parameters["multiplicity"],
+                              _sample=_Sample)
         
         #------------------------------------------------------------------
         if      self.parameters["Software"] == "pDynamo"   : ER.RunInternalSMO(self.parameters["methods_lists"],nmaxthreads)
@@ -258,10 +261,13 @@ class Simulation:
         elif self.parameters["Software"] == "pySCF"     : ER.RunPySCF(self.parameters["functional"],self.parameters["basis"],_SCF_type=self.parameters["pySCF_method"])
         elif self.parameters["Software"] == "ORCA"        : ER.RunORCA(self.parameters["orca_method"],self.parameters["basis"],nmaxthreads,_restart=self.restart)
         elif self.parameters["Software"] == "mopac" or self.parameters["Software"]=="MOPAC":
-            _mopacKeyWords = ["AUX","LARGE"] 
+            _mopacKeyWords = ["AUX","LARGE"]
+            path_mopac = "/opt/mopac/bin/mopac": 
             if "mopac_keywords" in self.parameters:
                 for key in self.parameters["mopac_keywords"]: _mopacKeyWords.append(key)
-            ER.RunMopacSMO(self.parameters["methods_lists"],_mopacKeyWords)
+            if "software_path" in self.parameters: 
+                path_mopac = self.parameters["software_path"]
+            ER.RunMopacSMO(self.parameters["methods_lists"],_mopacKeyWords,_soft_path=path_mopac)
         #------------------------------------------------------------
         log_path = ER.WriteLog()        
         EA       = EnergyAnalysis(self.parameters["xnbins"],self.parameters["ynbins"],_type=_type)        

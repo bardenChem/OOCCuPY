@@ -14,7 +14,7 @@ folder05 = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_05")
 #===================================
 def info():
 	print_message =  "OOCCuPy pDynamoWrapper Libray test #10:\n\t "
-	print_message += "Testing the setting and run of bidimensional internal energy refinement .\n"
+	print_message += "Testing the setting and run of bidimensional energy refinement .\n"
 
 	print(print_message)
 #-----------------------------------
@@ -41,7 +41,7 @@ def Run_Test():
 		"reverse_rc1":"yes",
 	}
 
-	_path   = "Tests/pDynamoWrapper/test_05/Multiple_Distance_rm1/ScanTraj.ptGeo"
+	_path   = os.path.join(folder05, "Simple_Distance_am1","ScanTraj.ptGeo")
 	methods = ["am1","pm3","rm1","pm6"]
 	
 	simulation_parameters = { "xnbins":20			    ,
@@ -71,6 +71,7 @@ def Run_Test():
 	test_02.Set_System(system_parameters)
 	test_02.Run_Simulation(simulation_parameters)
 	test_02.SaveSystem()
+	input()
 	
 	simulation_parameters["Software"]    = "ORCA"
 	simulation_parameters["folder"]      = os.path.join("Tests","pDynamoWrapper","test_10_orca")
@@ -78,7 +79,7 @@ def Run_Test():
 	simulation_parameters["basis"]       = "6-31G*" 
 	test_03 = Wrapper("test_10_orca")
 	test_03.Set_System(system_parameters)
-	test_03.Run_Simulation(simulation_parameters)
+	#test_03.Run_Simulation(simulation_parameters)
 	test_03.SaveSystem()
 	
 #===================================
