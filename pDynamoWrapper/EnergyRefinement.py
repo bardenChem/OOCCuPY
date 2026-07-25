@@ -285,10 +285,7 @@ class EnergyRefinement:
                 else:
                     division = 1
                     if self.sample >0: division = self.sample
-                    self.energiesArray[ int(lsFrames[0]/division) ] = mop.GetEnergy()
-                    print( int(lsFrames[0]/division) )
-                    print(lsFrames[0])
-                    print(len(self.indexArrayX))
+                    self.energiesArray[ int(lsFrames[0]/division) ] = mop.GetEnergy()                    
                     self.indexArrayX[ int(lsFrames[0]/division) ] = lsFrames[0]                    
             #----------------            
             if self.ylen > 0:
