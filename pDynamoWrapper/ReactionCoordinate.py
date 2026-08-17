@@ -172,7 +172,7 @@ class ReactionCoordinate:
                 else:
                     self.reaction_type = "association"
                     self.minimumD = dist_initial
-                    self.maximumD = dist_initial - 1.0 # Set maximum distance for association
+                    self.maximumD = 1.4 - dist_initial # Set maximum distance for association
 
                 if self.maximumD <= self.minimumD:
 
