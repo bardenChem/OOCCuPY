@@ -1,0 +1,9 @@
+Example 2 QM/MM b - Configure semiempirical QM/MM
+--------------------------------
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example1BbyInput/1atp_peptide.pkl
+#SET_ENERGY_MODEL_QM SMO
+#HAMILTONIAN am1
+#SET_QMMM_REGION #residue_patterns 1 *:ARG.19:*
+#QC_CHARGE 1 
+#MULTIPLICITY 1
+_____________________________

@@ -1,0 +1,9 @@
+Example 2d - Configure PySCF QM/MM from a GROMACS system
+--------------------------------
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example1BbyInput/1atp_peptide.pkl
+#SET_ENERGY_MODEL_QM pySCF
+#FUNCTIONAL b3lyp
+#BASIS 6-31G*
+#SET_QMMM_REGION #residue_patterns 1 *:ARG.19:*
+#QC_CHARGE 1 
+_____________________________

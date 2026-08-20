@@ -1,0 +1,5 @@
+Example 1b - Load a GROMACS system
+--------------------------------
+#INPUT_TYPE gromacs @OOCCUPY_ROOT@/data/1atp_peptide.top @OOCCUPY_ROOT@/data/1atp_peptide.gro
+#SAVE_NAME 1atp_peptide
+_____________________________
