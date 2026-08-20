@@ -226,10 +226,11 @@ class Wrapper:
             _parameters["analysis_type"] = an
             self.Run_Analysis(_parameters)    
         if "method_class" in _parameters:
-            if _parameters["method_class"] == "pySCF":
-                pass
+            if not _parameters["method_class"] == "pySCF":     
+                self.SaveSystem(save_name)
         else:
             self.SaveSystem(save_name)
+
         inpFile.close()        
 
     #-----------------------------------------

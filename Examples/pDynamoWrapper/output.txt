@@ -2,16 +2,87 @@ Starting pDynamoWrapper_handler - output will be saved to output.txt
 
 
 ========================================
-Project folder at: /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/neb_test
+Project folder at: /home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper
 ========================================
 
 
-Running Nudged Elastic Band Simulation
-Warning: Initial function value or RMS gradient is None. This may indicate an issue with the objective function evaluation.
-Root Mean Sqaute of Deviation of the optimized structure from the initial: 0.0920679294123979
-Error in importing seaborn package!
-Skipping biplot distribution plot!
-/home/igorchem/Dev/OOCCuPY/Examples/pDynamoWrapper/neb_test/NEB.ptGeo
-Root Mean Sqaute of Deviation of the optimized structure from the initial: 0.09206792941239784
-Error in importing seaborn package!
-Skipping biplot distribution plot!
+Starting relaxed surface scan with parameters:
+nsteps_rc1: 12
+nsteps_rc2: 0
+DEBUG: d(A-B) = 1.133, d(B-C) = 1.875
+DEBUG: weight13 = 0.429, weight31 = 0.571
+DEBUG: Calculated RC = -0.585
+DEBUG: Expected RC = -0.742
+One dimension relaxed surface scan!
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] >>> STARTING: Minimization
+[GeometrySearcher] [INFO]     Context: algorithm=ConjugatedGradient | max_iterations=1500
+[GeometrySearcher] [INFO] ======================================================================
+[GeometrySearcher] [INFO] [✓] CHECKPOINT: Minimization completed
+[GeometrySearcher] [INFO] <<< COMPLETED: Minimization
