@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import config
+from pDynamoWrapper import Wrapper
+import os, sys
+
+from config import get_config
+config = get_config()
+ooccupy_root = config.get_ooccupy_root()
+
+folder = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_09")
+folder05 = os.path.join(ooccupy_root, "Tests", "pDynamoWrapper", "test_05")
+
+#===================================
+def info():
+	print_message =  "OOCCuPy pDynamoWrapper Libray test #09:\n\t "
+	print_message += "Testing the setting and run of unidimensional energy refinement.\n"
+
+	print(print_message)
+#----------------------------------
+def Run_Test():
+	'''
+	Test internal energy refinement
+	'''
+	info()
+	system_parameters = {
+		"Input_Type":"pkl",		
+		"pkl_file":os.path.join(folder05,"qcmm_optam1","7tim_am1_opt_PF.pkl"),
+		"set_reaction_crd":1,	
+		"atoms_rc1":["*:LIG.*:C02","*:LIG.*:H02","*:GLU.164:OE2"],
+		"type_rc1":"Distance",
+		"mass_constraints":["yes","yes"],
+	}
+
+	_path   = os.path.join(folder05, "Simple_Distance_am1","ScanTraj.ptGeo")
+	methods = ["am1","pm3","rm1","pm6"]
+	
+	simulation_parameters = { "xnbins":20			    ,
+				   "source_folder":_path                , 
+				   "folder":folder                      ,
+				   "QCcharge":-3	                    ,
+				   "multiplicity":1 	                ,
+				   "methods_lists":methods              ,					   
+				   "NmaxThreads":10                     ,
+				   "simulation_type":"Energy_Refinement",
+				   "Software":"pDynamo"	}				  
+					
+	#------------------------------------
+	test_01 = Wrapper(folder)
+	test_01.Set_System(system_parameters)
+	#test_01.Run_Simulation(simulation_parameters)
+	test_01.SaveSystem()
+	#-----------------------------------
+	methods.append("pm7")
+	
+	simulation_parameters["Software"] = "mopac"
+	simulation_parameters["mopac_keywords"] = [] 
+	simulation_parameters["folder"] = folder
+	simulation_parameters["sampling_factor"] = 5
+
+	test_02 = Wrapper("test_09_mopac")
+	test_02.Set_System(system_parameters)
+	test_02.Run_Simulation(simulation_parameters)
+	test_02.SaveSystem()
+
+	simulation_parameters["Software"] = "pySCF"
+	simulation_parameters["folder"]   = folder
+	simulation_parameters["pySCF_method"] = "RKS"
+	simulation_parameters["functional"] = "b3lyp"   	                                         
+	simulation_parameters["basis"]      = "6-31G*" 
+
+	test_03 = Wrapper(folder)
+	test_03.Set_System(system_parameters)
+	test_03.Run_Simulation(simulation_parameters)
+
+	simulation_parameters["Software"]    = "ORCA"
+	simulation_parameters["folder"]      = folder
+	simulation_parameters["orca_method"] = "b3lyp"   	                                         
+	simulation_parameters["basis"]       = "6-31G*" 
+	test_04 = Wrapper(folder)
+	test_04.Set_System(system_parameters)
+	#test_04.Run_Simulation(simulation_parameters)
+	test_04.SaveSystem()
+	
+#===================================
+if __name__ == '__main__': 
+	Run_Test()
