@@ -1,0 +1,6 @@
+Example 1c - Load, prune, and fix an AMBER system
+--------------------------------
+#INPUT_TYPE amber @OOCCUPY_ROOT@/data/7tim.top @OOCCUPY_ROOT@/data/7tim.crd
+#SPHERICAL_PRUNNING *:LIG.248:C02 25.0
+#FIXED_ATOMS *:LIG.248:C02 20.0
+_____________________________

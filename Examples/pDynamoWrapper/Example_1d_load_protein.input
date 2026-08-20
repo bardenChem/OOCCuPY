@@ -1,0 +1,4 @@
+Example 1d - Load a protein structure
+--------------------------------
+#INPUT_TYPE protein @OOCCUPY_ROOT@/data/1l2y.pdb
+_____________________________

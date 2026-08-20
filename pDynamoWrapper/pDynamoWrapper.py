@@ -213,6 +213,7 @@ class Wrapper:
                 elif lines[0] == "#CONVERGER": _parameters["converger"] = lines[1]
                 elif lines[0] == "#OPT_US": _parameters["optimize_US"] = lines[1] 
                 elif lines[0] == "#SELECT_WATERS": _parameters["select_waters"] = int(lines[1])
+                elif lines[0] == "#SAMPLING_FACTOR": _parameters["sampling_factor"] = int(lines[1])
 
         
         _parameters["set_reaction_crd"] = SET_CRD_NMB            

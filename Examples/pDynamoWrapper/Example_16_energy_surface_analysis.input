@@ -1,0 +1,16 @@
+Example 16 - Two-dimensional energy-surface analysis
+--------------------------------
+#INPUT_TYPE pkl @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example3BbyInput/7tim_opt_pm6_PF.pkl
+#RUN_ANALYSIS Energy_Plots
+#SET_REACTION_CRD distance yes 3 *:LIG.*:C02 *:LIG.*:H02 *:GLU.164:OE2
+#SET_REACTION_CRD distance yes 3 *:HIE.94:NE2 *:LIG.*:O06 *:HIE.94:HE2
+#RETRIEVE_PATH @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example6CbyInput/ScanTraj.ptGeo
+#LOGNAME @OOCCUPY_ROOT@/Examples/pDynamoWrapper/example6CbyInput/ScanTraj.log
+#XSIZE 10
+#YSIZE 10
+#INPOINT 1 1 
+#FINPOINT 9 9 
+#PLOTTYPE 2D
+#FOLDER example16byInput
+#CONTOUR_LINES 14
+_____________________

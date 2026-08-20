@@ -315,33 +315,33 @@ contacts = pdb.calculate_contacts()
 OOCCuPY includes extensive examples for the pDynamo wrapper. Run them with:
 
 ```bash
-# Run all pDynamo examples
-ooccupy pdynamo --tests
+# Run all pDynamo test scripts
+ooccupy pDynamo --tests
 
-# Run specific example (e.g., Example 1)
-python Examples/pDynamoWrapper/Example_1.input
+# Run a specific example (e.g., Example 1)
+ooccupy pDynamo --input Examples/pDynamoWrapper/Example_1_load_geometry.input
 ```
 
-#### Example 1: Basic Geometry Optimization
+#### Example 1: Basic Structure Loading
 
 ```python
 from pDynamoWrapper.pDynamoWrapper import Wrapper
 
-wrapper = Wrapper.From_Input("Examples/pDynamoWrapper/Example_1.input")
+wrapper = Wrapper.From_Input("Examples/pDynamoWrapper/Example_1_load_geometry.input")
 ```
 
-#### Example 2: Molecular Dynamics Simulation
+#### Example 2: Quantum Model Setup
 
 ```python
-# Build system and run MD simulation with pDynamo
-# See Examples/pDynamoWrapper/Example_2.input
+# Configure a semiempirical quantum model with pDynamo
+# See Examples/pDynamoWrapper/Example_2_qm_smo.input
 ```
 
-#### Example 3: QM/MM Calculations
+#### Example 3: Geometry Optimization
 
 ```python
-# Hybrid quantum mechanics / molecular mechanics
-# See Examples/pDynamoWrapper/Example_3.input
+# Optimize a molecular-mechanics system
+# See Examples/pDynamoWrapper/Example_3_geometry_optimization_mm.input
 ```
 
 #### Example 4-16: Advanced Simulations
@@ -478,10 +478,9 @@ gromacs.run()  # Run minimization
 ### Running Examples
 
 ```bash
-# Run all pDynamo examples
-cd Examples/pDynamoWrapper
-python Example_1.input
-python Example_2.input
+# Run pDynamo examples individually
+ooccupy pDynamo --input Examples/pDynamoWrapper/Example_1_load_geometry.input
+ooccupy pDynamo --input Examples/pDynamoWrapper/Example_2_qm_smo.input
 # ... and so on
 ```
 
@@ -489,14 +488,13 @@ python Example_2.input
 
 ```bash
 # Run all tests
-ooccupy pdynamo --tests
+ooccupy pDynamo --tests
 
 # Run specific test
-ooccupy pdynamo --test 01
+ooccupy pDynamo --test 01
 
 # Or directly with Python
-cd Tests/pDynamoWrapper
-python test_01.py
+python Tests/pDynamoWrapper/test_01_system_setup.py
 ```
 
 Test files are located in:

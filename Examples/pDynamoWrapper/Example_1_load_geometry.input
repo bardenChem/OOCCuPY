@@ -1,0 +1,4 @@
+Example 1 - Load a geometry file
+--------------------------------
+#INPUT_TYPE geometry @OOCCUPY_ROOT@/data/cyclohexane_single_frame.xyz
+_____________________________
