@@ -134,7 +134,10 @@ class Interface:
 				print(f"Searching in: {test_dir}")
 			
 				# Run individual tests
-				test_files = list(test_dir.glob("test_*.py"))
+				test_files = [
+					path for path in test_dir.glob("test_*.py")
+					if not path.stem.endswith("_with_logging")
+				]
 				if test_files:
 					print(f"Found {len(test_files)} test files:")
 					for tf in sorted(test_files):
@@ -149,11 +152,26 @@ class Interface:
 				else:
 					print("No test files found!")
 				
-		elif self.args.test_number: 
-			# Find specific test
-			test_file = find_data_file(f"test_{self.args.test_number:02d}.py", "pDynamoWrapper")
-			if test_file:
-				self._run_subprocess_real_time(["python3", str(test_file)])
+		elif self.args.test_number:
+			# Descriptive test names keep the numeric CLI interface stable.
+			test_prefix = f"test_{self.args.test_number:02d}_"
+			search_dirs = [config.get_test_data_path("pDynamoWrapper")]
+			package_tests = config.get("paths.package_tests")
+			if package_tests:
+				search_dirs.append(Path(package_tests) / "pDynamoWrapper")
+			search_dirs.append(Path(__file__).parent / "Tests" / "pDynamoWrapper")
+			candidates = sorted({
+				path.resolve()
+				for test_dir in search_dirs
+				for path in test_dir.glob(f"{test_prefix}*.py")
+			})
+			primary_tests = [path for path in candidates if not path.stem.endswith("_with_logging")]
+			if len(primary_tests) == 1:
+				self._run_subprocess_real_time(["python3", str(primary_tests[0])])
+			elif len(primary_tests) > 1:
+				print(f"⚠ More than one primary test matches {self.args.test_number:02d}: ")
+				for test_file in primary_tests:
+					print(f"  - {test_file.name}")
 			else:
 				print(f"⚠ Test {self.args.test_number} not found")
 		else:
@@ -243,8 +261,6 @@ def main():
 #=============================================================
 if __name__=="__main__":
 	main()
-
-
 
 
 
