@@ -79,7 +79,7 @@ class MD:
         self.trajectory             = None
         self.trajectorySoft         = None
         self.algorithm              = _parameters["MD_method"]
-        self.saveFormat             = None # binary file format to save the trajectory
+        self.saveFormat             = ".dcd" # binary file format to save the trajectory
         self.Nsteps                 = _parameters["production_nsteps"] 
         self.timeStep               = _parameters["timeStep"]
         self.temperature            = _parameters["temperature"]
